@@ -1,6 +1,6 @@
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
 import { Pressable, StyleSheet, View } from "react-native";
-import { ThemedText } from "../themed-text";
-import { ThemedView } from "../themed-view";
 
 interface IProps {
   title: string;
