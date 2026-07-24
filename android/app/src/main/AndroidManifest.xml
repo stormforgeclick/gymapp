@@ -26,6 +26,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="gymbroapp"/>
+        <data android:scheme="exp+gymbro-app"/>
       </intent-filter>
     </activity>
   </application>
