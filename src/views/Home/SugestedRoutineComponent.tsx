@@ -60,12 +60,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "BarlowCondensed_900Black",
     lineHeight: 32,
+    color: "#FFFFFF",
   },
 
   subtitle: {
     opacity: 0.6,
     fontSize: 10,
     lineHeight: 15,
+    color: "#6A6A6A",
   },
 
   button: {
@@ -75,7 +77,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#000",
+    color: "#000000",
     fontSize: 14,
     fontFamily: "Inter_700Bold",
   },

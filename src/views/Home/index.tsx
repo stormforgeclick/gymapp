@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet } from "react-native";
 import { ScreenContainer } from "@/components/ScreenContainer";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { RoutineColors } from "@/constants/theme";
 import DayRoutineComponent from "./DayRoutineComponent";
 import SugestedRoutineComponent from "./SugestedRoutineComponent";
 
@@ -21,7 +22,7 @@ const HomeScreen = () => {
           <SugestedRoutineComponent
             title="Leg Day"
             subtitle="4 ex."
-            color="#D9FF00"
+            color={RoutineColors.routineOne}
             action={() => console.log("Leg")}
           />
         </ThemedView>
@@ -37,14 +38,14 @@ const HomeScreen = () => {
             <DayRoutineComponent
               title="Leg Day"
               subtitle="4 ex."
-              color="#D9FF00"
+              color={RoutineColors.routineOne}
               action={() => console.log("Leg")}
             />
 
             <DayRoutineComponent
               title="Pull Day"
               subtitle="4 ex."
-              color="#14C7FF"
+              color={RoutineColors.routineTwo}
               action={() => console.log("Pull")}
             />
           </ScrollView>
@@ -66,6 +67,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 15,
     letterSpacing: 1,
+    color: "#6A6A80",
   },
 
   titleSection: {

@@ -26,6 +26,16 @@ export const Colors = {
   },
 } as const;
 
+export const RoutineColors = {
+  routineOne: "#C8FF00",
+  routineTwo: "#00D4FF",
+  routineThree: "#FF6B35",
+  routineFour: "#B44DFF",
+  routineFive: "#FF2D78",
+  routineSix: "#00FFB3",
+  routineSeven: "#FFB300",
+};
+
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({

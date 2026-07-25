@@ -60,8 +60,8 @@ const styles = StyleSheet.create({
   },
 
   dot: {
-    width: 10,
-    height: 10,
+    width: 8,
+    height: 8,
     borderRadius: 5,
   },
 
@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
   subtitle: {
     opacity: 0.6,
     fontSize: 10,
+    color: "#6A6A6A",
   },
 
   button: {
