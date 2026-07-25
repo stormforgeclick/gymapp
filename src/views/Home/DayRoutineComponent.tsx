@@ -23,7 +23,9 @@ const DayRoutineComponent = ({ color, title, subtitle, action }: IProps) => {
         />
 
         <View style={styles.textContainer}>
-          <ThemedText style={styles.title}>{title}</ThemedText>
+          <ThemedText style={styles.title} type="smallBold">
+            {title}
+          </ThemedText>
           <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
         </View>
       </View>
