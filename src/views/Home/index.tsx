@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
 
   routinesContainer: {
-    gap: 16,
+    gap: 8,
   },
 });
 
