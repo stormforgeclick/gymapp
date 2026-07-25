@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
 
   routinesSection: {
     flex: 1,
+    gap: 8,
   },
 
   scrollView: {
