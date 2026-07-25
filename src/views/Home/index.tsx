@@ -1,24 +1,19 @@
 import { ScrollView, StyleSheet } from "react-native";
 
-import { ScreenContainer } from "@/components/ScreenContainer";
-import { ThemedText } from "@/components/themed-text";
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { ThemedView } from "@/components/themed-view";
 import { RoutineColors } from "@/constants/theme";
 import DayRoutineComponent from "./DayRoutineComponent";
 import SugestedRoutineComponent from "./SugestedRoutineComponent";
+import Title from "@/components/ui/Title";
+import { ThemedText } from "@/components/themed-text";
 
 const HomeScreen = () => {
   return (
     <ScreenContainer>
       <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleSection}>
-          <ThemedText style={styles.textheader}>Monday · July 20</ThemedText>
-          <ThemedText type="title" style={styles.title}>
-            READY TO{"\n"}LIFT? 💪
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.sugestedSection}>
+        <Title title={`READY TO \nLIFT? 💪`} subtitle="Monday · July 20" />
+        <ThemedView>
           <SugestedRoutineComponent
             title="Leg Day"
             subtitle="4 ex."
@@ -26,10 +21,8 @@ const HomeScreen = () => {
             action={() => console.log("Leg")}
           />
         </ThemedView>
-
         <ThemedView style={styles.routinesSection}>
-          <ThemedText style={styles.textheader}>YOUR ROUTINES</ThemedText>
-
+          <ThemedText style={styles.textHeader}>YOUR ROUTINES</ThemedText>
           <ScrollView
             style={styles.scrollView}
             contentContainerStyle={styles.routinesContainer}
@@ -61,28 +54,18 @@ const styles = StyleSheet.create({
     gap: 16,
   },
 
-  textheader: {
+  routinesSection: {
+    flex: 1,
+    gap: 8,
+  },
+
+  textHeader: {
     textAlign: "left",
     opacity: 0.6,
     fontSize: 10,
     lineHeight: 15,
     letterSpacing: 1,
     color: "#6A6A80",
-  },
-
-  titleSection: {
-    marginTop: 10,
-  },
-
-  title: {
-    textAlign: "left",
-  },
-
-  sugestedSection: {},
-
-  routinesSection: {
-    flex: 1,
-    gap: 8,
   },
 
   scrollView: {

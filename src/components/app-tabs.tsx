@@ -14,7 +14,6 @@ export default function AppTabs() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.icon,
-
         tabBarButton: TabBarButton,
       }}
     >
