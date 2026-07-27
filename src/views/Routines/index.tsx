@@ -1,6 +1,7 @@
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import RoutineComponent from "./RoutineComponent";
+import Title from "@/components/ui/Title";
 import { Colors, RoutineColors } from "@/constants/theme";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Pressable,
   ScrollView,
@@ -8,8 +9,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import Title from "@/components/ui/Title";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import RoutineComponent from "./RoutineComponent";
 
 const RoutinesScreen = () => {
   const scheme = useColorScheme();
@@ -38,6 +38,26 @@ const RoutinesScreen = () => {
           color={RoutineColors.routineOne}
           action={() => console.log("Leg")}
           tags={["Leg Press", "Bulgarian", "Extentions", "Curl", "Adductors"]}
+        />
+        <RoutineComponent
+          title="Pull Day"
+          subtitle="4 Exercies"
+          color={RoutineColors.routineTwo}
+          action={() => console.log("Pull")}
+          tags={["Pull-ups", "Rows", "Lat Pulldowns", "Curls", "Hammer Curls"]}
+        />
+        <RoutineComponent
+          title="Push Day"
+          subtitle="4 Exercies"
+          color={RoutineColors.routineThree}
+          action={() => console.log("Push")}
+          tags={[
+            "Bench Press",
+            "Incline Press",
+            "Shoulder Press",
+            "Tricep Dips",
+            "Chest Flys",
+          ]}
         />
       </ScrollView>
     </ScreenContainer>

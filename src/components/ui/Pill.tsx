@@ -7,17 +7,13 @@ interface IProps {
   textColor?: string;
 }
 
-const Pill = ({
-  label,
-  backgroundColor = "#2C2F26",
-  textColor = "#8D9383",
-}: IProps) => {
+const Pill = ({ label, backgroundColor, textColor = "#6A6A80" }: IProps) => {
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor,
+          backgroundColor: `${backgroundColor}14`,
         },
       ]}
     >
@@ -28,6 +24,7 @@ const Pill = ({
             color: textColor,
           },
         ]}
+        type="small"
       >
         {label}
       </ThemedText>
@@ -38,13 +35,11 @@ const Pill = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 8,
-    borderRadius: 999,
-    alignSelf: "flex-start",
+    paddingVertical: 2,
+    borderRadius: 25,
   },
-
   text: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
   },
 });
 

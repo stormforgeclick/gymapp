@@ -13,42 +13,52 @@ interface IProps {
 
 const RoutineComponent = ({ color, title, subtitle, action, tags }: IProps) => {
   return (
-    <ThemedView
-      type="backgroundElement"
-      style={[styles.container, { borderLeftWidth: 6, borderLeftColor: color }]}
+    <View
+      style={[
+        styles.wrapper,
+        {
+          backgroundColor: color,
+        },
+      ]}
     >
-      <View style={styles.headerSection}>
-        <View style={styles.textContainer}>
-          <ThemedText style={styles.title}>{title}</ThemedText>
-          <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
+      <ThemedView type="backgroundElement" style={styles.container}>
+        <View style={styles.headerSection}>
+          <View style={styles.textContainer}>
+            <ThemedText style={styles.title}>{title}</ThemedText>
+            <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
+          </View>
+
+          <Pressable
+            style={[
+              styles.button,
+              {
+                backgroundColor: color,
+              },
+            ]}
+            onPress={action}
+          >
+            <ThemedText style={styles.buttonText}>Edit</ThemedText>
+          </Pressable>
         </View>
 
-        <Pressable
-          style={[
-            styles.button,
-            {
-              backgroundColor: color,
-            },
-          ]}
-          onPress={action}
-        >
-          <ThemedText style={styles.buttonText}>Edit</ThemedText>
-        </Pressable>
-      </View>
-
-      <View style={styles.tagsSection}>
-        {tags.map((x) => (
-          <Pill label={x} />
-        ))}
-      </View>
-    </ThemedView>
+        <View style={styles.tagsSection}>
+          {tags.map((x, id) => (
+            <Pill label={x} key={id} backgroundColor={color} />
+          ))}
+        </View>
+      </ThemedView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    paddingLeft: 6,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
   container: {
     alignItems: "center",
-    borderRadius: 5,
     padding: 12,
   },
 
@@ -69,8 +79,8 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    opacity: 0.6,
     fontSize: 10,
+    color: "#6A6A80",
   },
 
   button: {
