@@ -40,6 +40,15 @@ export default function AppTabs() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="exercises"
+        options={{
+          title: "Exercises",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="list-box" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
