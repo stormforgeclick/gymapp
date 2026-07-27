@@ -15,6 +15,10 @@ export default function AppTabs() {
         headerShown: false,
         tabBarActiveTintColor: colors.icon,
         tabBarButton: TabBarButton,
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          borderTopColor: colors.backgroundSelected,
+        },
       }}
     >
       <Tabs.Screen
