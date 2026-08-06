@@ -1,17 +1,24 @@
+import { ThemedText } from "@/components/themed-text";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import Title from "@/components/ui/Title";
-import { Colors } from "@/constants/theme";
-import { StyleSheet, useColorScheme, View } from "react-native";
+import { useExercises } from "@/hooks/api/exercises";
+import { StyleSheet, View } from "react-native";
 
 const ExercisesScreen = () => {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === "unspecified" ? "light" : scheme];
+  const { data, isLoading, isError } = useExercises();
 
   return (
     <ScreenContainer>
       <View style={styles.headerSection}>
         <Title title="EXERCISES" />
       </View>
+      {data?.map((exercise) => (
+        <View key={exercise.id}>
+          <ThemedText style={{ fontSize: 16, marginBottom: 8 }}>
+            {exercise.name}
+          </ThemedText>
+        </View>
+      ))}
     </ScreenContainer>
   );
 };
