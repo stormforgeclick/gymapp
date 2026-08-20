@@ -9,11 +9,14 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import RoutineComponent from "./RoutineComponent";
+import RoutineComponent from "./Components/Routine";
+import AddRoutineComponent from "./Components/AddRoutine";
+import { useState } from "react";
 
 const RoutinesScreen = () => {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "unspecified" ? "light" : scheme];
+  const [showAdd, setShowAdd] = useState<boolean>(false);
 
   return (
     <ScreenContainer>
@@ -21,7 +24,7 @@ const RoutinesScreen = () => {
         <Title title="ROUTINES" />
         <Pressable
           style={[styles.button, { backgroundColor: colors.icon }]}
-          onPress={() => console.log("Add")}
+          onPress={() => setShowAdd(true)}
         >
           <MaterialCommunityIcons name="plus" size={35} />
         </Pressable>
@@ -60,6 +63,7 @@ const RoutinesScreen = () => {
           ]}
         />
       </ScrollView>
+      {showAdd && <AddRoutineComponent setShowAdd={setShowAdd} />}
     </ScreenContainer>
   );
 };
