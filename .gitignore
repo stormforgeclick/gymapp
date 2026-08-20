@@ -44,4 +44,7 @@ node_modules
 .claude/
 .expo/
 
+android/
+ios/
+
 .env
