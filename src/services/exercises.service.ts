@@ -11,3 +11,13 @@ export async function getExercises() {
 
   return data;
 }
+
+export async function getExercisesFilters() {
+  const { data, error } = await supabase.rpc("get_exercise_filters");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+  return data;
+}
