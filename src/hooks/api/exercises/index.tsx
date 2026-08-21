@@ -1,19 +1,21 @@
 import {
   getExercises,
   getExercisesFilters,
-} from "@/services/exercises.service";
+} from "@/hooks/api/exercises/queries";
 import { useQuery } from "@tanstack/react-query";
 
-export function useExercises() {
+export const useExercises = (
+  selectedFilters: Record<string, string | undefined> = {}
+) => {
   return useQuery({
-    queryKey: ["exercises"],
-    queryFn: getExercises,
+    queryKey: ["exercises", selectedFilters],
+    queryFn: () => getExercises(selectedFilters),
   });
-}
+};
 
-export function useExercisesFilters() {
+export const useExercisesFilters = () => {
   return useQuery({
     queryKey: ["exercisesFilters"],
     queryFn: getExercisesFilters,
   });
-}
+};
