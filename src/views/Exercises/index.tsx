@@ -6,6 +6,7 @@ import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import Title from "@/components/ui/Title";
 
 import { useExercises, useExercisesFilters } from "@/hooks/api/exercises";
+import { FlatList } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 type ExerciseFilters = {
@@ -17,7 +18,14 @@ type ExerciseFilters = {
 const ExercisesScreen = () => {
   const [selectedFilters, setSelectedFilters] = useState<ExerciseFilters>({});
 
-  const { data: exercises, isLoading, isError } = useExercises(selectedFilters);
+  const {
+    data: exercisesData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useExercises(selectedFilters);
+
+  const exercises = exercisesData?.pages.flat() ?? [];
 
   const { data: filters } = useExercisesFilters();
 
@@ -57,39 +65,49 @@ const ExercisesScreen = () => {
             </ThemedText>
           </Pressable>
 
-          {filters?.categories?.map((category: string) => {
-            const isSelected = selectedFilters.category === category;
+          {filters?.categories?.map(
+            (category: { id: string; name: string }) => {
+              const isSelected = selectedFilters.category === category.id;
 
-            return (
-              <Pressable
-                key={category}
-                onPress={() => setFilter("category", category)}
-                style={[
-                  styles.filterItem,
-                  isSelected && styles.filterItemSelected,
-                ]}
-              >
-                <ThemedText
+              return (
+                <Pressable
+                  key={category.id}
+                  onPress={() => setFilter("category", category.id)}
                   style={[
-                    styles.filterText,
-                    isSelected && styles.filterTextSelected,
+                    styles.filterItem,
+                    isSelected && styles.filterItemSelected,
                   ]}
                 >
-                  {category}
-                </ThemedText>
-              </Pressable>
-            );
-          })}
+                  <ThemedText
+                    style={[
+                      styles.filterText,
+                      isSelected && styles.filterTextSelected,
+                    ]}
+                  >
+                    {category.name}
+                  </ThemedText>
+                </Pressable>
+              );
+            }
+          )}
         </ScrollView>
       </View>
 
-      <View style={styles.exerciseList}>
-        {exercises?.map((exercise: { id: string; name: string }) => (
-          <View key={exercise.id}>
-            <ThemedText style={styles.exerciseName}>{exercise.name}</ThemedText>
+      <FlatList
+        data={exercises}
+        keyExtractor={(item: { id: string }) => item.id}
+        renderItem={({ item }: { item: { id: string; name: string } }) => (
+          <View style={styles.exerciseList}>
+            <ThemedText style={styles.exerciseName}>{item.name}</ThemedText>
           </View>
-        ))}
-      </View>
+        )}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.5}
+      />
     </ScreenContainer>
   );
 };

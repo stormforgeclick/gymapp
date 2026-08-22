@@ -2,20 +2,39 @@ import {
   getExercises,
   getExercisesFilters,
 } from "@/hooks/api/exercises/queries";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-export const useExercises = (
-  selectedFilters: Record<string, string | undefined> = {}
-) => {
-  return useQuery({
-    queryKey: ["exercises", selectedFilters],
-    queryFn: () => getExercises(selectedFilters),
+type Language = "en" | "es";
+
+export function useExercises(
+  selectedFilters: Record<string, string | undefined>,
+  language: Language = "es"
+) {
+  return useInfiniteQuery({
+    queryKey: ["exercises", selectedFilters, language],
+
+    queryFn: ({ pageParam }) => {
+      console.log("query language:", language);
+      console.log("pageParam:", pageParam);
+
+      return getExercises(selectedFilters, language, pageParam);
+    },
+
+    initialPageParam: 0,
+
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < 20) {
+        return undefined;
+      }
+
+      return allPages.length * 20;
+    },
   });
-};
+}
 
 export const useExercisesFilters = () => {
   return useQuery({
     queryKey: ["exercisesFilters"],
-    queryFn: getExercisesFilters,
+    queryFn: () => getExercisesFilters(),
   });
 };
