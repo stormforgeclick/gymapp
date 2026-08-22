@@ -14,9 +14,6 @@ export function useExercises(
     queryKey: ["exercises", selectedFilters, language],
 
     queryFn: ({ pageParam }) => {
-      console.log("query language:", language);
-      console.log("pageParam:", pageParam);
-
       return getExercises(selectedFilters, language, pageParam);
     },
 
