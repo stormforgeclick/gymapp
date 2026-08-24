@@ -16,6 +16,7 @@ export type Exercise = {
 
 export async function getExercises(
   selectedFilters: Record<string, string | undefined>,
+  search = "",
   language: Language = "es",
   pageParam = 0
 ) {
@@ -23,10 +24,14 @@ export async function getExercises(
 
   const { data, error } = await supabase.rpc("get_exercises", {
     p_language: language,
+
     p_category_id: selectedFilters.category ?? null,
     p_equipment_id: selectedFilters.equipment ?? null,
     p_muscle_group_id: selectedFilters.muscle_group ?? null,
     p_target_id: selectedFilters.target ?? null,
+
+    p_search: search.trim() || null,
+
     p_limit: pageSize,
     p_offset: pageParam,
   });

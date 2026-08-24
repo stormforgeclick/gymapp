@@ -8,13 +8,14 @@ type Language = "en" | "es";
 
 export function useExercises(
   selectedFilters: Record<string, string | undefined>,
+  search: string,
   language: Language = "es"
 ) {
   return useInfiniteQuery({
-    queryKey: ["exercises", selectedFilters, language],
+    queryKey: ["exercises", selectedFilters, search, language],
 
     queryFn: ({ pageParam }) => {
-      return getExercises(selectedFilters, language, pageParam);
+      return getExercises(selectedFilters, search, language, pageParam);
     },
 
     initialPageParam: 0,

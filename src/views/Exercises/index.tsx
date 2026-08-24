@@ -4,9 +4,10 @@ import { StyleSheet, View } from "react-native";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import Title from "@/components/ui/Title";
 
+import SearchInput from "@/components/ui/SearchInput";
 import { useExercises, useExercisesFilters } from "@/hooks/api/exercises";
 import ExercisesList from "./Components/ExercisesList";
-import Filter from "./Components/filter";
+import Filter from "./Components/Filter";
 
 type ExerciseFilters = {
   category?: string;
@@ -16,6 +17,7 @@ type ExerciseFilters = {
 
 const ExercisesScreen = () => {
   const [selectedFilters, setSelectedFilters] = useState<ExerciseFilters>({});
+  const [search, setSearch] = useState("");
 
   const { data: filters } = useExercisesFilters();
 
@@ -24,7 +26,7 @@ const ExercisesScreen = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useExercises(selectedFilters);
+  } = useExercises(selectedFilters, search);
 
   const exercises = exercisesData?.pages.flat() ?? [];
 
@@ -50,6 +52,12 @@ const ExercisesScreen = () => {
         <Title title="EXERCISES" />
       </View>
 
+      <SearchInput
+        value={search}
+        onChangeText={setSearch}
+        placeholder="Search exercises..."
+      />
+
       <Filter
         selectedFilters={selectedFilters}
         setFilter={setFilter}
@@ -72,6 +80,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 10,
   },
 });
 
