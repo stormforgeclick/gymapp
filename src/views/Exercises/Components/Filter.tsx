@@ -1,5 +1,5 @@
-import { ThemedText } from "@/components/themed-text";
-import { Pressable, StyleSheet, View } from "react-native";
+import FilterButton from "@/components/ui/FilterButton";
+import { StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 type ExerciseFilters = {
@@ -27,44 +27,22 @@ const Filter = ({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.filterList}
       >
-        <Pressable
+        <FilterButton
+          label="All"
+          selected={selectedFilters.category === undefined}
           onPress={() => setFilter("category", undefined)}
-          style={[
-            styles.filterItem,
-            !selectedFilters.category && styles.filterItemSelected,
-          ]}
-        >
-          <ThemedText
-            style={[
-              styles.filterText,
-              !selectedFilters.category && styles.filterTextSelected,
-            ]}
-          >
-            All
-          </ThemedText>
-        </Pressable>
+        />
 
         {filters?.categories?.map((category: { id: string; name: string }) => {
           const isSelected = selectedFilters.category === category.id;
 
           return (
-            <Pressable
+            <FilterButton
               key={category.id}
+              label={category.name}
+              selected={isSelected}
               onPress={() => setFilter("category", category.id)}
-              style={[
-                styles.filterItem,
-                isSelected && styles.filterItemSelected,
-              ]}
-            >
-              <ThemedText
-                style={[
-                  styles.filterText,
-                  isSelected && styles.filterTextSelected,
-                ]}
-              >
-                {category.name}
-              </ThemedText>
-            </Pressable>
+            />
           );
         })}
       </ScrollView>
@@ -86,30 +64,6 @@ const styles = StyleSheet.create({
   filterList: {
     flexDirection: "row",
     gap: 8,
-  },
-
-  filterItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-
-  filterItemSelected: {
-    opacity: 0.6,
-  },
-
-  filterText: {
-    fontSize: 14,
-  },
-
-  filterTextSelected: {
-    fontWeight: "700",
-  },
-
-  clearButton: {
-    marginTop: 20,
-    paddingVertical: 10,
   },
 });
 
