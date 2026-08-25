@@ -51,30 +51,37 @@ const ExercisesScreen = () => {
       <View style={styles.headerSection}>
         <Title title="EXERCISES" />
       </View>
+      <View style={styles.container}>
+        <SearchInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search exercises..."
+        />
 
-      <SearchInput
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Search exercises..."
-      />
+        <Filter
+          selectedFilters={selectedFilters}
+          setFilter={setFilter}
+          filters={filters}
+          isLoading={!filters}
+        />
 
-      <Filter
-        selectedFilters={selectedFilters}
-        setFilter={setFilter}
-        filters={filters}
-      />
-
-      <ExercisesList
-        exercises={exercises}
-        hasNextPage={hasNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        fetchNextPage={fetchNextPage}
-      />
+        <ExercisesList
+          exercises={exercises}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          isLoading={!exercisesData && !isFetchingNextPage}
+        />
+      </View>
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: 16,
+  },
   headerSection: {
     width: "100%",
     flexDirection: "row",
