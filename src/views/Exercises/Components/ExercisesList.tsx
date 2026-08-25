@@ -1,45 +1,68 @@
-import { ThemedText } from "@/components/themed-text";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, View } from "react-native";
+
+import ExerciseCard from "./ExerciseCard";
+import ExerciseCardSkeleton from "./ExerciseCardSkeleton";
+
+type Exercise = {
+  id: string;
+  name: string;
+  category: string;
+  equipment: string;
+  image: string;
+};
 
 const ExercisesList = ({
   exercises,
   hasNextPage,
   isFetchingNextPage,
+  isLoading,
   fetchNextPage,
 }: {
-  exercises: { id: string; name: string }[];
+  exercises: Exercise[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isLoading: boolean;
   fetchNextPage: () => void;
 }) => {
+  if (isLoading) {
+    return (
+      <FlatList
+        data={Array.from({ length: 6 })}
+        keyExtractor={(_, index) => `skeleton-${index}`}
+        contentContainerStyle={{
+          gap: 12,
+          paddingBottom: 16,
+        }}
+        renderItem={() => <ExerciseCardSkeleton />}
+      />
+    );
+  }
+
   return (
     <FlatList
+      contentContainerStyle={{
+        gap: 12,
+        paddingBottom: 16,
+      }}
       data={exercises}
-      keyExtractor={(item: { id: string }) => item.id}
-      renderItem={({ item }: { item: { id: string; name: string } }) => (
-        <View style={styles.exerciseList}>
-          <ThemedText style={styles.exerciseName}>{item.name}</ThemedText>
-        </View>
-      )}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => <ExerciseCard exercise={item} />}
       onEndReached={() => {
         if (hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       }}
       onEndReachedThreshold={0.5}
+      ListFooterComponent={
+        isFetchingNextPage ? (
+          <View style={{ gap: 12 }}>
+            <ExerciseCardSkeleton />
+            <ExerciseCardSkeleton />
+          </View>
+        ) : null
+      }
     />
   );
 };
-
-const styles = StyleSheet.create({
-  exerciseList: {
-    marginTop: 24,
-  },
-
-  exerciseName: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-});
 
 export default ExercisesList;
