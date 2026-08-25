@@ -61,12 +61,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     width: "100%",
-
     color: "#6A6A80",
-
-    paddingVertical: 0,
-
-    fontSize: 12,
     fontFamily: "Inter_400Regular",
   },
 });

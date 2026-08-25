@@ -9,7 +9,7 @@ export type ThemedTextProps = TextProps & {
     | "title"
     | "small"
     | "smallBold"
-    | "semibold"
+    | "semiBold"
     | "subtitle"
     | "link"
     | "linkPrimary"
@@ -33,7 +33,7 @@ export function ThemedText({
         type === "title" && styles.title,
         type === "small" && styles.small,
         type === "smallBold" && styles.smallBold,
-        type === "semibold" && styles.semibold,
+        type === "semiBold" && styles.semibold,
         type === "subtitle" && styles.subtitle,
         type === "link" && styles.link,
         type === "linkPrimary" && styles.linkPrimary,

@@ -31,7 +31,7 @@ const FilterButton = ({
           !selected && styles.textDefault,
           selected && styles.textSelected,
         ]}
-        type="semibold"
+        type="semiBold"
       >
         {upperCaseLabel}
       </ThemedText>
