@@ -1,8 +1,8 @@
 import { ThemedText } from "@/components/themed-text";
-import Skeleton from "@/components/ui/Skeleton";
+import CustomImage from "@/components/ui/CustomImage";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -16,6 +16,7 @@ type Exercise = {
 
 const ExerciseCard = ({ exercise }: { exercise: Exercise }) => {
   const [imageLoading, setImageLoading] = useState(true);
+  const router = useRouter();
 
   const capitalizeFirstLetter = (str: string) => {
     if (!str) return str;
@@ -23,21 +24,21 @@ const ExerciseCard = ({ exercise }: { exercise: Exercise }) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
+  const handlePress = () => {
+    router.push(`/exercises/${exercise.id}`);
+  };
+
   return (
-    <Pressable style={styles.card}>
+    <Pressable style={styles.card} onPress={handlePress}>
       <View style={styles.cardContent}>
         <View style={styles.imageContainer}>
-          <Image
+          <CustomImage
             source={{ uri: exercise.image }}
             style={styles.image}
             onLoadStart={() => setImageLoading(true)}
             onLoad={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
           />
-
-          {imageLoading && (
-            <Skeleton variant="image" style={StyleSheet.absoluteFill} />
-          )}
         </View>
 
         <View style={styles.textContainer}>

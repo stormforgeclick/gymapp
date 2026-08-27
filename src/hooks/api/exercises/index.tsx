@@ -1,4 +1,5 @@
 import {
+  getExercise,
   getExercises,
   getExercisesFilters,
 } from "@/hooks/api/exercises/queries";
@@ -34,5 +35,12 @@ export const useExercisesFilters = () => {
   return useQuery({
     queryKey: ["exercisesFilters"],
     queryFn: () => getExercisesFilters(),
+  });
+};
+
+export const useExercise = (id: string, language: Language = "es") => {
+  return useQuery({
+    queryKey: ["exercise", id, language],
+    queryFn: () => getExercise(id, language),
   });
 };

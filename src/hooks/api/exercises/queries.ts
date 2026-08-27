@@ -52,3 +52,14 @@ export async function getExercisesFilters(language: Language = "es") {
 
   return data;
 }
+
+export async function getExercise(id: string, language: Language = "es") {
+  const { data, error } = await supabase.rpc("get_exercise", {
+    p_id: id,
+    p_language: language,
+  });
+
+  if (error) throw error;
+
+  return data?.[0] ?? null;
+}
