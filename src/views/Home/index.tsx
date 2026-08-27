@@ -4,8 +4,8 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { RoutineColors } from "@/constants/theme";
-import DayRoutineComponent from "./DayRoutineComponent";
-import SugestedRoutineComponent from "./SugestedRoutineComponent";
+import DayRoutineComponent from "./components/DayRoutineComponent";
+import SugestedRoutineComponent from "./components/SugestedRoutineComponent";
 
 const HomeScreen = () => {
   const formatDate = (date: Date) => {
