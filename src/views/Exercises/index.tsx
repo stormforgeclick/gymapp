@@ -49,13 +49,13 @@ const ExercisesScreen = () => {
   return (
     <ScreenContainer>
       <View style={styles.headerSection}>
-        <Title title="EXERCISES" />
+        <Title title="EJERCICIOS" />
       </View>
       <View style={styles.container}>
         <SearchInput
           value={search}
           onChangeText={setSearch}
-          placeholder="Search exercises..."
+          placeholder="Buscar ejercicios..."
         />
 
         <Filter

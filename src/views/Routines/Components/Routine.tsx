@@ -1,17 +1,14 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Pill from "@/components/ui/Pill";
+import type { IRoutineResponse } from "@/types/routine";
 import { Pressable, StyleSheet, View } from "react-native";
 
-interface IProps {
-  title: string;
-  subtitle: string;
-  color: string;
+interface IProps extends IRoutineResponse {
   action: () => void;
-  tags: string[];
 }
 
-const RoutineComponent = ({ color, title, subtitle, action, tags }: IProps) => {
+const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
   return (
     <View
       style={[
@@ -24,8 +21,11 @@ const RoutineComponent = ({ color, title, subtitle, action, tags }: IProps) => {
       <ThemedView type="backgroundElement" style={styles.container}>
         <View style={styles.headerSection}>
           <View style={styles.textContainer}>
-            <ThemedText style={styles.title}>{title}</ThemedText>
-            <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
+            <ThemedText style={styles.title}>{name}</ThemedText>
+
+            <ThemedText style={styles.subtitle}>
+              {quantity} Ejercicios
+            </ThemedText>
           </View>
 
           <Pressable
@@ -37,13 +37,13 @@ const RoutineComponent = ({ color, title, subtitle, action, tags }: IProps) => {
             ]}
             onPress={action}
           >
-            <ThemedText style={styles.buttonText}>Edit</ThemedText>
+            <ThemedText style={styles.buttonText}>Editar</ThemedText>
           </Pressable>
         </View>
 
         <View style={styles.tagsSection}>
-          {tags.map((x, id) => (
-            <Pill label={x} key={id} backgroundColor={color} />
+          {tags.map((tag) => (
+            <Pill label={tag} key={tag} backgroundColor={color} />
           ))}
         </View>
       </ThemedView>
@@ -57,8 +57,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
   },
+
   container: {
-    alignItems: "center",
     padding: 12,
   },
 

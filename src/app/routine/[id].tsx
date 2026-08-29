@@ -1,4 +1,4 @@
-import RoutineDetail from "@/views/Routine";
+import RoutineDetail from "@/views/RoutineDetails";
 
 export default function Routine() {
   return <RoutineDetail />;

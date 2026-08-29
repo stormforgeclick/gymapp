@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Pressable, useColorScheme } from "react-native";
-import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetModal,
+  BottomSheetTextInput,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors, RoutineColors } from "@/constants/theme";
-import { TextInput } from "react-native-gesture-handler";
 
 const ROUTINE_BACKGROUND = "#0F0F1C";
 
@@ -41,18 +44,19 @@ const AddRoutineComponent = ({ setShowAdd }: IProps) => {
       onDismiss={handleDismiss}
       backgroundStyle={styles.background}
       handleIndicatorStyle={styles.handleIndicator}
+      keyboardBehavior="interactive"
     >
       <BottomSheetView style={styles.container}>
         <View style={[styles.contentContainer, { paddingBottom: bottom }]}>
-          <ThemedText style={styles.title}>NEW ROUTINE</ThemedText>
+          <ThemedText style={styles.title}>NUEVA RUTINA</ThemedText>
 
           <View>
-            <ThemedText style={styles.textHeader}>ROUTINE NAME</ThemedText>
-            <TextInput
+            <ThemedText style={styles.textHeader}>RUTINA</ThemedText>
+            <BottomSheetTextInput
               style={styles.textInput}
               placeholder="Upper, Chest Day, etc. ..."
               placeholderTextColor="#6A6A80"
-              value={name}
+              defaultValue={name}
               onChangeText={setName}
             />
           </View>
@@ -78,10 +82,13 @@ const AddRoutineComponent = ({ setShowAdd }: IProps) => {
           </View>
 
           <Pressable
-            style={[styles.button, { backgroundColor: colors.icon }]}
+            style={[
+              styles.button,
+              { backgroundColor: RoutineColors[selectedColor] },
+            ]}
             onPress={handleCreateRoutine}
           >
-            <ThemedText style={styles.buttonText}>Create Routine</ThemedText>
+            <ThemedText style={styles.buttonText}>Crear Rutina</ThemedText>
           </Pressable>
         </View>
       </BottomSheetView>

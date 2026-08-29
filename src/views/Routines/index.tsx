@@ -1,6 +1,6 @@
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import Title from "@/components/ui/Title";
-import { Colors, RoutineColors } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Pressable,
@@ -13,6 +13,7 @@ import RoutineComponent from "./Components/Routine";
 import AddRoutineComponent from "./Components/AddRoutine";
 import { useState } from "react";
 import { useRouter } from "expo-router";
+import { routinesMock } from "@/mocks/routines";
 
 const RoutinesScreen = () => {
   const router = useRouter();
@@ -23,7 +24,7 @@ const RoutinesScreen = () => {
   return (
     <ScreenContainer>
       <View style={styles.headerSection}>
-        <Title title="ROUTINES" />
+        <Title title="RUTINAS" />
         <Pressable
           style={[styles.button, { backgroundColor: colors.icon }]}
           onPress={() => setShowAdd(true)}
@@ -37,48 +38,18 @@ const RoutinesScreen = () => {
         contentContainerStyle={styles.routinesContainer}
         showsVerticalScrollIndicator={false}
       >
-        <RoutineComponent
-          title="Leg Day"
-          subtitle="4 Exercies"
-          color={RoutineColors.routineOne}
-          action={() =>
-            router.push({
-              pathname: "/routine/[id]",
-              params: { id: "123" },
-            })
-          }
-          tags={["Leg Press", "Bulgarian", "Extentions", "Curl", "Adductors"]}
-        />
-        <RoutineComponent
-          title="Pull Day"
-          subtitle="4 Exercies"
-          color={RoutineColors.routineTwo}
-          action={() =>
-            router.push({
-              pathname: "/routine/[id]",
-              params: { id: "123" },
-            })
-          }
-          tags={["Pull-ups", "Rows", "Lat Pulldowns", "Curls", "Hammer Curls"]}
-        />
-        <RoutineComponent
-          title="Push Day"
-          subtitle="4 Exercies"
-          color={RoutineColors.routineThree}
-          action={() =>
-            router.push({
-              pathname: "/routine/[id]",
-              params: { id: "123" },
-            })
-          }
-          tags={[
-            "Bench Press",
-            "Incline Press",
-            "Shoulder Press",
-            "Tricep Dips",
-            "Chest Flys",
-          ]}
-        />
+        {routinesMock.map((routine) => (
+          <RoutineComponent
+            key={routine.id}
+            {...routine}
+            action={() =>
+              router.push({
+                pathname: "/routine/[id]",
+                params: { id: routine.id },
+              })
+            }
+          />
+        ))}
       </ScrollView>
       {showAdd && <AddRoutineComponent setShowAdd={setShowAdd} />}
     </ScreenContainer>
