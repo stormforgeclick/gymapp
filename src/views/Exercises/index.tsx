@@ -1,34 +1,99 @@
-import { ThemedText } from "@/components/themed-text";
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import Title from "@/components/ui/Title";
-import { useExercises } from "@/hooks/api/exercises";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
+import Title from "@/components/ui/Title";
+
+import SearchInput from "@/components/ui/SearchInput";
+import { useExercises, useExercisesFilters } from "@/hooks/api/exercises";
+import ExercisesList from "./Components/ExercisesList";
+import Filter from "./Components/Filter";
+
+type ExerciseFilters = {
+  category?: string;
+  equipment?: string;
+  target?: string;
+};
+
 const ExercisesScreen = () => {
-  const { data, isLoading, isError } = useExercises();
+  const [selectedFilters, setSelectedFilters] = useState<ExerciseFilters>({});
+  const [search, setSearch] = useState("");
+
+  const { data: filters } = useExercisesFilters();
+
+  const {
+    data: exercisesData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useExercises(selectedFilters, search);
+
+  const exercises = exercisesData?.pages.flat() ?? [];
+
+  const setFilter = (key: keyof ExerciseFilters, value: string | undefined) => {
+    setSelectedFilters((prev) => {
+      if (value === undefined) {
+        return {
+          ...prev,
+          [key]: undefined,
+        };
+      }
+
+      return {
+        ...prev,
+        [key]: prev[key] === value ? undefined : value,
+      };
+    });
+  };
 
   return (
     <ScreenContainer>
       <View style={styles.headerSection}>
         <Title title="EXERCISES" />
       </View>
-      {data?.map((exercise) => (
-        <View key={exercise.id}>
-          <ThemedText style={{ fontSize: 16, marginBottom: 8 }}>
-            {exercise.name}
-          </ThemedText>
-        </View>
-      ))}
+      <View style={styles.container}>
+        <SearchInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search exercises..."
+        />
+
+        <Filter
+          selectedFilters={selectedFilters}
+          setFilter={setFilter}
+          filters={filters}
+          isLoading={!filters}
+        />
+
+        <ExercisesList
+          exercises={exercises}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          isLoading={!exercisesData && !isFetchingNextPage}
+        />
+      </View>
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: 16,
+  },
   headerSection: {
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 10,
   },
 });
 
