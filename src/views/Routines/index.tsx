@@ -12,8 +12,10 @@ import {
 import RoutineComponent from "./Components/Routine";
 import AddRoutineComponent from "./Components/AddRoutine";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 
 const RoutinesScreen = () => {
+  const router = useRouter();
   const scheme = useColorScheme();
   const colors = Colors[scheme === "unspecified" ? "light" : scheme];
   const [showAdd, setShowAdd] = useState<boolean>(false);
@@ -39,21 +41,36 @@ const RoutinesScreen = () => {
           title="Leg Day"
           subtitle="4 Exercies"
           color={RoutineColors.routineOne}
-          action={() => console.log("Leg")}
+          action={() =>
+            router.push({
+              pathname: "/routine/[id]",
+              params: { id: "123" },
+            })
+          }
           tags={["Leg Press", "Bulgarian", "Extentions", "Curl", "Adductors"]}
         />
         <RoutineComponent
           title="Pull Day"
           subtitle="4 Exercies"
           color={RoutineColors.routineTwo}
-          action={() => console.log("Pull")}
+          action={() =>
+            router.push({
+              pathname: "/routine/[id]",
+              params: { id: "123" },
+            })
+          }
           tags={["Pull-ups", "Rows", "Lat Pulldowns", "Curls", "Hammer Curls"]}
         />
         <RoutineComponent
           title="Push Day"
           subtitle="4 Exercies"
           color={RoutineColors.routineThree}
-          action={() => console.log("Push")}
+          action={() =>
+            router.push({
+              pathname: "/routine/[id]",
+              params: { id: "123" },
+            })
+          }
           tags={[
             "Bench Press",
             "Incline Press",
