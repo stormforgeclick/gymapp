@@ -1,0 +1,261 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { ThemedText } from "@/components/themed-text";
+import { AuthInput } from "@/components/ui/AuthInput";
+import { useRegister } from "@/hooks/api/auth";
+
+export function RegisterView() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const { mutate: register, isPending, error } = useRegister();
+
+  function handleRegister() {
+    if (password !== confirmPassword) {
+      setValidationError("Las contraseñas no coinciden");
+      return;
+    }
+    setValidationError(null);
+    register(
+      { name: name.trim(), email: email.trim(), password },
+      { onSuccess: () => router.replace("/(tabs)") }
+    );
+  }
+
+  const displayError = validationError ?? error?.message ?? null;
+
+  return (
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Logo */}
+          <View style={styles.logoWrapper}>
+            <View style={styles.logoCircle}>
+              <MaterialCommunityIcons name="dumbbell" size={32} color="#080810" />
+            </View>
+            <ThemedText type="title" style={styles.appName}>
+              GYMAPP
+            </ThemedText>
+          </View>
+
+          {/* Header */}
+          <View style={styles.header}>
+            <ThemedText type="subtitle" style={styles.greeting}>
+              CREA TU CUENTA
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Empieza a registrar tu progreso hoy
+            </ThemedText>
+          </View>
+
+          {/* Form */}
+          <View style={styles.form}>
+            <AuthInput
+              label="Nombre"
+              icon="person-outline"
+              value={name}
+              onChangeText={setName}
+              placeholder="Tu nombre"
+              autoCapitalize="words"
+            />
+
+            <AuthInput
+              label="Correo electrónico"
+              icon="mail-outline"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="tu@correo.com"
+              keyboardType="email-address"
+            />
+
+            <AuthInput
+              label="Contraseña"
+              icon="lock-closed-outline"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Mín. 8 caracteres"
+              secureEntry
+            />
+
+            <AuthInput
+              label="Confirmar contraseña"
+              icon="shield-checkmark-outline"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder="Repite tu contraseña"
+              secureEntry
+            />
+
+            {displayError && (
+              <ThemedText type="small" style={styles.errorText}>
+                {displayError}
+              </ThemedText>
+            )}
+          </View>
+
+          {/* CTA */}
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={[styles.primaryButton, isPending && styles.primaryButtonDisabled]}
+              activeOpacity={0.85}
+              onPress={handleRegister}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <ActivityIndicator color="#080810" />
+              ) : (
+                <ThemedText type="semiBold" style={styles.primaryButtonText}>
+                  Registrarse
+                </ThemedText>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.dividerRow}>
+              <View style={styles.divider} />
+              <ThemedText type="small" themeColor="textSecondary" style={styles.dividerText}>
+                o
+              </ThemedText>
+              <View style={styles.divider} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              activeOpacity={0.85}
+              onPress={() => router.replace("/login")}
+            >
+              <ThemedText type="semiBold" style={styles.secondaryButtonText}>
+                Ya tengo cuenta
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+
+          {/* Terms */}
+          <ThemedText type="small" themeColor="textSecondary" style={styles.terms}>
+            Al registrarte aceptas nuestros{" "}
+            <ThemedText type="small" style={styles.termsLink}>
+              Términos de uso
+            </ThemedText>{" "}
+            y{" "}
+            <ThemedText type="small" style={styles.termsLink}>
+              Política de privacidad
+            </ThemedText>
+          </ThemedText>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#080810",
+  },
+  scroll: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 32,
+    gap: 32,
+  },
+  logoWrapper: {
+    alignItems: "center",
+    gap: 12,
+  },
+  logoCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#C8FF00",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  appName: {
+    color: "#C8FF00",
+    letterSpacing: 4,
+    fontSize: 28,
+    lineHeight: 36,
+  },
+  header: {
+    gap: 6,
+  },
+  greeting: {
+    fontSize: 22,
+    lineHeight: 30,
+    color: "#ffffff",
+  },
+  form: {
+    gap: 20,
+  },
+  errorText: {
+    color: "#FF2D78",
+  },
+  actions: {
+    gap: 16,
+  },
+  primaryButton: {
+    backgroundColor: "#C8FF00",
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  primaryButtonDisabled: {
+    opacity: 0.6,
+  },
+  primaryButtonText: {
+    color: "#080810",
+    fontSize: 16,
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#212225",
+  },
+  dividerText: {
+    fontSize: 13,
+  },
+  secondaryButton: {
+    backgroundColor: "#212225",
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  secondaryButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+  },
+  terms: {
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  termsLink: {
+    color: "#C8FF00",
+  },
+});
