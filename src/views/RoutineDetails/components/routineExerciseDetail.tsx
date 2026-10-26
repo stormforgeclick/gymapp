@@ -1,125 +1,120 @@
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Pill from "@/components/ui/Pill";
-import { IRoutineExerciseResponse } from "@/types/exercise";
-import { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import type { RoutineExercise, SetInput } from "@/hooks/api/routineExercises/queries";
+import SetEditor from "./SetEditor";
 
 interface IProps {
+  routineExercise: RoutineExercise;
   color: string;
-  exercise: IRoutineExerciseResponse;
-  handleRemove: () => void;
-  handleUpdate: (updatedData: {
-    sets: number;
-    reps: number;
-    weight: number;
-  }) => void;
+  onDelete: () => void;
+  onSave: (sets: SetInput[]) => void;
+  isSaving: boolean;
+  saveError: string | null;
+  isDeleting: boolean;
 }
 
 const RoutineExerciseDetailComponent = ({
+  routineExercise,
   color,
-  exercise,
-  handleRemove,
-  handleUpdate,
+  onDelete,
+  onSave,
+  isSaving,
+  saveError,
+  isDeleting,
 }: IProps) => {
-  const { name, tag, exerciseRoutineDetail } = exercise;
+  const { name, muscle_group, sets } = routineExercise;
 
-  const [showEdit, setShowEdit] = useState<boolean>(false);
-  const [sets, setSets] = useState(String(exerciseRoutineDetail.sets));
-  const [reps, setReps] = useState(String(exerciseRoutineDetail.minReps));
-  const [weight, setWeight] = useState(String(exerciseRoutineDetail.weight));
+  const [editing, setEditing] = useState(false);
 
-  const handleSave = () => {
-    handleUpdate({
-      sets: Number(sets),
-      reps: Number(reps),
-      weight: Number(weight),
-    });
-    setShowEdit(false);
-  };
+  const prevSavingRef = useRef(false);
+  useEffect(() => {
+    if (prevSavingRef.current && !isSaving && !saveError) {
+      setEditing(false);
+    }
+    prevSavingRef.current = isSaving;
+  }, [isSaving, saveError]);
 
-  const handleCancel = () => {
-    setSets(String(exerciseRoutineDetail.sets));
-    setReps(String(exerciseRoutineDetail.minReps));
-    setWeight(String(exerciseRoutineDetail.weight));
-    setShowEdit(false);
+  const handleDeletePress = () => {
+    Alert.alert(
+      "Eliminar ejercicio",
+      `¿Eliminar "${name}" de la rutina?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Eliminar", style: "destructive", onPress: onDelete },
+      ]
+    );
   };
 
   return (
     <ThemedView type="backgroundElement" style={styles.container}>
       <View style={styles.headerSection}>
         <View style={styles.titleRow}>
-          <ThemedText style={styles.title}>{name}</ThemedText>
-          <Pill label={tag} backgroundColor={color} />
+          <ThemedText style={styles.title} numberOfLines={1}>
+            {name}
+          </ThemedText>
+          {muscle_group && <Pill label={muscle_group} backgroundColor={color} />}
         </View>
 
-        <View style={styles.actionsRow}>
-          {showEdit ? (
-            <Pressable onPress={handleCancel}>
-              <ThemedText style={styles.actionTextSecondary}>Cancel</ThemedText>
+        {!editing && (
+          <View style={styles.actionsRow}>
+            <Pressable
+              onPress={() => setEditing(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`Editar ${name}`}
+              hitSlop={10}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <ThemedText style={styles.actionTextSecondary}>Editar</ThemedText>
             </Pressable>
-          ) : (
-            <Pressable onPress={() => setShowEdit(true)}>
-              <ThemedText style={styles.actionTextSecondary}>Edit</ThemedText>
-            </Pressable>
-          )}
 
-          <Pressable onPress={handleRemove}>
-            <ThemedText style={styles.actionTextDanger}>Remove</ThemedText>
-          </Pressable>
-        </View>
+            <Pressable
+              onPress={handleDeletePress}
+              disabled={isDeleting}
+              accessibilityRole="button"
+              accessibilityLabel={`Eliminar ${name}`}
+              hitSlop={10}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              {isDeleting ? (
+                <ActivityIndicator size="small" color="#E53935" />
+              ) : (
+                <ThemedText style={styles.actionTextDanger}>Eliminar</ThemedText>
+              )}
+            </Pressable>
+          </View>
+        )}
       </View>
 
-      {!showEdit ? (
-        <View style={styles.readOnlyRow}>
-          <ThemedText style={styles.infoText}>
-            {exerciseRoutineDetail.sets} sets
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
-            {exerciseRoutineDetail.minReps}-{exerciseRoutineDetail.maxReps} reps
-          </ThemedText>
-          <ThemedText style={styles.infoText}>
-            {exerciseRoutineDetail.weight} kg
-          </ThemedText>
+      {!editing ? (
+        <View style={styles.setsReadList}>
+          {sets.map((s, i) => {
+            const repsLabel =
+              s.min_reps === s.max_reps
+                ? `${s.min_reps} reps`
+                : `${s.min_reps}-${s.max_reps} reps`;
+            return (
+              <View key={s.id ?? i} style={styles.setReadRow}>
+                <ThemedText style={styles.setIndex}>{i + 1}</ThemedText>
+                <ThemedText style={styles.infoText}>{repsLabel}</ThemedText>
+                {s.weight != null && (
+                  <ThemedText style={styles.infoText}>{s.weight} kg</ThemedText>
+                )}
+              </View>
+            );
+          })}
         </View>
       ) : (
-        <View style={styles.editSection}>
-          <View style={styles.inputsContainer}>
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.label}>SETS</ThemedText>
-              <TextInput
-                style={styles.input}
-                value={sets}
-                onChangeText={setSets}
-                keyboardType="numeric"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.label}>REPS</ThemedText>
-              <TextInput
-                style={styles.input}
-                value={reps}
-                onChangeText={setReps}
-                keyboardType="numeric"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.label}>WEIGHT KG</ThemedText>
-              <TextInput
-                style={styles.input}
-                value={weight}
-                onChangeText={setWeight}
-                keyboardType="numeric"
-              />
-            </View>
-          </View>
-
-          <Pressable style={styles.saveButton} onPress={handleSave}>
-            <ThemedText style={styles.checkIcon}>✓</ThemedText>
-          </Pressable>
-        </View>
+        <SetEditor
+          initialSets={sets}
+          color={color}
+          isSaving={isSaving}
+          saveError={saveError}
+          onSave={onSave}
+          onCancel={() => setEditing(false)}
+        />
       )}
     </ThemedView>
   );
@@ -140,10 +135,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    flex: 1,
   },
   title: {
     fontSize: 18,
     fontFamily: "BarlowCondensed_900Black",
+    flexShrink: 1,
+  },
+  pressed: {
+    opacity: 0.6,
   },
   actionsRow: {
     flexDirection: "row",
@@ -158,54 +158,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#E53935",
   },
-  readOnlyRow: {
+  setsReadList: {
+    gap: 6,
+  },
+  setReadRow: {
     flexDirection: "row",
-    gap: 16,
+    alignItems: "center",
+    gap: 12,
+  },
+  setIndex: {
+    fontSize: 12,
+    color: "#6A6A80",
+    width: 16,
+    textAlign: "right",
   },
   infoText: {
     fontSize: 14,
     color: "#6A6A80",
-  },
-  editSection: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 12,
-  },
-  inputsContainer: {
-    flex: 1,
-    flexDirection: "row",
-    gap: 8,
-  },
-  inputGroup: {
-    flex: 1,
-    gap: 4,
-  },
-  label: {
-    fontSize: 10,
-    color: "#6A6A80",
-    letterSpacing: 0.5,
-  },
-  input: {
-    backgroundColor: "#22222E",
-    borderRadius: 12,
-    color: "#FFF",
-    textAlign: "center",
-    paddingVertical: 10,
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
-  },
-  saveButton: {
-    backgroundColor: "#CCFF00",
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  checkIcon: {
-    color: "#000",
-    fontSize: 18,
-    fontWeight: "bold",
   },
 });
 

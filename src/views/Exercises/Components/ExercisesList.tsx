@@ -1,4 +1,10 @@
-import { FlatList, View } from "react-native";
+import { ComponentType } from "react";
+import {
+  FlatList,
+  FlatListProps,
+  ListRenderItem,
+  View,
+} from "react-native";
 
 import ExerciseCard from "./ExerciseCard";
 import ExerciseCardSkeleton from "./ExerciseCardSkeleton";
@@ -11,42 +17,76 @@ type Exercise = {
   image: string;
 };
 
+type ListComponentType = ComponentType<FlatListProps<Exercise>>;
+
+interface ExercisesListProps {
+  exercises: Exercise[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  isLoading: boolean;
+  fetchNextPage: () => void;
+  ListComponent?: ListComponentType;
+  renderItem?: ListRenderItem<Exercise>;
+  ListHeaderComponent?: FlatListProps<Exercise>["ListHeaderComponent"];
+  stickyHeaderIndices?: FlatListProps<Exercise>["stickyHeaderIndices"];
+  contentContainerStyle?: FlatListProps<Exercise>["contentContainerStyle"];
+}
+
+const defaultRenderItem: ListRenderItem<Exercise> = ({ item }) => (
+  <ExerciseCard exercise={item} />
+);
+
 const ExercisesList = ({
   exercises,
   hasNextPage,
   isFetchingNextPage,
   isLoading,
   fetchNextPage,
-}: {
-  exercises: Exercise[];
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  isLoading: boolean;
-  fetchNextPage: () => void;
-}) => {
+  ListComponent,
+  renderItem = defaultRenderItem,
+  ListHeaderComponent,
+  stickyHeaderIndices,
+  contentContainerStyle,
+}: ExercisesListProps) => {
+  const List = (ListComponent ?? FlatList) as ListComponentType;
+
   if (isLoading) {
+    const skeletonData = Array.from({ length: 6 }).map(
+      (_, index) =>
+        ({
+          id: `skeleton-${index}`,
+          name: "",
+          category: "",
+          equipment: "",
+          image: "",
+        }) as Exercise
+    );
     return (
-      <FlatList
-        data={Array.from({ length: 6 })}
-        keyExtractor={(_, index) => `skeleton-${index}`}
-        contentContainerStyle={{
-          gap: 12,
-          paddingBottom: 16,
-        }}
+      <List
+        data={skeletonData}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={[
+          { gap: 12, paddingBottom: 16 },
+          contentContainerStyle,
+        ]}
+        ListHeaderComponent={ListHeaderComponent}
+        stickyHeaderIndices={stickyHeaderIndices}
         renderItem={() => <ExerciseCardSkeleton />}
       />
     );
   }
 
   return (
-    <FlatList
-      contentContainerStyle={{
-        gap: 12,
-        paddingBottom: 16,
-      }}
+    <List
       data={exercises}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <ExerciseCard exercise={item} />}
+      contentContainerStyle={[
+        { gap: 12, paddingBottom: 16 },
+        contentContainerStyle,
+      ]}
+      ListHeaderComponent={ListHeaderComponent}
+      stickyHeaderIndices={stickyHeaderIndices}
+      renderItem={renderItem}
       onEndReached={() => {
         if (hasNextPage && !isFetchingNextPage) {
           fetchNextPage();

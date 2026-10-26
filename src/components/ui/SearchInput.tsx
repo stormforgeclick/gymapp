@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { ComponentType, useEffect, useState } from "react";
+import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
 
 import { useDebounce } from "@/hooks/utils/useDebounce";
 
@@ -8,12 +8,14 @@ type SearchInputProps = {
   value?: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  TextInputComponent?: ComponentType<TextInputProps>;
 };
 
 const SearchInput = ({
   value = "",
   onChangeText,
   placeholder = "Search...",
+  TextInputComponent = TextInput,
 }: SearchInputProps) => {
   const [inputValue, setInputValue] = useState(value);
 
@@ -27,7 +29,7 @@ const SearchInput = ({
     <View style={styles.container}>
       <Ionicons name="search-outline" size={24} style={styles.icon} />
 
-      <TextInput
+      <TextInputComponent
         value={inputValue}
         onChangeText={setInputValue}
         placeholder={placeholder}

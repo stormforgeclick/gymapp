@@ -59,9 +59,10 @@ const ExercisesScreen = () => {
         />
 
         <Filter
-          selectedFilters={selectedFilters}
-          setFilter={setFilter}
-          filters={filters}
+          items={filters?.categories}
+          selectedId={selectedFilters.category}
+          onSelect={(id) => setFilter("category", id)}
+          allLabel="Todos"
           isLoading={!filters}
         />
 

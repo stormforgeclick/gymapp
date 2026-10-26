@@ -10,13 +10,9 @@ interface IProps extends IRoutineResponse {
 
 const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
   return (
-    <View
-      style={[
-        styles.wrapper,
-        {
-          backgroundColor: color,
-        },
-      ]}
+    <Pressable
+      onPress={action}
+      style={[styles.wrapper, { backgroundColor: color }]}
     >
       <ThemedView type="backgroundElement" style={styles.container}>
         <View style={styles.headerSection}>
@@ -27,18 +23,6 @@ const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
               {quantity} Ejercicios
             </ThemedText>
           </View>
-
-          <Pressable
-            style={[
-              styles.button,
-              {
-                backgroundColor: color,
-              },
-            ]}
-            onPress={action}
-          >
-            <ThemedText style={styles.buttonText}>Editar</ThemedText>
-          </Pressable>
         </View>
 
         <View style={styles.tagsSection}>
@@ -47,7 +31,7 @@ const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
           ))}
         </View>
       </ThemedView>
-    </View>
+    </Pressable>
   );
 };
 
@@ -81,19 +65,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 10,
     color: "#6A6A80",
-  },
-
-  button: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-
-  buttonText: {
-    color: "#000",
-    fontSize: 12,
-    lineHeight: 16,
-    fontFamily: "Inter_700Bold",
   },
 
   tagsSection: {

@@ -4,26 +4,23 @@ import { StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import FilterSkeleton from "./FilterSkeleton";
 
-type ExerciseFilters = {
-  category?: string;
-  equipment?: string;
-  target?: string;
-};
+type FilterItem = { id: string; name: string };
+
+interface FilterProps {
+  items?: FilterItem[];
+  selectedId?: string;
+  onSelect: (id: string | undefined) => void;
+  allLabel?: string;
+  isLoading?: boolean;
+}
 
 const Filter = ({
-  selectedFilters,
-  setFilter,
-  filters,
+  items,
+  selectedId,
+  onSelect,
+  allLabel = "Todos",
   isLoading,
-}: {
-  selectedFilters: ExerciseFilters;
-  setFilter: (key: keyof ExerciseFilters, value: string | undefined) => void;
-  filters?: {
-    categories: { id: string; name: string }[];
-    equipment?: { id: string; name: string }[];
-  };
-  isLoading: boolean;
-}) => {
+}: FilterProps) => {
   return (
     <View style={styles.filterSection}>
       <ScrollView
@@ -36,20 +33,20 @@ const Filter = ({
         ) : (
           <>
             <FilterButton
-              label="All"
-              selected={selectedFilters.category === undefined}
-              onPress={() => setFilter("category", undefined)}
+              label={allLabel}
+              selected={selectedId === undefined}
+              onPress={() => onSelect(undefined)}
             />
 
-            {filters?.categories?.map((category) => {
-              const isSelected = selectedFilters.category === category.id;
+            {items?.map((item) => {
+              const isSelected = selectedId === item.id;
 
               return (
                 <FilterButton
-                  key={category.id}
-                  label={category.name}
+                  key={item.id}
+                  label={item.name}
                   selected={isSelected}
-                  onPress={() => setFilter("category", category.id)}
+                  onPress={() => onSelect(isSelected ? undefined : item.id)}
                 />
               );
             })}
