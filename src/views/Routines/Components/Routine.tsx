@@ -1,8 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Pill from "@/components/ui/Pill";
-import { Opacity, Radius, Spacing } from "@/constants/theme";
+import { Opacity, Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 import type { IRoutineResponse } from "@/types/routine";
 import { Pressable, View } from "react-native";
 
@@ -10,10 +11,12 @@ interface IProps extends IRoutineResponse {
   action: () => void;
 }
 
-const makeStyles = () => ({
+const makeStyles = (c: ThemeColors) => ({
   wrapper: {
     paddingLeft: 6,
     borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: c.border,
     overflow: "hidden" as const,
   },
   container: {
@@ -33,12 +36,14 @@ const makeStyles = () => ({
 
 const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
+  const exerciseCount = t("routines.exercises", { count: quantity });
 
   return (
     <Pressable
       onPress={action}
       accessibilityRole="button"
-      accessibilityLabel={`${name}, ${quantity} ejercicios`}
+      accessibilityLabel={`${name}, ${exerciseCount}`}
       style={({ pressed }) => [
         styles.wrapper,
         { backgroundColor: color },
@@ -50,7 +55,7 @@ const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
           <ThemedText type="title">{name}</ThemedText>
 
           <ThemedText type="label" tone="secondary">
-            {quantity} Ejercicios
+            {exerciseCount}
           </ThemedText>
         </View>
 

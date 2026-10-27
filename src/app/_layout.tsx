@@ -17,7 +17,10 @@ import { useColorScheme } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { queryClient } from "@/lib/queryClient";
+import { AccentProvider } from "@/providers/AccentProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { DialogProvider } from "@/providers/DialogProvider";
+import { ToastProvider } from "@/providers/ToastProvider";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -79,18 +82,25 @@ export default function RootLayout() {
 
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <BottomSheetModalProvider>
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="index" />
-                  <Stack.Screen name="login" />
-                  <Stack.Screen name="register" />
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="exercises/[id]" />
-                  <Stack.Screen name="routine/[id]" options={{ headerShown: false }} />
-                </Stack>
-              </BottomSheetModalProvider>
-            </GestureHandlerRootView>
+            <AccentProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <BottomSheetModalProvider>
+                  <ToastProvider>
+                    <DialogProvider>
+                      <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="index" />
+                        <Stack.Screen name="login" />
+                        <Stack.Screen name="register" />
+                        <Stack.Screen name="(tabs)" />
+                        <Stack.Screen name="exercises/[id]" />
+                        <Stack.Screen name="routine/[id]" options={{ headerShown: false }} />
+                        <Stack.Screen name="workout/[id]" />
+                      </Stack>
+                    </DialogProvider>
+                  </ToastProvider>
+                </BottomSheetModalProvider>
+              </GestureHandlerRootView>
+            </AccentProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ThemeProvider>

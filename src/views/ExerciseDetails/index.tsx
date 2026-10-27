@@ -7,6 +7,7 @@ import { Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useExercise } from "@/hooks/api/exercises";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import ExerciseDetailsSkeleton from "./components/ExerciseDetails";
@@ -37,6 +38,8 @@ const makeStyles = (c: ThemeColors) => ({
     paddingVertical: Spacing.five + Spacing.one,
     backgroundColor: c.surface,
     borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: c.border,
     alignItems: "center" as const,
   },
   video: {
@@ -53,6 +56,8 @@ const makeStyles = (c: ThemeColors) => ({
     padding: Spacing.three,
     backgroundColor: c.surface,
     borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: c.border,
     gap: Spacing.two,
   },
 });
@@ -62,15 +67,16 @@ const ExerciseDetailsScreen = () => {
   const router = useRouter();
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t, language } = useT();
 
-  const { data: exercise, isLoading } = useExercise(exerciseId);
+  const { data: exercise, isLoading } = useExercise(exerciseId, language);
 
   return (
     <ScreenContainer edges={["top", "bottom"]}>
       <IconButton
         icon="arrow-left"
         onPress={() => router.back()}
-        accessibilityLabel="Volver"
+        accessibilityLabel={t("common.back")}
         style={[styles.backButton, { alignSelf: "flex-start" }]}
       />
 
@@ -84,7 +90,7 @@ const ExerciseDetailsScreen = () => {
         </ScrollView>
       ) : !exercise ? (
         <View style={styles.centered}>
-          <ThemedText tone="secondary">No se encontró el ejercicio</ThemedText>
+          <ThemedText tone="secondary">{t("exerciseDetails.notFound")}</ThemedText>
         </View>
       ) : (
         <ScrollView
@@ -119,7 +125,7 @@ const ExerciseDetailsScreen = () => {
 
           <View style={styles.coachingContainer}>
             <ThemedText type="overline" tone="accent">
-              Técnica
+              {t("exerciseDetails.technique")}
             </ThemedText>
 
             <ThemedText tone="secondary">{exercise.instructions}</ThemedText>

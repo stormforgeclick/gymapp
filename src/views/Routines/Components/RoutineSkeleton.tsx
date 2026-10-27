@@ -7,6 +7,8 @@ const makeStyles = (c: ThemeColors) => ({
   card: {
     backgroundColor: c.surface,
     borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: c.border,
     padding: Spacing.tight,
     gap: Spacing.two,
   },

@@ -3,9 +3,13 @@ import {
   FlatList,
   FlatListProps,
   ListRenderItem,
+  RefreshControl,
   View,
 } from "react-native";
 
+import EmptyState from "@/components/ui/EmptyState";
+import { useTheme } from "@/hooks/use-theme";
+import { useT } from "@/i18n";
 import ExerciseCard from "./ExerciseCard";
 import ExerciseCardSkeleton from "./ExerciseCardSkeleton";
 
@@ -25,6 +29,12 @@ interface ExercisesListProps {
   isFetchingNextPage: boolean;
   isLoading: boolean;
   fetchNextPage: () => void;
+  /** The first page failed to load: show an error with a retry action. */
+  isError?: boolean;
+  onRetry?: () => void;
+  /** Pull-to-refresh. Leave `onRefresh` unset inside bottom sheets. */
+  refreshing?: boolean;
+  onRefresh?: () => void;
   ListComponent?: ListComponentType;
   renderItem?: ListRenderItem<Exercise>;
   ListHeaderComponent?: FlatListProps<Exercise>["ListHeaderComponent"];
@@ -50,6 +60,10 @@ const ExercisesList = ({
   isFetchingNextPage,
   isLoading,
   fetchNextPage,
+  isError = false,
+  onRetry,
+  refreshing = false,
+  onRefresh,
   ListComponent,
   renderItem = defaultRenderItem,
   ListHeaderComponent,
@@ -57,6 +71,8 @@ const ExercisesList = ({
   contentContainerStyle,
 }: ExercisesListProps) => {
   const List = (ListComponent ?? FlatList) as ListComponentType;
+  const theme = useTheme();
+  const { t } = useT();
 
   if (isLoading) {
     return (
@@ -92,6 +108,34 @@ const ExercisesList = ({
         }
       }}
       onEndReachedThreshold={0.5}
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.accentText}
+            colors={[theme.accentText]}
+            progressBackgroundColor={theme.surface}
+          />
+        ) : undefined
+      }
+      ListEmptyComponent={
+        isError ? (
+          <EmptyState
+            alert
+            icon="alert-circle-outline"
+            title={t("exercises.loadError")}
+            actionLabel={t("common.retry")}
+            onAction={onRetry}
+          />
+        ) : (
+          <EmptyState
+            icon="magnify"
+            title={t("exercises.noResults")}
+            description={t("exercises.noResultsHint")}
+          />
+        )
+      }
       ListFooterComponent={
         isFetchingNextPage ? (
           <View style={{ gap: 12 }}>

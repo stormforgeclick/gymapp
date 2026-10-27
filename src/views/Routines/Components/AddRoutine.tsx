@@ -4,7 +4,6 @@ import { renderSheetBackdrop, useSheetStyles } from "@/components/ui/sheet";
 import TextField from "@/components/ui/TextField";
 import {
   IconSize,
-  RoutineColorNames,
   RoutineColors,
   Spacing,
   type ThemeColors,
@@ -13,6 +12,9 @@ import { useCreateRoutine, useDeleteRoutine, useUpdateRoutine } from "@/hooks/ap
 import type { Routine } from "@/hooks/api/routines/queries";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
+import { useDialog } from "@/providers/DialogProvider";
+import { useToast } from "@/providers/ToastProvider";
 import {
   BottomSheetModal,
   BottomSheetTextInput,
@@ -20,7 +22,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface IProps {
@@ -53,6 +55,8 @@ const makeStyles = (c: ThemeColors) => ({
     width: 32,
     height: 32,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: c.edge,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -71,6 +75,9 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
   const sheet = useSheetStyles();
+  const { t } = useT();
+  const toast = useToast();
+  const dialog = useDialog();
 
   const initialColor =
     (Object.entries(RoutineColors).find(
@@ -104,30 +111,44 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
     if (!trimmed) return;
     const color = RoutineColors[selectedColor];
 
+    const done = (message: string) => () => {
+      toast.show(message);
+      dismiss();
+    };
+
     if (routineToEdit) {
       updateMut.mutate(
         { id: routineToEdit.id, name: trimmed, color },
-        { onSuccess: dismiss }
+        { onSuccess: done(t("routines.toast.updated")) }
       );
     } else {
-      createMut.mutate({ name: trimmed, color }, { onSuccess: dismiss });
+      createMut.mutate(
+        { name: trimmed, color },
+        { onSuccess: done(t("routines.toast.created")) }
+      );
     }
   };
 
   const handleDelete = () => {
     if (!routineToEdit) return;
-    Alert.alert(
-      "Eliminar rutina",
-      "¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer.",
-      [
-        { text: "Cancelar", style: "cancel" },
+    dialog.show({
+      title: t("routines.sheet.deleteConfirmTitle"),
+      message: t("routines.sheet.deleteConfirmMessage"),
+      actions: [
+        { label: t("common.cancel"), variant: "cancel" },
         {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: () => deleteMut.mutate(routineToEdit.id, { onSuccess: dismiss }),
+          label: t("common.delete"),
+          variant: "destructive",
+          onPress: () =>
+            deleteMut.mutate(routineToEdit.id, {
+              onSuccess: () => {
+                toast.show(t("routines.toast.deleted"));
+                dismiss();
+              },
+            }),
         },
-      ]
-    );
+      ],
+    });
   };
 
   const trimmedName = name.trim();
@@ -145,21 +166,21 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
       <BottomSheetView style={styles.container}>
         <View style={[styles.contentContainer, { paddingBottom: bottom }]}>
           <ThemedText type="headline" accessibilityRole="header">
-            {isEditing ? "EDITAR RUTINA" : "NUEVA RUTINA"}
+            {isEditing ? t("routines.sheet.editTitle") : t("routines.sheet.newTitle")}
           </ThemedText>
 
           <TextField
-            label="Nombre"
+            label={t("routines.sheet.name")}
             value={name}
             onChangeText={setName}
-            placeholder="Upper, Chest Day, etc. ..."
+            placeholder={t("routines.sheet.namePlaceholder")}
             autoCapitalize="sentences"
             TextInputComponent={BottomSheetTextInput as any}
           />
 
           <View style={styles.colorSection}>
             <ThemedText type="overline" tone="secondary">
-              Color
+              {t("routines.sheet.color")}
             </ThemedText>
             <View style={styles.colorsContainer}>
               {Object.entries(RoutineColors).map(([key, color]) => {
@@ -172,7 +193,9 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
                     onPress={() => setSelectedColor(colorKey)}
                     style={styles.colorOptionWrapper}
                     accessibilityRole="button"
-                    accessibilityLabel={`Color ${RoutineColorNames[colorKey]}`}
+                    accessibilityLabel={t("routines.sheet.colorA11y", {
+                      name: t(`colors.${colorKey}`),
+                    })}
                     accessibilityState={{ selected: isSelected }}
                   >
                     <View
@@ -209,7 +232,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
 
           <View>
             <Button
-              label={isEditing ? "Guardar" : "Crear rutina"}
+              label={isEditing ? t("routines.sheet.save") : t("routines.sheet.create")}
               color={RoutineColors[selectedColor]}
               onPress={handleSubmit}
               loading={isSubmitting && !deleteMut.isPending}
@@ -218,7 +241,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
 
             {isEditing && (
               <Button
-                label="Eliminar rutina"
+                label={t("routines.sheet.delete")}
                 variant="danger"
                 onPress={handleDelete}
                 loading={deleteMut.isPending}

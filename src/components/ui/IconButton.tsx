@@ -40,7 +40,11 @@ const IconButton = ({
       accessibilityState={{ disabled }}
       style={({ pressed }) => [
         styles.base,
-        filled && { backgroundColor: color ?? theme.primary },
+        filled && {
+          backgroundColor: color ?? theme.primary,
+          borderWidth: 1,
+          borderColor: theme.edge,
+        },
         disabled && { opacity: Opacity.disabled },
         pressed && !disabled && { opacity: Opacity.pressed },
         style,

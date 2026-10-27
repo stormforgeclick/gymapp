@@ -81,7 +81,9 @@ const Button = ({
       ? theme.danger
       : variant === "outline"
         ? theme.textSecondary
-        : undefined;
+        : variant === "primary"
+          ? theme.edge
+          : undefined;
 
   return (
     <Pressable
@@ -100,7 +102,7 @@ const Button = ({
         borderColor !== undefined && {
           borderColor,
           borderWidth: 1,
-          borderStyle: dashed ? "dashed" : "solid",
+          borderStyle: dashed && variant === "outline" ? "dashed" : "solid",
         },
         isDisabled && { opacity: Opacity.disabled },
         pressed && !isDisabled && { opacity: Opacity.pressed },

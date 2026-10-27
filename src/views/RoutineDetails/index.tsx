@@ -1,5 +1,5 @@
-import { ThemedText } from "@/components/themed-text";
 import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import ScreenHeader from "@/components/ui/ScreenHeader";
@@ -12,6 +12,9 @@ import {
 import type { SetInput } from "@/hooks/api/routineExercises/queries";
 import { useRoutines } from "@/hooks/api/routines";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useStartRoutineWorkout } from "@/hooks/useStartRoutineWorkout";
+import { useT } from "@/i18n";
+import { useToast } from "@/providers/ToastProvider";
 import AddRoutineComponent from "@/views/Routines/Components/AddRoutine";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -34,9 +37,8 @@ const makeStyles = () => ({
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
-  emptyState: {
-    paddingVertical: Spacing.five + Spacing.two,
-    alignItems: "center" as const,
+  startButton: {
+    marginTop: Spacing.two,
   },
 });
 
@@ -44,12 +46,19 @@ const RoutineDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const styles = useThemedStyles(makeStyles);
+  const { t, language } = useT();
+  const toast = useToast();
 
-  const { data: routines } = useRoutines();
+  const { data: routines } = useRoutines(language);
   const routine = routines?.find((r) => r.id === id);
   const routineColor = routine?.color ?? RoutineColors.routineOne;
 
-  const { data: exercises, isLoading, isError } = useRoutineExercises(id ?? "");
+  const {
+    data: exercises,
+    isLoading,
+    isError,
+    refetch,
+  } = useRoutineExercises(id ?? "", language);
 
   const replaceMut = useReplaceRoutineExerciseSets(id ?? "");
   const deleteMut = useDeleteRoutineExercise(id ?? "");
@@ -60,12 +69,32 @@ const RoutineDetail = () => {
   const [showPicker, setShowPicker] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
+  const { start, isStarting, activeRoutineId } = useStartRoutineWorkout();
+
+  const isResuming = activeRoutineId === id;
+  // The loaded exercises are the freshest count; the list's count covers the gap.
+  const exerciseCount = exercises?.length ?? routine?.quantity ?? 0;
+  const canStart = !isLoading && !isError && !!routine;
+
+  // An empty routine isn't hidden from here: starting it explains why it can't
+  // and offers to open the exercise picker.
+  const handleStartWorkout = () => {
+    if (!routine) return;
+    start(
+      { id: routine.id, name: routine.name, quantity: exerciseCount },
+      () => setShowPicker(true)
+    );
+  };
+
   const handleSave = (routineExerciseId: string) => (sets: SetInput[]) => {
     save.begin(routineExerciseId);
     replaceMut.mutate(
       { routineExerciseId, sets },
       {
-        onSuccess: () => save.succeed(routineExerciseId),
+        onSuccess: () => {
+          save.succeed(routineExerciseId);
+          toast.show(t("routineDetails.toast.setsSaved"));
+        },
         onError: (err) => save.fail(routineExerciseId, err.message),
       }
     );
@@ -74,7 +103,10 @@ const RoutineDetail = () => {
   const handleDelete = (routineExerciseId: string) => () => {
     del.begin(routineExerciseId);
     deleteMut.mutate(routineExerciseId, {
-      onSuccess: () => del.succeed(routineExerciseId),
+      onSuccess: () => {
+        del.succeed(routineExerciseId);
+        toast.show(t("routineDetails.toast.exerciseRemoved"));
+      },
       onError: (err) => del.fail(routineExerciseId, err.message),
     });
   };
@@ -83,6 +115,8 @@ const RoutineDetail = () => {
     <ScreenContainer edges={["top", "bottom"]}>
       <ScreenHeader
         title={routine?.name ?? ""}
+        size="headline"
+        titleLines={1}
         onBack={() => router.back()}
         right={
           <IconButton
@@ -90,7 +124,7 @@ const RoutineDetail = () => {
             variant="filled"
             color={routineColor}
             onPress={() => setShowEdit(true)}
-            accessibilityLabel="Editar rutina"
+            accessibilityLabel={t("routineDetails.editRoutine")}
           />
         }
       />
@@ -103,7 +137,13 @@ const RoutineDetail = () => {
 
       {isError && (
         <View style={styles.centered}>
-          <ThemedText tone="secondary">Error al cargar los ejercicios</ThemedText>
+          <EmptyState
+            alert
+            icon="alert-circle-outline"
+            title={t("routineDetails.loadError")}
+            actionLabel={t("common.retry")}
+            onAction={() => refetch()}
+          />
         </View>
       )}
 
@@ -126,19 +166,31 @@ const RoutineDetail = () => {
             />
           )}
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <ThemedText tone="secondary">Aún no has agregado ejercicios</ThemedText>
-            </View>
+            <EmptyState
+              icon="dumbbell"
+              title={t("routineDetails.empty")}
+              description={t("routineDetails.emptyHint")}
+            />
           }
           ListFooterComponent={
             <Button
-              label="Agregar ejercicio"
+              label={t("routineDetails.addExercise")}
               variant="outline"
               dashed
               leftIcon="plus"
               onPress={() => setShowPicker(true)}
             />
           }
+        />
+      )}
+
+      {canStart && (
+        <Button
+          label={isResuming ? t("workout.resume") : t("workout.start")}
+          color={routineColor}
+          onPress={handleStartWorkout}
+          loading={isStarting}
+          style={styles.startButton}
         />
       )}
 

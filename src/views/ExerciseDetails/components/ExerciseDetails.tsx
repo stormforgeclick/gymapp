@@ -11,6 +11,8 @@ const makeStyles = (c: ThemeColors) => ({
     paddingVertical: Spacing.five + Spacing.one,
     backgroundColor: c.surface,
     borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: c.border,
     alignItems: "center" as const,
   },
   video: {
@@ -50,6 +52,8 @@ const makeStyles = (c: ThemeColors) => ({
     padding: Spacing.three,
     backgroundColor: c.surface,
     borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: c.border,
     gap: Spacing.tight,
   },
   coachingTitle: {

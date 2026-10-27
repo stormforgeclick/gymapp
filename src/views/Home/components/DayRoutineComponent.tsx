@@ -1,19 +1,26 @@
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Button from "@/components/ui/Button";
-import { Radius, Spacing } from "@/constants/theme";
+import { Opacity, Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 
 interface IProps {
   title: string;
   subtitle: string;
   color: string;
+  /** Starts the workout (or resumes it when `resuming`). */
   action: () => void;
+  /** Tapping the card body, e.g. to open the routine. */
+  onPress: () => void;
+  /** This routine is the one with an unfinished workout. */
+  resuming?: boolean;
+  disabled?: boolean;
 }
 
-const makeStyles = () => ({
+const makeStyles = (c: ThemeColors) => ({
   container: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -21,6 +28,8 @@ const makeStyles = () => ({
     gap: Spacing.three,
     padding: Spacing.three,
     borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   leftContent: {
     flex: 1,
@@ -38,12 +47,29 @@ const makeStyles = () => ({
   },
 });
 
-const DayRoutineComponent = ({ color, title, subtitle, action }: IProps) => {
+const DayRoutineComponent = ({
+  color,
+  title,
+  subtitle,
+  action,
+  onPress,
+  resuming = false,
+  disabled = false,
+}: IProps) => {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
 
   return (
     <ThemedView type="surface" style={styles.container}>
-      <View style={styles.leftContent}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${title}, ${subtitle}`}
+        style={({ pressed }) => [
+          styles.leftContent,
+          pressed && { opacity: Opacity.pressed },
+        ]}
+      >
         <View style={[styles.dot, { backgroundColor: color }]} />
 
         <View style={styles.textContainer}>
@@ -54,15 +80,20 @@ const DayRoutineComponent = ({ color, title, subtitle, action }: IProps) => {
             {subtitle}
           </ThemedText>
         </View>
-      </View>
+      </Pressable>
 
       <Button
-        label="Ir"
+        label={resuming ? t("workout.continue") : t("home.go")}
         size="sm"
         color={color}
         fullWidth={false}
+        disabled={disabled}
         onPress={action}
-        accessibilityLabel={`Iniciar ${title}`}
+        accessibilityLabel={
+          resuming
+            ? `${t("workout.resume")}: ${title}`
+            : t("home.goA11y", { title })
+        }
       />
     </ThemedView>
   );

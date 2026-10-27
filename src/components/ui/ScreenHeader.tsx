@@ -5,12 +5,17 @@ import { ThemedText } from "@/components/themed-text";
 import IconButton from "@/components/ui/IconButton";
 import { Spacing } from "@/constants/theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 
 interface ScreenHeaderProps {
   title: string;
   overline?: string;
   onBack?: () => void;
   right?: ReactNode;
+  /** `display` is 36px; `headline` (28px) fits headers that share the row with actions. */
+  size?: "display" | "headline";
+  /** Lines the title may use before truncating; `\n` in `title` breaks a line. */
+  titleLines?: number;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -30,8 +35,17 @@ const makeStyles = () => ({
   },
 });
 
-const ScreenHeader = ({ title, overline, onBack, right, style }: ScreenHeaderProps) => {
+const ScreenHeader = ({
+  title,
+  overline,
+  onBack,
+  right,
+  size = "display",
+  titleLines = 2,
+  style,
+}: ScreenHeaderProps) => {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
 
   return (
     <View style={[styles.container, style]}>
@@ -39,7 +53,7 @@ const ScreenHeader = ({ title, overline, onBack, right, style }: ScreenHeaderPro
         <IconButton
           icon="arrow-left"
           onPress={onBack}
-          accessibilityLabel="Volver"
+          accessibilityLabel={t("common.back")}
           style={styles.back}
         />
       )}
@@ -51,8 +65,8 @@ const ScreenHeader = ({ title, overline, onBack, right, style }: ScreenHeaderPro
           </ThemedText>
         )}
         <ThemedText
-          type="headline"
-          numberOfLines={1}
+          type={size}
+          numberOfLines={titleLines}
           accessibilityRole="header"
         >
           {title}

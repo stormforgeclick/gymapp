@@ -3,12 +3,26 @@
  * https://docs.expo.dev/guides/color-schemes/
  */
 
-import { Colors } from '@/constants/theme';
+import { useMemo } from 'react';
+
+import { Colors, type ThemeColors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { readableAccent } from '@/lib/color';
+import { useAccent } from '@/providers/AccentProvider';
 
-export function useTheme() {
+/**
+ * The palette for the current color scheme. While there is a routine of the
+ * day its color replaces the brand accent (`primary` for fills, `accentText`
+ * for text and icons), so everything built on those tokens follows it.
+ */
+export function useTheme(): ThemeColors {
   const scheme = useColorScheme();
-  const theme = scheme === 'unspecified' ? 'light' : scheme;
+  const mode = scheme === 'unspecified' ? 'light' : scheme;
+  const accent = useAccent();
 
-  return Colors[theme];
+  return useMemo(() => {
+    const base = Colors[mode];
+    if (!accent) return base;
+    return { ...base, primary: accent, accentText: readableAccent(accent, mode) };
+  }, [mode, accent]);
 }

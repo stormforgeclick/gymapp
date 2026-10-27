@@ -11,6 +11,7 @@ import { IconSize, Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useLogin } from "@/hooks/api/auth";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 
 const makeStyles = (c: ThemeColors) => ({
   flex: {
@@ -61,6 +62,7 @@ const makeStyles = (c: ThemeColors) => ({
 export function LoginView() {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -102,27 +104,25 @@ export function LoginView() {
 
           <View style={styles.header}>
             <ThemedText type="title" accessibilityRole="header">
-              BIENVENIDO DE VUELTA
+              {t("auth.login.title")}
             </ThemedText>
-            <ThemedText tone="secondary">
-              Inicia sesión para continuar tu progreso
-            </ThemedText>
+            <ThemedText tone="secondary">{t("auth.login.subtitle")}</ThemedText>
           </View>
 
           <View style={styles.form}>
             <TextField
-              label="Correo electrónico"
+              label={t("auth.email")}
               icon="email-outline"
               value={email}
               onChangeText={setEmail}
-              placeholder="tu@correo.com"
+              placeholder={t("auth.emailPlaceholder")}
               keyboardType="email-address"
               autoComplete="email"
               textContentType="emailAddress"
             />
 
             <TextField
-              label="Contraseña"
+              label={t("auth.password")}
               icon="lock-outline"
               value={password}
               onChangeText={setPassword}
@@ -136,7 +136,7 @@ export function LoginView() {
 
           <View style={styles.actions}>
             <Button
-              label="Iniciar sesión"
+              label={t("auth.login.submit")}
               onPress={handleLogin}
               loading={isPending}
               disabled={!canSubmit}
@@ -145,13 +145,13 @@ export function LoginView() {
             <View style={styles.dividerRow}>
               <View style={styles.divider} />
               <ThemedText type="label" tone="secondary">
-                o
+                {t("common.or")}
               </ThemedText>
               <View style={styles.divider} />
             </View>
 
             <Button
-              label="Crear cuenta"
+              label={t("auth.login.createAccount")}
               variant="secondary"
               onPress={() => router.replace("/register")}
             />

@@ -18,6 +18,7 @@ import {
 } from "@/hooks/api/routineExercises";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 import ExerciseCard from "@/views/Exercises/Components/ExerciseCard";
 import ExercisesList from "@/views/Exercises/Components/ExercisesList";
 import Filter from "@/views/Exercises/Components/Filter";
@@ -65,18 +66,19 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
   const sheet = useSheetStyles();
+  const { t, language } = useT();
 
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string | undefined>();
   const [adding, setAdding] = useState<Set<string>>(new Set());
 
-  const { data: routineExercises } = useRoutineExercises(routineId);
+  const { data: routineExercises } = useRoutineExercises(routineId, language);
   const addedIds = useMemo(
     () => new Set(routineExercises?.map((re) => re.gymbro_exercise_id) ?? []),
     [routineExercises]
   );
 
-  const { data: filters } = useExercisesFilters();
+  const { data: filters } = useExercisesFilters(language);
   const categories = filters?.categories ?? [];
 
   const {
@@ -84,7 +86,9 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useExercises({ category: categoryId }, search);
+    isError,
+    refetch,
+  } = useExercises({ category: categoryId }, search, language);
   const addMut = useAddRoutineExercise(routineId);
   const errors = useRowMutationState<string>();
 
@@ -92,7 +96,8 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
     () => (data?.pages.flat() ?? []) as Exercise[],
     [data]
   );
-  const isLoading = !data && !isFetchingNextPage;
+  // A failed first load must stop showing skeletons so the error state can appear.
+  const isLoading = !data && !isError && !isFetchingNextPage;
 
   useEffect(() => {
     ref.current?.present();
@@ -107,7 +112,7 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
     try {
       await addMut.mutateAsync(gymbroExerciseId);
     } catch (e: any) {
-      errors.fail(gymbroExerciseId, e?.message ?? "Error al agregar");
+      errors.fail(gymbroExerciseId, e?.message ?? t("routineDetails.picker.addError"));
     } finally {
       setAdding((prev) => {
         const next = new Set(prev);
@@ -158,18 +163,20 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
         hasNextPage={!!hasNextPage}
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}
+        isError={isError && !data}
+        onRetry={() => refetch()}
         ListComponent={BottomSheetFlatList as any}
         stickyHeaderIndices={[0]}
         contentContainerStyle={{ paddingBottom: bottom + Spacing.three }}
         ListHeaderComponent={
           <View style={styles.header}>
             <ThemedText type="headline" accessibilityRole="header">
-              AGREGAR EJERCICIOS
+              {t("routineDetails.picker.title")}
             </ThemedText>
             <SearchInput
               value={search}
               onChangeText={setSearch}
-              placeholder="Buscar ejercicio..."
+              placeholder={t("routineDetails.picker.searchPlaceholder")}
               TextInputComponent={BottomSheetTextInput as any}
             />
             {categories.length > 0 && (
@@ -177,7 +184,7 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
                 items={categories}
                 selectedId={categoryId}
                 onSelect={setCategoryId}
-                allLabel="Todos"
+                allLabel={t("common.all")}
               />
             )}
           </View>
@@ -187,10 +194,10 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
           const isInFlight = adding.has(item.id);
           const rowError = errors.errorFor(item.id);
           const a11yState = isInFlight
-            ? "Agregando"
+            ? t("routineDetails.picker.adding")
             : isAdded
-              ? "Ya agregado"
-              : "Agregar";
+              ? t("routineDetails.picker.alreadyAdded")
+              : t("routineDetails.picker.add");
 
           return (
             <View>
@@ -199,7 +206,10 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
                 onPress={() => handleTap(item.id)}
                 disabled={isAdded || isInFlight}
                 dimmed={isAdded}
-                accessibilityLabel={`${item.name}. ${a11yState}`}
+                accessibilityLabel={t("routineDetails.picker.rowA11y", {
+                  name: item.name,
+                  state: a11yState,
+                })}
                 rightSlot={renderRightSlot(isInFlight, isAdded)}
               />
               {rowError && (

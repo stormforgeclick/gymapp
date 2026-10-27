@@ -31,10 +31,10 @@ export function useExercises(
   });
 }
 
-export const useExercisesFilters = () => {
+export const useExercisesFilters = (language: Language = "es") => {
   return useQuery({
-    queryKey: ["exercisesFilters"],
-    queryFn: () => getExercisesFilters(),
+    queryKey: ["exercisesFilters", language],
+    queryFn: () => getExercisesFilters(language),
     staleTime: Infinity,
   });
 };

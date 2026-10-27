@@ -1,14 +1,16 @@
-import { ThemedText } from "@/components/themed-text";
-import Button from "@/components/ui/Button";
+import ActiveWorkoutBanner from "@/components/ui/ActiveWorkoutBanner";
+import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { Spacing } from "@/constants/theme";
 import { useRoutines } from "@/hooks/api/routines";
+import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, View } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import AddRoutineComponent from "./Components/AddRoutine";
 import RoutineComponent from "./Components/Routine";
 import RoutineSkeleton from "./Components/RoutineSkeleton";
@@ -23,19 +25,25 @@ const makeStyles = () => ({
   },
   centered: {
     flex: 1,
-    alignItems: "center" as const,
     justifyContent: "center" as const,
-    gap: Spacing.three,
   },
 });
 
 const RoutinesScreen = () => {
   const router = useRouter();
+  const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t, language } = useT();
 
   const [showAdd, setShowAdd] = useState(false);
 
-  const { data: routines, isLoading, isError, refetch } = useRoutines();
+  const {
+    data: routines,
+    isLoading,
+    isError,
+    isRefetching,
+    refetch,
+  } = useRoutines(language);
 
   const handleRoutinePress = useCallback(
     (routineId: string) => {
@@ -47,16 +55,18 @@ const RoutinesScreen = () => {
   return (
     <ScreenContainer>
       <ScreenHeader
-        title="RUTINAS"
+        title={t("routines.title")}
         right={
           <IconButton
             icon="plus"
             variant="filled"
             onPress={() => setShowAdd(true)}
-            accessibilityLabel="Crear rutina"
+            accessibilityLabel={t("routines.create")}
           />
         }
       />
+
+      <ActiveWorkoutBanner />
 
       {isLoading && (
         <View style={styles.routinesContainer}>
@@ -68,29 +78,24 @@ const RoutinesScreen = () => {
 
       {isError && (
         <View style={styles.centered}>
-          <ThemedText
-            tone="secondary"
-            accessibilityLiveRegion="polite"
-            accessibilityRole="alert"
-          >
-            Hubo un error cargando tus rutinas
-          </ThemedText>
-          <Button
-            label="Reintentar"
-            variant="outline"
-            fullWidth={false}
-            onPress={() => refetch()}
+          <EmptyState
+            alert
+            icon="alert-circle-outline"
+            title={t("routines.loadError")}
+            actionLabel={t("common.retry")}
+            onAction={() => refetch()}
           />
         </View>
       )}
 
       {!isLoading && !isError && routines?.length === 0 && (
         <View style={styles.centered}>
-          <ThemedText tone="secondary">Aún no tienes rutinas</ThemedText>
-          <Button
-            label="Crear tu primera rutina"
-            fullWidth={false}
-            onPress={() => setShowAdd(true)}
+          <EmptyState
+            icon="dumbbell"
+            title={t("routines.empty")}
+            actionLabel={t("routines.createFirst")}
+            actionVariant="primary"
+            onAction={() => setShowAdd(true)}
           />
         </View>
       )}
@@ -102,6 +107,15 @@ const RoutinesScreen = () => {
           showsVerticalScrollIndicator={false}
           data={routines}
           keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={theme.accentText}
+              colors={[theme.accentText]}
+              progressBackgroundColor={theme.surface}
+            />
+          }
           renderItem={({ item }) => (
             <RoutineComponent
               {...item}

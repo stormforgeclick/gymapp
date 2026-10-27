@@ -15,6 +15,7 @@ import type {
 } from "@/hooks/api/routineExercises/queries";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 import { defaultDraftSet } from "../utils/defaultDraftSet";
 
 type DraftSet = {
@@ -93,6 +94,7 @@ const SetEditor = ({
 }: IProps) => {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
 
   const [draft, setDraft] = useState<DraftSet[]>(() => toDraft(initialSets));
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -118,7 +120,7 @@ const SetEditor = ({
     for (const d of draft) {
       const reps = Number(d.reps);
       if (!Number.isInteger(reps) || reps <= 0) {
-        setValidationError("Las repeticiones deben ser enteros mayores a 0");
+        setValidationError(t("sets.repsError"));
         return;
       }
       const trimmedWeight = d.weight.trim();
@@ -126,7 +128,7 @@ const SetEditor = ({
       if (trimmedWeight !== "") {
         const w = Number(trimmedWeight);
         if (!Number.isFinite(w) || w < 0) {
-          setValidationError("El peso debe ser un número válido (≥ 0)");
+          setValidationError(t("sets.weightError"));
           return;
         }
         weight = w;
@@ -150,7 +152,7 @@ const SetEditor = ({
 
           <View style={styles.inputGroup}>
             <ThemedText type="caption" tone="secondary" accessibilityElementsHidden>
-              REPS
+              {t("sets.reps")}
             </ThemedText>
             <TextInput
               style={styles.input}
@@ -158,13 +160,13 @@ const SetEditor = ({
               onChangeText={(v) => updateRow(i, "reps", v)}
               keyboardType="numeric"
               selectTextOnFocus
-              accessibilityLabel="Repeticiones"
+              accessibilityLabel={t("sets.repsA11y")}
             />
           </View>
 
           <View style={styles.inputGroup}>
             <ThemedText type="caption" tone="secondary" accessibilityElementsHidden>
-              KG
+              {t("sets.kg")}
             </ThemedText>
             <TextInput
               style={styles.input}
@@ -174,7 +176,7 @@ const SetEditor = ({
               placeholder="—"
               placeholderTextColor={theme.textTertiary}
               selectTextOnFocus
-              accessibilityLabel="Peso en kilogramos"
+              accessibilityLabel={t("sets.weightA11y")}
             />
           </View>
 
@@ -185,13 +187,13 @@ const SetEditor = ({
             iconColor={onlyOneRow ? theme.textTertiary : theme.danger}
             onPress={() => removeRow(i)}
             disabled={onlyOneRow || isSaving}
-            accessibilityLabel={`Eliminar serie ${i + 1}`}
+            accessibilityLabel={t("sets.deleteSet", { n: i + 1 })}
           />
         </View>
       ))}
 
       <Button
-        label="Agregar serie"
+        label={t("sets.addSet")}
         variant="outline"
         dashed
         size="sm"
@@ -212,7 +214,7 @@ const SetEditor = ({
       ) : null}
 
       <Button
-        label="Guardar cambios"
+        label={t("sets.save")}
         color={color}
         onPress={handleSave}
         loading={isSaving}
@@ -220,11 +222,11 @@ const SetEditor = ({
       />
 
       <Button
-        label="Cancelar"
+        label={t("common.cancel")}
         variant="ghost"
         onPress={onCancel}
         disabled={isSaving}
-        accessibilityLabel="Cancelar edición"
+        accessibilityLabel={t("sets.cancelA11y")}
       />
     </View>
   );

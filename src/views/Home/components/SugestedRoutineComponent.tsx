@@ -3,8 +3,9 @@ import { View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Button from "@/components/ui/Button";
-import { Radius, Spacing } from "@/constants/theme";
+import { Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 
 interface IProps {
   title: string;
@@ -13,7 +14,7 @@ interface IProps {
   action: () => void;
 }
 
-const makeStyles = () => ({
+const makeStyles = (c: ThemeColors) => ({
   container: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -21,6 +22,8 @@ const makeStyles = () => ({
     gap: Spacing.three,
     padding: Spacing.three,
     borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   textContainer: {
     flex: 1,
@@ -34,12 +37,13 @@ const SugestedRoutineComponent = ({
   action,
 }: IProps) => {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
 
   return (
     <ThemedView type="surface" style={styles.container}>
       <View style={styles.textContainer}>
         <ThemedText type="overline" tone="secondary">
-          Sugerida para hoy
+          {t("home.suggested")}
         </ThemedText>
         <ThemedText type="headline" numberOfLines={1}>
           {title}
@@ -50,11 +54,11 @@ const SugestedRoutineComponent = ({
       </View>
 
       <Button
-        label="Empezar"
+        label={t("home.start")}
         color={color}
         fullWidth={false}
         onPress={action}
-        accessibilityLabel={`Empezar ${title}`}
+        accessibilityLabel={t("home.startA11y", { title })}
       />
     </ThemedView>
   );

@@ -25,9 +25,13 @@ const makeStyles = (c: ThemeColors) => ({
     paddingHorizontal: Spacing.tight,
     borderRadius: Radius.pill,
     backgroundColor: c.surfaceInput,
+    // Reserved on every chip so selecting one doesn't shift the row by 2px.
+    borderWidth: 1,
+    borderColor: "transparent",
   },
   buttonSelected: {
     backgroundColor: c.primary,
+    borderColor: c.edge,
   },
 });
 

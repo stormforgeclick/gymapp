@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Pill from "@/components/ui/Pill";
-import { Opacity, Radius, Spacing } from "@/constants/theme";
+import { Opacity, Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import type { RoutineExercise, SetInput } from "@/hooks/api/routineExercises/queries";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
+import { useDialog } from "@/providers/DialogProvider";
 import SetEditor from "./SetEditor";
 
 interface IProps {
@@ -19,9 +21,11 @@ interface IProps {
   isDeleting: boolean;
 }
 
-const makeStyles = () => ({
+const makeStyles = (c: ThemeColors) => ({
   container: {
     borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: c.border,
     padding: Spacing.three,
     gap: Spacing.tight,
   },
@@ -76,6 +80,8 @@ const RoutineExerciseDetailComponent = ({
   const { name, muscle_group, sets } = routineExercise;
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
+  const dialog = useDialog();
 
   const [editing, setEditing] = useState(false);
 
@@ -88,14 +94,14 @@ const RoutineExerciseDetailComponent = ({
   }, [isSaving, saveError]);
 
   const handleDeletePress = () => {
-    Alert.alert(
-      "Eliminar ejercicio",
-      `¿Eliminar "${name}" de la rutina?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Eliminar", style: "destructive", onPress: onDelete },
-      ]
-    );
+    dialog.show({
+      title: t("routineDetails.deleteConfirmTitle"),
+      message: t("routineDetails.deleteConfirmMessage", { name }),
+      actions: [
+        { label: t("common.cancel"), variant: "cancel" },
+        { label: t("common.delete"), variant: "destructive", onPress: onDelete },
+      ],
+    });
   };
 
   return (
@@ -113,14 +119,14 @@ const RoutineExerciseDetailComponent = ({
             <Pressable
               onPress={() => setEditing(true)}
               accessibilityRole="button"
-              accessibilityLabel={`Editar ${name}`}
+              accessibilityLabel={t("routineDetails.editExercise", { name })}
               style={({ pressed }) => [
                 styles.actionButton,
                 pressed && { opacity: Opacity.pressed },
               ]}
             >
               <ThemedText type="label" tone="secondary">
-                Editar
+                {t("common.edit")}
               </ThemedText>
             </Pressable>
 
@@ -128,8 +134,8 @@ const RoutineExerciseDetailComponent = ({
               onPress={handleDeletePress}
               disabled={isDeleting}
               accessibilityRole="button"
-              accessibilityLabel={`Eliminar ${name}`}
-              accessibilityHint="Elimina este ejercicio de la rutina"
+              accessibilityLabel={t("routineDetails.deleteExercise", { name })}
+              accessibilityHint={t("routineDetails.deleteExerciseHint")}
               accessibilityState={{ disabled: isDeleting, busy: isDeleting }}
               style={({ pressed }) => [
                 styles.actionButton,
@@ -140,7 +146,7 @@ const RoutineExerciseDetailComponent = ({
                 <ActivityIndicator size="small" color={theme.danger} />
               ) : (
                 <ThemedText type="label" tone="danger">
-                  Eliminar
+                  {t("common.delete")}
                 </ThemedText>
               )}
             </Pressable>
@@ -160,17 +166,25 @@ const RoutineExerciseDetailComponent = ({
                 key={s.id ?? i}
                 style={styles.setReadRow}
                 accessible={true}
-                accessibilityLabel={`Serie ${i + 1}, ${reps} repeticiones${s.weight != null ? `, ${s.weight} kg` : ""}`}
+                accessibilityLabel={
+                  s.weight != null
+                    ? t("routineDetails.setA11yWithWeight", {
+                        n: i + 1,
+                        reps,
+                        weight: s.weight,
+                      })
+                    : t("routineDetails.setA11y", { n: i + 1, reps })
+                }
               >
                 <ThemedText type="caption" tone="secondary" tabular style={styles.setIndex}>
                   {i + 1}
                 </ThemedText>
                 <ThemedText type="label" tone="secondary" tabular>
-                  {reps} reps
+                  {t("routineDetails.reps", { reps })}
                 </ThemedText>
                 {s.weight != null && (
                   <ThemedText type="label" tone="secondary" tabular>
-                    {s.weight} kg
+                    {t("routineDetails.weight", { weight: s.weight })}
                   </ThemedText>
                 )}
               </View>

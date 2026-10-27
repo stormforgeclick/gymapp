@@ -12,6 +12,7 @@ import {
 } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT } from "@/i18n";
 
 type TextFieldProps = TextInputProps & {
   label?: string;
@@ -73,6 +74,7 @@ const TextField = ({
 }: TextFieldProps) => {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
   const [visible, setVisible] = useState(!secureEntry);
   const [focused, setFocused] = useState(false);
 
@@ -123,7 +125,9 @@ const TextField = ({
             onPress={() => setVisible((v) => !v)}
             style={styles.toggle}
             accessibilityRole="button"
-            accessibilityLabel={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
+            accessibilityLabel={
+              visible ? t("auth.hidePassword") : t("auth.showPassword")
+            }
           >
             <MaterialCommunityIcons
               name={visible ? "eye-off-outline" : "eye-outline"}

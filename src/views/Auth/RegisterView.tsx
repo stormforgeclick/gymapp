@@ -11,24 +11,26 @@ import { IconSize, Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useRegister } from "@/hooks/api/auth";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useT, type TranslationKey } from "@/i18n";
 
 type FieldName = "email" | "password" | "confirmPassword";
-type FieldErrors = Partial<Record<FieldName, string>>;
+// Validators return translation keys so the message follows the device language.
+type FieldErrors = Partial<Record<FieldName, TranslationKey>>;
 
 const validators: Record<
   FieldName,
-  (values: { email: string; password: string; confirmPassword: string }) => string | undefined
+  (values: { email: string; password: string; confirmPassword: string }) => TranslationKey | undefined
 > = {
   email: ({ email }) =>
     !email.trim().includes("@") || !email.trim().includes(".")
-      ? "Ingresa un correo electrónico válido"
+      ? "auth.register.errors.invalidEmail"
       : undefined,
   password: ({ password }) =>
-    password.length < 8
-      ? "La contraseña debe tener al menos 8 caracteres"
-      : undefined,
+    password.length < 8 ? "auth.register.errors.passwordTooShort" : undefined,
   confirmPassword: ({ password, confirmPassword }) =>
-    password !== confirmPassword ? "Las contraseñas no coinciden" : undefined,
+    password !== confirmPassword
+      ? "auth.register.errors.passwordMismatch"
+      : undefined,
 };
 
 const makeStyles = (c: ThemeColors) => ({
@@ -83,6 +85,7 @@ const makeStyles = (c: ThemeColors) => ({
 export function RegisterView() {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t } = useT();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -149,62 +152,62 @@ export function RegisterView() {
 
           <View style={styles.header}>
             <ThemedText type="title" accessibilityRole="header">
-              CREA TU CUENTA
+              {t("auth.register.title")}
             </ThemedText>
             <ThemedText tone="secondary">
-              Empieza a registrar tu progreso hoy
+              {t("auth.register.subtitle")}
             </ThemedText>
           </View>
 
           <View style={styles.form}>
             <TextField
-              label="Nombre"
+              label={t("auth.register.name")}
               icon="account-outline"
               value={name}
               onChangeText={setName}
-              placeholder="Tu nombre"
+              placeholder={t("auth.register.namePlaceholder")}
               autoCapitalize="words"
               autoComplete="name"
               textContentType="name"
             />
 
             <TextField
-              label="Correo electrónico"
+              label={t("auth.email")}
               icon="email-outline"
               value={email}
               onChangeText={change("email", setEmail)}
               onBlur={() => email && validateField("email")}
-              placeholder="tu@correo.com"
+              placeholder={t("auth.emailPlaceholder")}
               keyboardType="email-address"
               autoComplete="email"
               textContentType="emailAddress"
-              error={errors.email}
+              error={errors.email && t(errors.email)}
             />
 
             <TextField
-              label="Contraseña"
+              label={t("auth.password")}
               icon="lock-outline"
               value={password}
               onChangeText={change("password", setPassword)}
               onBlur={() => password && validateField("password")}
-              placeholder="Mín. 8 caracteres"
+              placeholder={t("auth.register.passwordPlaceholder")}
               secureEntry
               autoComplete="new-password"
               textContentType="newPassword"
-              error={errors.password}
+              error={errors.password && t(errors.password)}
             />
 
             <TextField
-              label="Confirmar contraseña"
+              label={t("auth.register.confirmPassword")}
               icon="shield-check-outline"
               value={confirmPassword}
               onChangeText={change("confirmPassword", setConfirmPassword)}
               onBlur={() => confirmPassword && validateField("confirmPassword")}
-              placeholder="Repite tu contraseña"
+              placeholder={t("auth.register.confirmPasswordPlaceholder")}
               secureEntry
               autoComplete="new-password"
               textContentType="newPassword"
-              error={errors.confirmPassword}
+              error={errors.confirmPassword && t(errors.confirmPassword)}
             />
           </View>
 
@@ -221,7 +224,7 @@ export function RegisterView() {
             )}
 
             <Button
-              label="Registrarse"
+              label={t("auth.register.submit")}
               onPress={handleRegister}
               loading={isPending}
               disabled={!canSubmit}
@@ -230,26 +233,26 @@ export function RegisterView() {
             <View style={styles.dividerRow}>
               <View style={styles.divider} />
               <ThemedText type="label" tone="secondary">
-                o
+                {t("common.or")}
               </ThemedText>
               <View style={styles.divider} />
             </View>
 
             <Button
-              label="Ya tengo cuenta"
+              label={t("auth.register.haveAccount")}
               variant="secondary"
               onPress={() => router.replace("/login")}
             />
           </View>
 
           <ThemedText type="label" tone="secondary" style={styles.terms}>
-            Al registrarte aceptas nuestros{" "}
+            {t("auth.register.termsPrefix")}{" "}
             <ThemedText type="label" tone="accent" accessibilityRole="link">
-              Términos de uso
+              {t("auth.register.terms")}
             </ThemedText>{" "}
-            y{" "}
+            {t("auth.register.and")}{" "}
             <ThemedText type="label" tone="accent" accessibilityRole="link">
-              Política de privacidad
+              {t("auth.register.privacy")}
             </ThemedText>
           </ThemedText>
         </ScrollView>

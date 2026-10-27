@@ -4,6 +4,8 @@ const dark = {
   surfaceElevated: "#1A1A28",
   surfaceInput: "#22222E",
   border: "#2A2A3A",
+  // Outline for color-filled controls; only needed where the fill blends into the background.
+  edge: "transparent",
   text: "#FFFFFF",
   textSecondary: "#9A9AAE",
   textTertiary: "#6A6A80",
@@ -22,6 +24,7 @@ const light: ThemeColors = {
   surfaceElevated: "#FFFFFF",
   surfaceInput: "#EEEEF3",
   border: "#E0E0E8",
+  edge: "rgba(0,0,0,0.25)",
   text: "#0B0B12",
   textSecondary: "#5A5A6E",
   textTertiary: "#8A8A9C",
@@ -41,16 +44,6 @@ export const RoutineColors = {
   routineFive: "#FF2D78",
   routineSix: "#00FFB3",
   routineSeven: "#FFB300",
-};
-
-export const RoutineColorNames: Record<keyof typeof RoutineColors, string> = {
-  routineOne: "Lima",
-  routineTwo: "Cian",
-  routineThree: "Naranja",
-  routineFour: "Violeta",
-  routineFive: "Rosa",
-  routineSix: "Menta",
-  routineSeven: "Ámbar",
 };
 
 export const Spacing = {
