@@ -1,33 +1,80 @@
 import { ThemedText } from "@/components/themed-text";
 import CustomImage from "@/components/ui/CustomImage";
+import IconButton from "@/components/ui/IconButton";
 import Pill from "@/components/ui/Pill";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
+import { Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useExercise } from "@/hooks/api/exercises";
-import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import ExerciseDetailsSkeleton from "./components/ExerciseDetails";
+
+const capitalizeString = (str: string) => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+const makeStyles = (c: ThemeColors) => ({
+  backButton: {
+    marginLeft: -Spacing.two,
+    marginVertical: Spacing.one,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    gap: Spacing.tight,
+    paddingBottom: Spacing.four,
+  },
+  centered: {
+    flex: 1,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  videoContainer: {
+    paddingVertical: Spacing.five + Spacing.one,
+    backgroundColor: c.surface,
+    borderRadius: Radius.md,
+    alignItems: "center" as const,
+  },
+  video: {
+    width: 180,
+    aspectRatio: 1,
+    borderRadius: Radius.md,
+  },
+  tagsContainer: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: Spacing.two,
+  },
+  coachingContainer: {
+    padding: Spacing.three,
+    backgroundColor: c.surface,
+    borderRadius: Radius.md,
+    gap: Spacing.two,
+  },
+});
 
 const ExerciseDetailsScreen = () => {
   const { id: exerciseId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
 
   const { data: exercise, isLoading } = useExercise(exerciseId);
-  const [imageLoading, setImageLoading] = useState(true);
 
-  const capitalizeString = (str: string) => {
-    if (!str) return str;
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
+  return (
+    <ScreenContainer edges={["top", "bottom"]}>
+      <IconButton
+        icon="arrow-left"
+        onPress={() => router.back()}
+        accessibilityLabel="Volver"
+        style={[styles.backButton, { alignSelf: "flex-start" }]}
+      />
 
-  if (isLoading) {
-    return (
-      <ScreenContainer>
-        <Pressable onPress={() => router.back()} style={styles.iconButton}>
-          <Ionicons name="chevron-back" size={24} color="#6A6A80" />
-        </Pressable>
-
+      {isLoading ? (
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.contentContainer}
@@ -35,120 +82,52 @@ const ExerciseDetailsScreen = () => {
         >
           <ExerciseDetailsSkeleton />
         </ScrollView>
-      </ScreenContainer>
-    );
-  }
-
-  return (
-    <ScreenContainer>
-      <Pressable onPress={() => router.back()} style={styles.iconButton}>
-        <Ionicons name="chevron-back" size={24} color="#6A6A80" />
-      </Pressable>
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.videoContainer}>
-          <CustomImage
-            source={{ uri: exercise.gif_url }}
-            style={styles.video}
-            contentFit="contain"
-            cachePolicy="memory-disk"
-          />
+      ) : !exercise ? (
+        <View style={styles.centered}>
+          <ThemedText tone="secondary">No se encontró el ejercicio</ThemedText>
         </View>
+      ) : (
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.videoContainer}>
+            <CustomImage
+              source={{ uri: exercise.gif_url }}
+              style={styles.video}
+              contentFit="contain"
+              cachePolicy="memory-disk"
+            />
+          </View>
 
-        <ThemedText type="title" style={styles.title}>
-          {capitalizeString(exercise.name)}
-        </ThemedText>
-
-        <View style={styles.tagsContainer}>
-          <Pill
-            label={capitalizeString(exercise.category)}
-            backgroundColor="rgba(200, 255, 0, 0.05)"
-            textColor="#C8FF00"
-          />
-
-          <Pill
-            label={capitalizeString(exercise.equipment)}
-            backgroundColor="rgba(255, 255, 255, 0.05)"
-            textColor="#6A6A80"
-          />
-
-          <Pill
-            label={capitalizeString(exercise.target)}
-            backgroundColor="rgba(255, 255, 255, 0.05)"
-            textColor="#6A6A80"
-          />
-        </View>
-
-        <View style={styles.coachingContainer}>
-          <ThemedText type="bold" style={styles.coachingTitle}>
-            Coaching Tip
+          <ThemedText type="display" accessibilityRole="header">
+            {capitalizeString(exercise.name)}
           </ThemedText>
 
-          <ThemedText type="small" style={styles.coachingText}>
-            {exercise.instructions}
-          </ThemedText>
-        </View>
-      </ScrollView>
+          <View style={styles.tagsContainer}>
+            <Pill
+              label={capitalizeString(exercise.category)}
+              backgroundColor={theme.accentText}
+              textColor={theme.accentText}
+            />
+
+            <Pill label={capitalizeString(exercise.equipment)} />
+
+            <Pill label={capitalizeString(exercise.target)} />
+          </View>
+
+          <View style={styles.coachingContainer}>
+            <ThemedText type="overline" tone="accent">
+              Técnica
+            </ThemedText>
+
+            <ThemedText tone="secondary">{exercise.instructions}</ThemedText>
+          </View>
+        </ScrollView>
+      )}
     </ScreenContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  iconButton: {
-    padding: 16,
-  },
-
-  scrollView: {
-    flex: 1,
-  },
-
-  contentContainer: {
-    gap: 12,
-    paddingHorizontal: 12,
-    paddingBottom: 24,
-  },
-
-  title: {
-    lineHeight: 32,
-  },
-
-  videoContainer: {
-    paddingVertical: 36,
-    backgroundColor: "#0A0A16",
-    borderRadius: 12,
-    alignItems: "center",
-  },
-
-  video: {
-    width: 180,
-    aspectRatio: 1,
-    borderRadius: 12,
-  },
-
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-
-  coachingContainer: {
-    padding: 12,
-    backgroundColor: "#14141F",
-    borderRadius: 12,
-    gap: 12,
-  },
-
-  coachingTitle: {
-    color: "#C8FF00",
-  },
-
-  coachingText: {
-    color: "#FFFFFFBF",
-  },
-});
 
 export default ExerciseDetailsScreen;

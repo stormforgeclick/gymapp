@@ -1,17 +1,20 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { TextInput, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
+import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
+import {
+  Radius,
+  Spacing,
+  Typography,
+  type ThemeColors,
+} from "@/constants/theme";
 import type {
   RoutineExerciseSet,
   SetInput,
 } from "@/hooks/api/routineExercises/queries";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { defaultDraftSet } from "../utils/defaultDraftSet";
 
 type DraftSet = {
@@ -41,6 +44,45 @@ interface IProps {
   onCancel: () => void;
 }
 
+const makeStyles = (c: ThemeColors) => ({
+  container: {
+    gap: Spacing.two,
+  },
+  setEditRow: {
+    flexDirection: "row" as const,
+    alignItems: "flex-end" as const,
+    gap: Spacing.two,
+  },
+  setIndex: {
+    width: 20,
+    textAlign: "right" as const,
+    // Aligns the index with the input text rather than the REPS/KG label.
+    paddingBottom: Spacing.tight,
+  },
+  inputGroup: {
+    flex: 1,
+    gap: Spacing.one,
+  },
+  input: {
+    minHeight: 44,
+    backgroundColor: c.surfaceInput,
+    borderRadius: Radius.md,
+    color: c.text,
+    textAlign: "center" as const,
+    paddingVertical: Spacing.two,
+    fontFamily: Typography.bodyStrong.fontFamily,
+    fontSize: Typography.bodyStrong.fontSize,
+    fontVariant: ["tabular-nums" as const],
+  },
+  addSetButton: {
+    minHeight: 44,
+    marginTop: Spacing.one,
+  },
+  saveButton: {
+    marginTop: Spacing.one,
+  },
+});
+
 const SetEditor = ({
   initialSets,
   color,
@@ -49,6 +91,9 @@ const SetEditor = ({
   onSave,
   onCancel,
 }: IProps) => {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
+
   const [draft, setDraft] = useState<DraftSet[]>(() => toDraft(initialSets));
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -93,71 +138,72 @@ const SetEditor = ({
   };
 
   const errorToShow = validationError ?? saveError;
+  const onlyOneRow = draft.length === 1;
 
   return (
     <View style={styles.container}>
       {draft.map((d, i) => (
         <View key={i} style={styles.setEditRow}>
-          <ThemedText style={styles.setIndex}>{i + 1}</ThemedText>
+          <ThemedText type="caption" tone="secondary" tabular style={styles.setIndex}>
+            {i + 1}
+          </ThemedText>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>REPS</ThemedText>
+            <ThemedText type="caption" tone="secondary" accessibilityElementsHidden>
+              REPS
+            </ThemedText>
             <TextInput
               style={styles.input}
               value={d.reps}
               onChangeText={(v) => updateRow(i, "reps", v)}
               keyboardType="numeric"
               selectTextOnFocus
+              accessibilityLabel="Repeticiones"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>KG</ThemedText>
+            <ThemedText type="caption" tone="secondary" accessibilityElementsHidden>
+              KG
+            </ThemedText>
             <TextInput
               style={styles.input}
               value={d.weight}
               onChangeText={(v) => updateRow(i, "weight", v)}
               keyboardType="decimal-pad"
               placeholder="—"
-              placeholderTextColor="#6A6A80"
+              placeholderTextColor={theme.textTertiary}
               selectTextOnFocus
+              accessibilityLabel="Peso en kilogramos"
             />
           </View>
 
-          <Pressable
-            style={({ pressed }) => [
-              styles.trashButton,
-              draft.length === 1 && styles.trashDisabled,
-              pressed && !isSaving && draft.length > 1 && styles.pressed,
-            ]}
+          <IconButton
+            icon="trash-can-outline"
+            variant="filled"
+            color={theme.surfaceInput}
+            iconColor={onlyOneRow ? theme.textTertiary : theme.danger}
             onPress={() => removeRow(i)}
-            disabled={draft.length === 1}
-            accessibilityRole="button"
+            disabled={onlyOneRow || isSaving}
             accessibilityLabel={`Eliminar serie ${i + 1}`}
-            accessibilityState={{ disabled: draft.length === 1 }}
-            hitSlop={6}
-          >
-            <MaterialCommunityIcons
-              name="trash-can-outline"
-              size={18}
-              color={draft.length === 1 ? "#6A6A80" : "#E53935"}
-            />
-          </Pressable>
+          />
         </View>
       ))}
 
-      <Pressable
+      <Button
+        label="Agregar serie"
+        variant="outline"
+        dashed
+        size="sm"
+        leftIcon="plus"
         onPress={addRow}
-        accessibilityRole="button"
-        accessibilityLabel="Agregar serie"
-        style={({ pressed }) => [styles.addSetButton, pressed && styles.pressed]}
-      >
-        <ThemedText style={styles.addSetText}>+ Agregar serie</ThemedText>
-      </Pressable>
+        style={styles.addSetButton}
+      />
 
       {errorToShow ? (
         <ThemedText
-          style={styles.errorText}
+          type="caption"
+          tone="danger"
           accessibilityLiveRegion="polite"
           accessibilityRole="alert"
         >
@@ -165,126 +211,23 @@ const SetEditor = ({
         </ThemedText>
       ) : null}
 
-      <Pressable
+      <Button
+        label="Guardar cambios"
+        color={color}
         onPress={handleSave}
-        disabled={isSaving}
-        accessibilityRole="button"
-        accessibilityLabel="Guardar cambios"
-        accessibilityState={{ disabled: isSaving }}
-        style={({ pressed }) => [
-          styles.saveButton,
-          { backgroundColor: color },
-          isSaving && styles.buttonDisabled,
-          pressed && !isSaving && styles.pressed,
-        ]}
-      >
-        {isSaving ? (
-          <ActivityIndicator color="#000" />
-        ) : (
-          <ThemedText style={styles.saveButtonText}>Guardar cambios</ThemedText>
-        )}
-      </Pressable>
+        loading={isSaving}
+        style={styles.saveButton}
+      />
 
-      <Pressable
+      <Button
+        label="Cancelar"
+        variant="ghost"
         onPress={onCancel}
         disabled={isSaving}
-        accessibilityRole="button"
         accessibilityLabel="Cancelar edición"
-        hitSlop={10}
-        style={({ pressed }) => pressed && styles.pressed}
-      >
-        <ThemedText style={styles.cancelText}>Cancelar</ThemedText>
-      </Pressable>
+      />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 8,
-  },
-  setEditRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 8,
-  },
-  setIndex: {
-    fontSize: 12,
-    color: "#6A6A80",
-    width: 16,
-    textAlign: "right",
-    paddingBottom: 12,
-  },
-  inputGroup: {
-    flex: 1,
-    gap: 4,
-  },
-  inputLabel: {
-    fontSize: 10,
-    color: "#6A6A80",
-    letterSpacing: 0.5,
-  },
-  input: {
-    backgroundColor: "#22222E",
-    borderRadius: 12,
-    color: "#FFF",
-    textAlign: "center",
-    paddingVertical: 10,
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
-  },
-  trashButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: "#22222E",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  trashDisabled: {
-    opacity: 0.4,
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  addSetButton: {
-    paddingVertical: 8,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#6A6A80",
-    borderStyle: "dashed",
-    borderRadius: 8,
-    marginTop: 4,
-  },
-  addSetText: {
-    fontSize: 13,
-    color: "#6A6A80",
-    fontFamily: "Inter_600SemiBold",
-  },
-  errorText: {
-    color: "#FF4D6D",
-    fontSize: 12,
-  },
-  saveButton: {
-    borderRadius: 4,
-    padding: 14,
-    alignItems: "center",
-    marginTop: 4,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  saveButtonText: {
-    color: "#000",
-    fontSize: 15,
-    fontFamily: "Inter_700Bold",
-  },
-  cancelText: {
-    fontSize: 14,
-    color: "#6A6A80",
-    textAlign: "center",
-    paddingVertical: 4,
-  },
-});
 
 export default SetEditor;

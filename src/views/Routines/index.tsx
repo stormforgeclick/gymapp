@@ -1,114 +1,119 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import Title from "@/components/ui/Title";
-import { Colors } from "@/constants/theme";
-import { useRoutines } from "@/hooks/api/routines";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from "react-native";
-import { useRouter } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
-import RoutineComponent from "./Components/Routine";
+import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
+import ScreenHeader from "@/components/ui/ScreenHeader";
+import { Spacing } from "@/constants/theme";
+import { useRoutines } from "@/hooks/api/routines";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { useRouter } from "expo-router";
+import { useCallback, useState } from "react";
+import { FlatList, View } from "react-native";
 import AddRoutineComponent from "./Components/AddRoutine";
+import RoutineComponent from "./Components/Routine";
+import RoutineSkeleton from "./Components/RoutineSkeleton";
+
+const makeStyles = () => ({
+  list: {
+    flex: 1,
+  },
+  routinesContainer: {
+    gap: Spacing.tight,
+    paddingBottom: Spacing.three,
+  },
+  centered: {
+    flex: 1,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: Spacing.three,
+  },
+});
 
 const RoutinesScreen = () => {
   const router = useRouter();
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === "unspecified" ? "light" : scheme];
+  const styles = useThemedStyles(makeStyles);
 
   const [showAdd, setShowAdd] = useState(false);
 
-  const { data: routines, isLoading, isError } = useRoutines();
+  const { data: routines, isLoading, isError, refetch } = useRoutines();
+
+  const handleRoutinePress = useCallback(
+    (routineId: string) => {
+      router.push({ pathname: "/routine/[id]", params: { id: routineId } });
+    },
+    [router]
+  );
 
   return (
     <ScreenContainer>
-      <View style={styles.headerSection}>
-        <Title title="RUTINAS" />
-        <Pressable
-          style={[styles.button, { backgroundColor: colors.icon }]}
-          onPress={() => setShowAdd(true)}
-        >
-          <MaterialCommunityIcons name="plus" size={35} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="RUTINAS"
+        right={
+          <IconButton
+            icon="plus"
+            variant="filled"
+            onPress={() => setShowAdd(true)}
+            accessibilityLabel="Crear rutina"
+          />
+        }
+      />
 
       {isLoading && (
-        <View style={styles.centered}>
-          <ActivityIndicator color={colors.icon} />
+        <View style={styles.routinesContainer}>
+          <RoutineSkeleton />
+          <RoutineSkeleton />
+          <RoutineSkeleton />
         </View>
       )}
 
       {isError && (
         <View style={styles.centered}>
-          <ThemedText type="small" themeColor="textSecondary">
+          <ThemedText
+            tone="secondary"
+            accessibilityLiveRegion="polite"
+            accessibilityRole="alert"
+          >
             Hubo un error cargando tus rutinas
           </ThemedText>
+          <Button
+            label="Reintentar"
+            variant="outline"
+            fullWidth={false}
+            onPress={() => refetch()}
+          />
         </View>
       )}
 
       {!isLoading && !isError && routines?.length === 0 && (
         <View style={styles.centered}>
-          <ThemedText type="small" themeColor="textSecondary">
-            Aún no tienes rutinas
-          </ThemedText>
+          <ThemedText tone="secondary">Aún no tienes rutinas</ThemedText>
+          <Button
+            label="Crear tu primera rutina"
+            fullWidth={false}
+            onPress={() => setShowAdd(true)}
+          />
         </View>
       )}
 
       {!isLoading && !isError && routines && routines.length > 0 && (
-        <ScrollView
-          style={styles.scrollView}
+        <FlatList
+          style={styles.list}
           contentContainerStyle={styles.routinesContainer}
           showsVerticalScrollIndicator={false}
-        >
-          {routines.map((routine) => (
+          data={routines}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
             <RoutineComponent
-              key={routine.id}
-              {...routine}
-              action={() =>
-                router.push({
-                  pathname: "/routine/[id]",
-                  params: { id: routine.id },
-                })
-              }
+              {...item}
+              action={() => handleRoutinePress(item.id)}
             />
-          ))}
-        </ScrollView>
+          )}
+        />
       )}
 
-      {showAdd && (
-        <AddRoutineComponent setShowAdd={setShowAdd} />
-      )}
+      {showAdd && <AddRoutineComponent setShowAdd={setShowAdd} />}
     </ScreenContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  headerSection: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  button: {
-    borderRadius: 999,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  routinesContainer: {
-    gap: 10,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
 
 export default RoutinesScreen;

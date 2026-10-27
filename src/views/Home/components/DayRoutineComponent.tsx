@@ -1,6 +1,10 @@
+import { View } from "react-native";
+
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Pressable, StyleSheet, View } from "react-native";
+import Button from "@/components/ui/Button";
+import { Radius, Spacing } from "@/constants/theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 interface IProps {
   title: string;
@@ -9,91 +13,59 @@ interface IProps {
   action: () => void;
 }
 
-const DayRoutineComponent = ({ color, title, subtitle, action }: IProps) => {
-  return (
-    <ThemedView type="backgroundElement" style={styles.container}>
-      <View style={styles.leftContent}>
-        <View
-          style={[
-            styles.dot,
-            {
-              backgroundColor: color,
-            },
-          ]}
-        />
-
-        <View style={styles.textContainer}>
-          <ThemedText style={styles.title} type="smallBold">
-            {title}
-          </ThemedText>
-          <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
-        </View>
-      </View>
-
-      <Pressable
-        style={[
-          styles.button,
-          {
-            backgroundColor: color,
-          },
-        ]}
-        onPress={action}
-      >
-        <ThemedText style={styles.buttonText}>Go</ThemedText>
-      </Pressable>
-    </ThemedView>
-  );
-};
-
-const styles = StyleSheet.create({
+const makeStyles = () => ({
   container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingVertical: 18,
-    borderRadius: 18,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    gap: Spacing.three,
+    padding: Spacing.three,
+    borderRadius: Radius.lg,
   },
-
   leftContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+    flex: 1,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: Spacing.tight,
   },
-
   dot: {
     width: 8,
     height: 8,
-    borderRadius: 5,
+    borderRadius: Radius.pill,
   },
-
   textContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-
-  title: {
-    fontSize: 14,
-  },
-
-  subtitle: {
-    opacity: 0.6,
-    fontSize: 10,
-    color: "#6A6A6A",
-  },
-
-  button: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-
-  buttonText: {
-    color: "#000",
-    fontSize: 12,
-    lineHeight: 16,
-    fontFamily: "Inter_700Bold",
+    flex: 1,
   },
 });
+
+const DayRoutineComponent = ({ color, title, subtitle, action }: IProps) => {
+  const styles = useThemedStyles(makeStyles);
+
+  return (
+    <ThemedView type="surface" style={styles.container}>
+      <View style={styles.leftContent}>
+        <View style={[styles.dot, { backgroundColor: color }]} />
+
+        <View style={styles.textContainer}>
+          <ThemedText type="bodyStrong" numberOfLines={1}>
+            {title}
+          </ThemedText>
+          <ThemedText type="caption" tone="secondary">
+            {subtitle}
+          </ThemedText>
+        </View>
+      </View>
+
+      <Button
+        label="Ir"
+        size="sm"
+        color={color}
+        fullWidth={false}
+        onPress={action}
+        accessibilityLabel={`Iniciar ${title}`}
+      />
+    </ThemedView>
+  );
+};
 
 export default DayRoutineComponent;

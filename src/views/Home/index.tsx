@@ -1,45 +1,59 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { RoutineColors } from "@/constants/theme";
+import ScreenHeader from "@/components/ui/ScreenHeader";
+import { RoutineColors, Spacing } from "@/constants/theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import DayRoutineComponent from "./components/DayRoutineComponent";
 import SugestedRoutineComponent from "./components/SugestedRoutineComponent";
 
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+const makeStyles = () => ({
+  container: {
+    flex: 1,
+    gap: Spacing.three,
+  },
+  routinesSection: {
+    flex: 1,
+    gap: Spacing.two,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  routinesContainer: {
+    gap: Spacing.three,
+  },
+});
+
 const HomeScreen = () => {
-  const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    };
-    return date.toLocaleDateString("en-US", options);
-  };
+  const styles = useThemedStyles(makeStyles);
 
   return (
     <ScreenContainer>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleSection}>
-          <ThemedText style={styles.textHeader}>
-            {formatDate(new Date())}
-          </ThemedText>
-          <ThemedText type="title" style={styles.title}>
-            READY TO{"\n"}LIFT? 💪
-          </ThemedText>
-        </ThemedView>
+      <View style={styles.container}>
+        <ScreenHeader
+          overline={formatDate(new Date())}
+          title="¿LISTO PARA ENTRENAR?"
+        />
 
-        <ThemedView style={styles.sugestedSection}>
-          <SugestedRoutineComponent
-            title="Leg Day"
-            subtitle="4 ex."
-            color={RoutineColors.routineOne}
-            action={() => console.log("Leg")}
-          />
-        </ThemedView>
+        <SugestedRoutineComponent
+          title="Leg Day"
+          subtitle="4 ejercicios"
+          color={RoutineColors.routineOne}
+          action={() => console.log("Leg")}
+        />
 
-        <ThemedView style={styles.routinesSection}>
-          <ThemedText style={styles.textHeader}>YOUR ROUTINES</ThemedText>
+        <View style={styles.routinesSection}>
+          <ThemedText type="overline" tone="secondary" accessibilityRole="header">
+            Tus rutinas
+          </ThemedText>
 
           <ScrollView
             style={styles.scrollView}
@@ -48,59 +62,22 @@ const HomeScreen = () => {
           >
             <DayRoutineComponent
               title="Leg Day"
-              subtitle="4 ex."
+              subtitle="4 ejercicios"
               color={RoutineColors.routineOne}
               action={() => console.log("Leg")}
             />
 
             <DayRoutineComponent
               title="Pull Day"
-              subtitle="4 ex."
+              subtitle="4 ejercicios"
               color={RoutineColors.routineTwo}
               action={() => console.log("Pull")}
             />
           </ScrollView>
-        </ThemedView>
-      </ThemedView>
+        </View>
+      </View>
     </ScreenContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: 16,
-  },
-
-  textHeader: {
-    textAlign: "left",
-    opacity: 0.6,
-    fontSize: 10,
-    lineHeight: 15,
-    letterSpacing: 1,
-  },
-
-  titleSection: {
-    marginTop: 10,
-  },
-
-  title: {
-    textAlign: "left",
-  },
-
-  sugestedSection: {},
-
-  routinesSection: {
-    flex: 1,
-  },
-
-  scrollView: {
-    flex: 1,
-  },
-
-  routinesContainer: {
-    gap: 16,
-  },
-});
 
 export default HomeScreen;

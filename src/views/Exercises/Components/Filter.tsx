@@ -1,6 +1,7 @@
 import FilterButton from "@/components/ui/FilterButton";
+import { Spacing } from "@/constants/theme";
 
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import FilterSkeleton from "./FilterSkeleton";
 
@@ -22,52 +23,48 @@ const Filter = ({
   isLoading,
 }: FilterProps) => {
   return (
-    <View style={styles.filterSection}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterList}
-      >
-        {isLoading ? (
-          <FilterSkeleton />
-        ) : (
-          <>
-            <FilterButton
-              label={allLabel}
-              selected={selectedId === undefined}
-              onPress={() => onSelect(undefined)}
-            />
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.filterList}
+      style={styles.filterScroll}
+    >
+      {isLoading ? (
+        <FilterSkeleton />
+      ) : (
+        <>
+          <FilterButton
+            label={allLabel}
+            selected={selectedId === undefined}
+            onPress={() => onSelect(undefined)}
+          />
 
-            {items?.map((item) => {
-              const isSelected = selectedId === item.id;
+          {items?.map((item) => {
+            const isSelected = selectedId === item.id;
 
-              return (
-                <FilterButton
-                  key={item.id}
-                  label={item.name}
-                  selected={isSelected}
-                  onPress={() => onSelect(isSelected ? undefined : item.id)}
-                />
-              );
-            })}
-          </>
-        )}
-      </ScrollView>
-    </View>
+            return (
+              <FilterButton
+                key={item.id}
+                label={item.name}
+                selected={isSelected}
+                onPress={() => onSelect(isSelected ? undefined : item.id)}
+              />
+            );
+          })}
+        </>
+      )}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  filterSection: {},
-
+  filterScroll: {
+    flexGrow: 1,
+  },
   filterList: {
     flexDirection: "row",
-    gap: 8,
-  },
-
-  filterSkeleton: {
-    width: 60,
-    height: 36,
+    gap: Spacing.two,
+    paddingBottom: Spacing.two,
   },
 });
 

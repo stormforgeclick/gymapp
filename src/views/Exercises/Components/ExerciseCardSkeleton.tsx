@@ -1,8 +1,48 @@
 import Skeleton from "@/components/ui/Skeleton";
+import { Radius, Spacing, type ThemeColors } from "@/constants/theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
+
+const makeStyles = (c: ThemeColors) => ({
+  card: {
+    backgroundColor: c.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.three,
+
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: Spacing.tight,
+  },
+  image: {
+    width: 56,
+    height: 56,
+    borderRadius: Radius.md,
+  },
+  textContainer: {
+    flex: 1,
+    gap: 6,
+  },
+  name: {
+    width: "80%" as const,
+    height: 14,
+    borderRadius: 4,
+  },
+  nameShort: {
+    width: "50%" as const,
+    height: 14,
+    borderRadius: 4,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+});
 
 const ExerciseCardSkeleton = () => {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <View style={styles.card}>
       <Skeleton variant="image" style={styles.image} />
@@ -17,46 +57,5 @@ const ExerciseCardSkeleton = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#14141F",
-    borderRadius: 10,
-    padding: 16,
-
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-
-  image: {
-    width: 56,
-    height: 56,
-    borderRadius: 12,
-  },
-
-  textContainer: {
-    flex: 1,
-    gap: 6,
-  },
-
-  name: {
-    width: "80%",
-    height: 14,
-    borderRadius: 4,
-  },
-
-  nameShort: {
-    width: "50%",
-    height: 14,
-    borderRadius: 4,
-  },
-
-  icon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-  },
-});
 
 export default ExerciseCardSkeleton;

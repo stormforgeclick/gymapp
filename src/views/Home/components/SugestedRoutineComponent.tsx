@@ -1,6 +1,10 @@
+import { View } from "react-native";
+
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Pressable, StyleSheet, View } from "react-native";
+import Button from "@/components/ui/Button";
+import { Radius, Spacing } from "@/constants/theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 interface IProps {
   title: string;
@@ -9,78 +13,51 @@ interface IProps {
   action: () => void;
 }
 
+const makeStyles = () => ({
+  container: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    gap: Spacing.three,
+    padding: Spacing.three,
+    borderRadius: Radius.lg,
+  },
+  textContainer: {
+    flex: 1,
+  },
+});
+
 const SugestedRoutineComponent = ({
   color,
   title,
   subtitle,
   action,
 }: IProps) => {
+  const styles = useThemedStyles(makeStyles);
+
   return (
-    <ThemedView type="backgroundElement" style={styles.container}>
-      <View style={styles.leftContent}>
-        <View>
-          <ThemedText style={styles.subtitle}>Sugested Today</ThemedText>
-          <ThemedText style={styles.title}>{title}</ThemedText>
-          <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
-        </View>
+    <ThemedView type="surface" style={styles.container}>
+      <View style={styles.textContainer}>
+        <ThemedText type="overline" tone="secondary">
+          Sugerida para hoy
+        </ThemedText>
+        <ThemedText type="headline" numberOfLines={1}>
+          {title}
+        </ThemedText>
+        <ThemedText type="label" tone="secondary">
+          {subtitle}
+        </ThemedText>
       </View>
 
-      <Pressable
-        style={[
-          styles.button,
-          {
-            backgroundColor: color,
-          },
-        ]}
+      <Button
+        label="Empezar"
+        color={color}
+        fullWidth={false}
         onPress={action}
-      >
-        <ThemedText style={styles.buttonText}>Start</ThemedText>
-      </Pressable>
+        accessibilityLabel={`Empezar ${title}`}
+      />
     </ThemedView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingVertical: 18,
-    borderRadius: 18,
-  },
-
-  leftContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-
-  title: {
-    fontSize: 24,
-    fontFamily: "BarlowCondensed_900Black",
-    lineHeight: 32,
-    color: "#FFFFFF",
-  },
-
-  subtitle: {
-    opacity: 0.6,
-    fontSize: 10,
-    lineHeight: 15,
-    color: "#6A6A6A",
-  },
-
-  button: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 15,
-  },
-
-  buttonText: {
-    color: "#000000",
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
-  },
-});
 
 export default SugestedRoutineComponent;

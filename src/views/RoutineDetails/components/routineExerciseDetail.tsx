@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Pill from "@/components/ui/Pill";
+import { Opacity, Radius, Spacing } from "@/constants/theme";
 import type { RoutineExercise, SetInput } from "@/hooks/api/routineExercises/queries";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import SetEditor from "./SetEditor";
 
 interface IProps {
@@ -16,6 +19,51 @@ interface IProps {
   isDeleting: boolean;
 }
 
+const makeStyles = () => ({
+  container: {
+    borderRadius: Radius.lg,
+    padding: Spacing.three,
+    gap: Spacing.tight,
+  },
+  headerSection: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+  },
+  titleRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: Spacing.two,
+    flex: 1,
+  },
+  title: {
+    flexShrink: 1,
+  },
+  actionsRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+  },
+  actionButton: {
+    minWidth: 44,
+    minHeight: 44,
+    paddingHorizontal: Spacing.two,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  setsReadList: {
+    gap: Spacing.two,
+  },
+  setReadRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: Spacing.tight,
+  },
+  setIndex: {
+    width: 20,
+    textAlign: "right" as const,
+  },
+});
+
 const RoutineExerciseDetailComponent = ({
   routineExercise,
   color,
@@ -26,6 +74,8 @@ const RoutineExerciseDetailComponent = ({
   isDeleting,
 }: IProps) => {
   const { name, muscle_group, sets } = routineExercise;
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
 
   const [editing, setEditing] = useState(false);
 
@@ -49,10 +99,10 @@ const RoutineExerciseDetailComponent = ({
   };
 
   return (
-    <ThemedView type="backgroundElement" style={styles.container}>
+    <ThemedView type="surface" style={styles.container}>
       <View style={styles.headerSection}>
         <View style={styles.titleRow}>
-          <ThemedText style={styles.title} numberOfLines={1}>
+          <ThemedText type="titleSm" style={styles.title} numberOfLines={1}>
             {name}
           </ThemedText>
           {muscle_group && <Pill label={muscle_group} backgroundColor={color} />}
@@ -64,10 +114,14 @@ const RoutineExerciseDetailComponent = ({
               onPress={() => setEditing(true)}
               accessibilityRole="button"
               accessibilityLabel={`Editar ${name}`}
-              hitSlop={10}
-              style={({ pressed }) => pressed && styles.pressed}
+              style={({ pressed }) => [
+                styles.actionButton,
+                pressed && { opacity: Opacity.pressed },
+              ]}
             >
-              <ThemedText style={styles.actionTextSecondary}>Editar</ThemedText>
+              <ThemedText type="label" tone="secondary">
+                Editar
+              </ThemedText>
             </Pressable>
 
             <Pressable
@@ -75,13 +129,19 @@ const RoutineExerciseDetailComponent = ({
               disabled={isDeleting}
               accessibilityRole="button"
               accessibilityLabel={`Eliminar ${name}`}
-              hitSlop={10}
-              style={({ pressed }) => pressed && styles.pressed}
+              accessibilityHint="Elimina este ejercicio de la rutina"
+              accessibilityState={{ disabled: isDeleting, busy: isDeleting }}
+              style={({ pressed }) => [
+                styles.actionButton,
+                pressed && { opacity: Opacity.pressed },
+              ]}
             >
               {isDeleting ? (
-                <ActivityIndicator size="small" color="#E53935" />
+                <ActivityIndicator size="small" color={theme.danger} />
               ) : (
-                <ThemedText style={styles.actionTextDanger}>Eliminar</ThemedText>
+                <ThemedText type="label" tone="danger">
+                  Eliminar
+                </ThemedText>
               )}
             </Pressable>
           </View>
@@ -91,16 +151,27 @@ const RoutineExerciseDetailComponent = ({
       {!editing ? (
         <View style={styles.setsReadList}>
           {sets.map((s, i) => {
-            const repsLabel =
+            const reps =
               s.min_reps === s.max_reps
-                ? `${s.min_reps} reps`
-                : `${s.min_reps}-${s.max_reps} reps`;
+                ? `${s.min_reps}`
+                : `${s.min_reps}-${s.max_reps}`;
             return (
-              <View key={s.id ?? i} style={styles.setReadRow}>
-                <ThemedText style={styles.setIndex}>{i + 1}</ThemedText>
-                <ThemedText style={styles.infoText}>{repsLabel}</ThemedText>
+              <View
+                key={s.id ?? i}
+                style={styles.setReadRow}
+                accessible={true}
+                accessibilityLabel={`Serie ${i + 1}, ${reps} repeticiones${s.weight != null ? `, ${s.weight} kg` : ""}`}
+              >
+                <ThemedText type="caption" tone="secondary" tabular style={styles.setIndex}>
+                  {i + 1}
+                </ThemedText>
+                <ThemedText type="label" tone="secondary" tabular>
+                  {reps} reps
+                </ThemedText>
                 {s.weight != null && (
-                  <ThemedText style={styles.infoText}>{s.weight} kg</ThemedText>
+                  <ThemedText type="label" tone="secondary" tabular>
+                    {s.weight} kg
+                  </ThemedText>
                 )}
               </View>
             );
@@ -119,63 +190,5 @@ const RoutineExerciseDetailComponent = ({
     </ThemedView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 16,
-    padding: 16,
-    gap: 12,
-  },
-  headerSection: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-  },
-  title: {
-    fontSize: 18,
-    fontFamily: "BarlowCondensed_900Black",
-    flexShrink: 1,
-  },
-  pressed: {
-    opacity: 0.6,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  actionTextSecondary: {
-    fontSize: 14,
-    color: "#6A6A80",
-  },
-  actionTextDanger: {
-    fontSize: 14,
-    color: "#E53935",
-  },
-  setsReadList: {
-    gap: 6,
-  },
-  setReadRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  setIndex: {
-    fontSize: 12,
-    color: "#6A6A80",
-    width: 16,
-    textAlign: "right",
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#6A6A80",
-  },
-});
 
 export default RoutineExerciseDetailComponent;

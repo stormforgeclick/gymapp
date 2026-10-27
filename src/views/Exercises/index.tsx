@@ -2,7 +2,8 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import Title from "@/components/ui/Title";
+import ScreenHeader from "@/components/ui/ScreenHeader";
+import { Spacing } from "@/constants/theme";
 
 import SearchInput from "@/components/ui/SearchInput";
 import { useExercises, useExercisesFilters } from "@/hooks/api/exercises";
@@ -48,9 +49,7 @@ const ExercisesScreen = () => {
 
   return (
     <ScreenContainer>
-      <View style={styles.headerSection}>
-        <Title title="EJERCICIOS" />
-      </View>
+      <ScreenHeader title="EJERCICIOS" />
       <View style={styles.container}>
         <SearchInput
           value={search}
@@ -81,20 +80,7 @@ const ExercisesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 16,
-  },
-  headerSection: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 8,
-    padding: 10,
-    marginVertical: 10,
+    gap: Spacing.three,
   },
 });
 

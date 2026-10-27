@@ -1,30 +1,29 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
 
-import { Colors } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 import { TabBarButton } from "./ui/TabBarButton";
 
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === "unspecified" ? "light" : scheme];
+  const colors = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.icon,
+        tabBarActiveTintColor: colors.accentText,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarButton: TabBarButton,
         tabBarStyle: {
           backgroundColor: colors.background,
-          borderTopColor: colors.backgroundSelected,
+          borderTopColor: colors.border,
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Inicio",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" size={size} color={color} />
           ),
@@ -34,7 +33,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="routines"
         options={{
-          title: "Routines",
+          title: "Rutinas",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="dumbbell" size={size} color={color} />
           ),
@@ -43,7 +42,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="exercises"
         options={{
-          title: "Exercises",
+          title: "Ejercicios",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="list-box" size={size} color={color} />
           ),

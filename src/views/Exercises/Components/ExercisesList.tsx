@@ -32,6 +32,14 @@ interface ExercisesListProps {
   contentContainerStyle?: FlatListProps<Exercise>["contentContainerStyle"];
 }
 
+const SKELETON_DATA: Exercise[] = Array.from({ length: 6 }, (_, index) => ({
+  id: `skeleton-${index}`,
+  name: "",
+  category: "",
+  equipment: "",
+  image: "",
+}));
+
 const defaultRenderItem: ListRenderItem<Exercise> = ({ item }) => (
   <ExerciseCard exercise={item} />
 );
@@ -51,19 +59,9 @@ const ExercisesList = ({
   const List = (ListComponent ?? FlatList) as ListComponentType;
 
   if (isLoading) {
-    const skeletonData = Array.from({ length: 6 }).map(
-      (_, index) =>
-        ({
-          id: `skeleton-${index}`,
-          name: "",
-          category: "",
-          equipment: "",
-          image: "",
-        }) as Exercise
-    );
     return (
       <List
-        data={skeletonData}
+        data={SKELETON_DATA}
         keyExtractor={(item) => item.id}
         contentContainerStyle={[
           { gap: 12, paddingBottom: 16 },
@@ -87,6 +85,7 @@ const ExercisesList = ({
       ListHeaderComponent={ListHeaderComponent}
       stickyHeaderIndices={stickyHeaderIndices}
       renderItem={renderItem}
+      removeClippedSubviews
       onEndReached={() => {
         if (hasNextPage && !isFetchingNextPage) {
           fetchNextPage();

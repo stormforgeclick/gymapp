@@ -1,6 +1,13 @@
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import {
+  Opacity,
+  Radius,
+  Spacing,
+  type ThemeColors,
+} from "@/constants/theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 type FilterButtonProps = {
   label: string;
@@ -8,58 +15,46 @@ type FilterButtonProps = {
   onPress: () => void;
 };
 
+const capitalizeWords = (text: string) =>
+  text.replace(/\b\w/g, (char) => char.toUpperCase());
+
+const makeStyles = (c: ThemeColors) => ({
+  button: {
+    minHeight: 36,
+    justifyContent: "center" as const,
+    paddingHorizontal: Spacing.tight,
+    borderRadius: Radius.pill,
+    backgroundColor: c.surfaceInput,
+  },
+  buttonSelected: {
+    backgroundColor: c.primary,
+  },
+});
+
 const FilterButton = ({
   label,
   selected = false,
   onPress,
 }: FilterButtonProps) => {
-  const capitalizeWords = (text: string) =>
-    text.replace(/\b\w/g, (char) => char.toUpperCase());
-  const upperCaseLabel = capitalizeWords(label);
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <Pressable
       onPress={onPress}
-      style={[
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+      style={({ pressed }) => [
         styles.button,
-        !selected && styles.buttonDefault,
         selected && styles.buttonSelected,
+        pressed && { opacity: Opacity.pressed },
       ]}
     >
-      <ThemedText
-        style={[
-          styles.text,
-          !selected && styles.textDefault,
-          selected && styles.textSelected,
-        ]}
-        type="semiBold"
-      >
-        {upperCaseLabel}
+      <ThemedText type="bodyStrong" tone={selected ? "onPrimary" : "secondary"}>
+        {capitalizeWords(label)}
       </ThemedText>
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 24,
-    width: "auto",
-  },
-  buttonDefault: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-  },
-  buttonSelected: {
-    backgroundColor: "#C8FF00",
-  },
-
-  text: {},
-  textDefault: {
-    color: "#6A6A80",
-  },
-  textSelected: {
-    color: "#000000",
-  },
-});
 
 export default FilterButton;

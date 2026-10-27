@@ -26,8 +26,7 @@ const styles = StyleSheet.create({
   },
   filterSkeleton: {
     width: 70,
-    height: 30,
-    borderRadius: 15,
+    height: 36,
   },
 });
 

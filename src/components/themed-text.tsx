@@ -1,27 +1,37 @@
-import { Platform, StyleSheet, Text, type TextProps } from "react-native";
+import { Text, type TextProps } from "react-native";
 
-import { Fonts, ThemeColor } from "@/constants/theme";
+import { ThemeColor, Typography, TypographyType } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 
+export type TextTone =
+  | "default"
+  | "secondary"
+  | "tertiary"
+  | "accent"
+  | "danger"
+  | "onPrimary";
+
+const TONE_COLOR: Record<TextTone, ThemeColor> = {
+  default: "text",
+  secondary: "textSecondary",
+  tertiary: "textTertiary",
+  accent: "accentText",
+  danger: "danger",
+  onPrimary: "onPrimary",
+};
+
 export type ThemedTextProps = TextProps & {
-  type?:
-    | "default"
-    | "title"
-    | "small"
-    | "smallBold"
-    | "semiBold"
-    | "bold"
-    | "subtitle"
-    | "link"
-    | "linkPrimary"
-    | "code";
-  themeColor?: ThemeColor;
+  type?: TypographyType;
+  tone?: TextTone;
+  /** Fixed-width digits so values like reps and weight don't shift layout. */
+  tabular?: boolean;
 };
 
 export function ThemedText({
   style,
-  type = "default",
-  themeColor,
+  type = "body",
+  tone = "default",
+  tabular,
   ...rest
 }: ThemedTextProps) {
   const theme = useTheme();
@@ -29,72 +39,12 @@ export function ThemedText({
   return (
     <Text
       style={[
-        { color: theme[themeColor ?? "text"] },
-        type === "default" && styles.default,
-        type === "title" && styles.title,
-        type === "small" && styles.small,
-        type === "smallBold" && styles.smallBold,
-        type === "semiBold" && styles.semibold,
-        type === "bold" && styles.bold,
-        type === "subtitle" && styles.subtitle,
-        type === "link" && styles.link,
-        type === "linkPrimary" && styles.linkPrimary,
-        type === "code" && styles.code,
+        Typography[type],
+        { color: theme[TONE_COLOR[tone]] },
+        tabular && { fontVariant: ["tabular-nums"] },
         style,
       ]}
       {...rest}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  small: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontFamily: "Inter_400Regular",
-  },
-  smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontFamily: "Inter_500Medium",
-  },
-  semibold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontFamily: "Inter_600SemiBold",
-  },
-  bold: {
-    fontSize: 10,
-    lineHeight: 15,
-    fontFamily: "Inter_700Bold",
-  },
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontFamily: "Inter_400Regular",
-  },
-  title: {
-    fontSize: 36,
-    lineHeight: 52,
-    fontFamily: "BarlowCondensed_900Black",
-  },
-  subtitle: {
-    fontSize: 24,
-    lineHeight: 44,
-    fontFamily: "BarlowCondensed_700Bold",
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 14,
-  },
-  linkPrimary: {
-    lineHeight: 30,
-    fontSize: 14,
-    color: "#3c87f7",
-  },
-  code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
-  },
-});

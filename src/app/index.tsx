@@ -1,15 +1,18 @@
+import { ThemedView } from "@/components/themed-view";
+import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/providers/AuthProvider";
 import { Redirect } from "expo-router";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 
 export default function Index() {
   const { session, isLoading } = useAuth();
+  const theme = useTheme();
 
   if (isLoading) {
     return (
-      <View style={styles.loader}>
-        <ActivityIndicator color="#C8FF00" />
-      </View>
+      <ThemedView style={styles.loader}>
+        <ActivityIndicator color={theme.accentText} />
+      </ThemedView>
     );
   }
 
@@ -19,7 +22,6 @@ export default function Index() {
 const styles = StyleSheet.create({
   loader: {
     flex: 1,
-    backgroundColor: "#080810",
     alignItems: "center",
     justifyContent: "center",
   },

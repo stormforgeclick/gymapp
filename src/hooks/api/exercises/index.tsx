@@ -35,6 +35,7 @@ export const useExercisesFilters = () => {
   return useQuery({
     queryKey: ["exercisesFilters"],
     queryFn: () => getExercisesFilters(),
+    staleTime: Infinity,
   });
 };
 

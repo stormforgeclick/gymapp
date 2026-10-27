@@ -1,12 +1,17 @@
-import { useEffect, useRef } from "react";
-import {
-  Animated,
+import { useEffect } from "react";
+import { StyleProp, ViewStyle } from "react-native";
+import Animated, {
+  cancelAnimation,
   Easing,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from "react-native";
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
+
+import { Radius, type ThemeColors } from "@/constants/theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 type SkeletonVariant = "text" | "image" | "pill" | "card";
 
@@ -15,70 +20,57 @@ type SkeletonProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-const Skeleton = ({ variant = "text", style }: SkeletonProps) => {
-  const translateX = useRef(new Animated.Value(-100)).current;
-
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.timing(translateX, {
-        toValue: 100,
-        duration: 1000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-
-    animation.start();
-
-    return () => animation.stop();
-  }, [translateX]);
-
-  return (
-    <View style={[styles.container, styles[variant], style]}>
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.shimmer,
-          {
-            transform: [{ translateX }],
-          },
-        ]}
-      />
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => ({
   container: {
-    overflow: "hidden",
-    backgroundColor: "#242432",
+    overflow: "hidden" as const,
+    backgroundColor: c.surfaceInput,
   },
-
-  shimmer: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 50,
-    backgroundColor: "#303044",
-    opacity: 0.7,
-    transform: [{ skewX: "-20deg" }],
-  },
-
   text: {
     borderRadius: 4,
   },
-
   image: {
-    borderRadius: 12,
+    borderRadius: Radius.md,
   },
-
   pill: {
-    borderRadius: 999,
+    borderRadius: Radius.pill,
   },
-
   card: {
-    borderRadius: 10,
+    borderRadius: Radius.md,
   },
 });
+
+const Skeleton = ({ variant = "text", style }: SkeletonProps) => {
+  const styles = useThemedStyles(makeStyles);
+  const reduceMotion = useReducedMotion();
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      progress.value = 0;
+      return;
+    }
+
+    progress.value = withRepeat(
+      withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+
+    return () => cancelAnimation(progress);
+  }, [progress, reduceMotion]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: 1 - progress.value * 0.5,
+  }));
+
+  return (
+    <Animated.View
+      style={[styles.container, styles[variant], animatedStyle, style]}
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    />
+  );
+};
 
 export default Skeleton;

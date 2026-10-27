@@ -1,6 +1,8 @@
 import { BottomTabBarButtonProps } from "expo-router/build/react-navigation/bottom-tabs";
 import { Pressable } from "react-native";
 
+import { Opacity } from "@/constants/theme";
+
 export function TabBarButton({
   style,
   children,
@@ -12,13 +14,7 @@ export function TabBarButton({
     <Pressable
       {...pressableProps}
       android_ripple={{ color: "transparent" }}
-      style={({ pressed }) => [
-        style,
-        {
-          opacity: pressed ? 0.8 : 1,
-          transform: [{ scale: pressed ? 0.96 : 1 }],
-        },
-      ]}
+      style={({ pressed }) => [style, { opacity: pressed ? Opacity.pressed : 1 }]}
     >
       {children}
     </Pressable>

@@ -1,6 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
+import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { RoutineColors } from "@/constants/theme";
+import ScreenHeader from "@/components/ui/ScreenHeader";
+import { RoutineColors, Spacing } from "@/constants/theme";
 import {
   useDeleteRoutineExercise,
   useReplaceRoutineExerciseSets,
@@ -8,23 +11,39 @@ import {
 } from "@/hooks/api/routineExercises";
 import type { SetInput } from "@/hooks/api/routineExercises/queries";
 import { useRoutines } from "@/hooks/api/routines";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import AddRoutineComponent from "@/views/Routines/Components/AddRoutine";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
 import AddExercisesSheet from "./components/AddExercisesSheet";
 import RoutineExerciseDetailComponent from "./components/routineExerciseDetail";
 import { useRowMutationState } from "./hooks/useRowMutationState";
 
+const makeStyles = () => ({
+  list: {
+    flex: 1,
+  },
+  exercisesContainer: {
+    gap: Spacing.tight,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.three,
+  },
+  centered: {
+    flex: 1,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  emptyState: {
+    paddingVertical: Spacing.five + Spacing.two,
+    alignItems: "center" as const,
+  },
+});
+
 const RoutineDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const styles = useThemedStyles(makeStyles);
 
   const { data: routines } = useRoutines();
   const routine = routines?.find((r) => r.id === id);
@@ -61,26 +80,20 @@ const RoutineDetail = () => {
   };
 
   return (
-    <ScreenContainer>
-      <View style={styles.header}>
-        <ThemedText style={styles.routineTitle} numberOfLines={1}>
-          {routine?.name ?? ""}
-        </ThemedText>
-        <Pressable
-          onPress={() => setShowEdit(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Editar rutina"
-          hitSlop={8}
-          style={({ pressed }) => [
-            styles.editButton,
-            { backgroundColor: routineColor },
-            pressed && styles.pressed,
-          ]}
-          android_ripple={{ color: "rgba(0,0,0,0.15)", borderless: true }}
-        >
-          <MaterialCommunityIcons name="pencil" size={20} color="#fff" />
-        </Pressable>
-      </View>
+    <ScreenContainer edges={["top", "bottom"]}>
+      <ScreenHeader
+        title={routine?.name ?? ""}
+        onBack={() => router.back()}
+        right={
+          <IconButton
+            icon="pencil"
+            variant="filled"
+            color={routineColor}
+            onPress={() => setShowEdit(true)}
+            accessibilityLabel="Editar rutina"
+          />
+        }
+      />
 
       {isLoading && (
         <View style={styles.centered}>
@@ -90,29 +103,19 @@ const RoutineDetail = () => {
 
       {isError && (
         <View style={styles.centered}>
-          <ThemedText type="small" themeColor="textSecondary">
-            Error al cargar los ejercicios
-          </ThemedText>
+          <ThemedText tone="secondary">Error al cargar los ejercicios</ThemedText>
         </View>
       )}
 
       {!isLoading && !isError && (
-        <ScrollView
-          style={styles.scrollView}
+        <FlatList
+          style={styles.list}
           contentContainerStyle={styles.exercisesContainer}
           showsVerticalScrollIndicator={false}
-        >
-          {exercises?.length === 0 && (
-            <View style={styles.emptyState}>
-              <ThemedText type="small" themeColor="textSecondary">
-                Aún no has agregado ejercicios
-              </ThemedText>
-            </View>
-          )}
-
-          {exercises?.map((re) => (
+          data={exercises ?? []}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item: re }) => (
             <RoutineExerciseDetailComponent
-              key={re.id}
               routineExercise={re}
               color={routineColor}
               isSaving={save.isActive(re.id)}
@@ -121,14 +124,22 @@ const RoutineDetail = () => {
               onSave={handleSave(re.id)}
               onDelete={handleDelete(re.id)}
             />
-          ))}
-
-          <Pressable style={styles.button} onPress={() => setShowPicker(true)}>
-            <ThemedText style={styles.buttonText}>
-              + Agregar ejercicio
-            </ThemedText>
-          </Pressable>
-        </ScrollView>
+          )}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <ThemedText tone="secondary">Aún no has agregado ejercicios</ThemedText>
+            </View>
+          }
+          ListFooterComponent={
+            <Button
+              label="Agregar ejercicio"
+              variant="outline"
+              dashed
+              leftIcon="plus"
+              onPress={() => setShowPicker(true)}
+            />
+          }
+        />
       )}
 
       {showPicker && id && (
@@ -144,62 +155,5 @@ const RoutineDetail = () => {
     </ScreenContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  routineTitle: {
-    fontSize: 28,
-    fontFamily: "BarlowCondensed_900Black",
-    flex: 1,
-    marginRight: 12,
-  },
-  editButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 999,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  scrollView: {
-    flex: 1,
-    paddingTop: 10,
-  },
-  exercisesContainer: {
-    gap: 10,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyState: {
-    paddingVertical: 40,
-    alignItems: "center",
-  },
-  button: {
-    width: "100%",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderColor: "#6A6A80",
-    borderWidth: 1,
-    borderRadius: 6,
-    borderStyle: "dashed",
-  },
-  buttonText: {
-    color: "#6A6A80",
-    fontSize: 12,
-    lineHeight: 16,
-    fontFamily: "Inter_700Bold",
-    alignSelf: "center",
-  },
-});
 
 export default RoutineDetail;
