@@ -9,6 +9,7 @@ export type RegisterCredentials = {
   name: string;
   email: string;
   password: string;
+  language: "en" | "es";
 };
 
 export async function login({ email, password }: LoginCredentials) {
@@ -17,11 +18,26 @@ export async function login({ email, password }: LoginCredentials) {
   return data;
 }
 
-export async function register({ name, email, password }: RegisterCredentials) {
+export async function register({
+  name,
+  email,
+  password,
+  language,
+}: RegisterCredentials) {
+  // The profile trigger reads these keys: the first word is the first name
+  // and the rest the last name.
+  const [firstName, ...rest] = name.split(/\s+/).filter(Boolean);
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name } },
+    options: {
+      data: {
+        first_name: firstName ?? "",
+        last_name: rest.join(" "),
+        language,
+      },
+    },
   });
   if (error) throw error;
   return data;

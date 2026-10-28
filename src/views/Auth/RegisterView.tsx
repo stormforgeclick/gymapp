@@ -85,7 +85,7 @@ const makeStyles = (c: ThemeColors) => ({
 export function RegisterView() {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const { t } = useT();
+  const { t, language } = useT();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -121,7 +121,7 @@ export function RegisterView() {
     if (Object.keys(nextErrors).length > 0) return;
 
     register(
-      { name: name.trim(), email: email.trim(), password },
+      { name: name.trim(), email: email.trim(), password, language },
       { onSuccess: () => router.replace("/(tabs)") }
     );
   }

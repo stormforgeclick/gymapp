@@ -155,6 +155,9 @@ const RoutineDetail = () => {
           style={styles.list}
           contentContainerStyle={styles.exercisesContainer}
           showsVerticalScrollIndicator={false}
+          // A routine has a handful of heavy cards; on Android, detaching and
+          // re-attaching their views while scrolling makes them move in steps.
+          removeClippedSubviews={false}
           data={exercises ?? []}
           keyExtractor={(item) => item.id}
           renderItem={({ item: re }) => (

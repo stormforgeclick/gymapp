@@ -151,6 +151,10 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
       ref={ref}
       snapPoints={["90%"]}
       enableDynamicSizing={false}
+      // Dragging the list must only scroll it: with content panning on, flinging
+      // back to the top hands the gesture to the sheet and pan-down-to-close
+      // (on by default in modals) dismisses it. The handle still closes it.
+      enableContentPanningGesture={false}
       onDismiss={onClose}
       backgroundStyle={sheet.background}
       handleIndicatorStyle={sheet.handleIndicator}

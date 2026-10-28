@@ -20,6 +20,7 @@ import { queryClient } from "@/lib/queryClient";
 import { AccentProvider } from "@/providers/AccentProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { DialogProvider } from "@/providers/DialogProvider";
+import { PreferencesProvider, usePreferences } from "@/providers/PreferencesProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -54,7 +55,16 @@ const navigationThemes = {
 };
 
 export default function RootLayout() {
+  return (
+    <PreferencesProvider>
+      <AppShell />
+    </PreferencesProvider>
+  );
+}
+
+function AppShell() {
   const colorScheme = useColorScheme();
+  const { isLoaded: preferencesLoaded } = usePreferences();
 
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -65,11 +75,15 @@ export default function RootLayout() {
     BarlowCondensed_900Black,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+  // The saved theme is applied once loaded, so the splash waits for it to
+  // avoid a flash of the wrong one.
+  const ready = fontsLoaded && preferencesLoaded;
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) {
     return null;
   }
 
@@ -92,6 +106,11 @@ export default function RootLayout() {
                         <Stack.Screen name="login" />
                         <Stack.Screen name="register" />
                         <Stack.Screen name="(tabs)" />
+                        <Stack.Screen name="settings" />
+                        <Stack.Screen name="edit-profile" />
+                        <Stack.Screen name="user/[id]" />
+                        <Stack.Screen name="shared-routine/[id]" />
+                        <Stack.Screen name="exercises/index" />
                         <Stack.Screen name="exercises/[id]" />
                         <Stack.Screen name="routine/[id]" options={{ headerShown: false }} />
                         <Stack.Screen name="workout/[id]" />

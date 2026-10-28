@@ -1,6 +1,7 @@
 import { useLocales } from "expo-localization";
 import { useCallback } from "react";
 
+import { usePreferences, type LanguagePreference } from "@/providers/PreferencesProvider";
 import { en } from "./en";
 import { es, type Translations } from "./es";
 
@@ -15,12 +16,24 @@ type Paths<T, Prefix extends string = ""> = {
 
 export type TranslationKey = Paths<typeof es>;
 
-type Language = "es" | "en";
+export type Language = "es" | "en";
 
 const dictionaries: Record<Language, Translations> = { es, en };
 
 const FALLBACK_LANGUAGE: Language = "es";
-const FALLBACK_DATE_LOCALE = "es-ES";
+const FALLBACK_DATE_LOCALES: Record<Language, string> = {
+  es: "es-ES",
+  en: "en-US",
+};
+
+/** The language to use: the user's choice, or the phone's when they follow the system. */
+export function resolveLanguage(
+  preference: LanguagePreference,
+  deviceLanguageCode: string | null | undefined
+): Language {
+  if (preference !== "system") return preference;
+  return deviceLanguageCode === "en" ? "en" : FALLBACK_LANGUAGE;
+}
 
 function resolve(dictionary: Translations, key: string): string | PluralEntry {
   return key
@@ -36,21 +49,22 @@ function interpolate(template: string, params?: Record<string, string | number>)
 }
 
 /**
- * Translator bound to the device language: English when the phone is set to
+ * Translator bound to the language the user picked in settings, or to the
+ * device's when they follow the system: English when the phone is set to
  * English, Spanish for anything else. `dateLocale` is the device's own locale
  * tag when it's one we translate, so dates match the interface language.
  */
 export function useT() {
   const [deviceLocale] = useLocales();
+  const { language: preference } = usePreferences();
 
-  const language: Language =
-    deviceLocale?.languageCode === "en" ? "en" : FALLBACK_LANGUAGE;
+  const language = resolveLanguage(preference, deviceLocale?.languageCode);
   const dictionary = dictionaries[language];
 
   const dateLocale =
     deviceLocale?.languageCode === language
-      ? (deviceLocale.languageTag ?? FALLBACK_DATE_LOCALE)
-      : FALLBACK_DATE_LOCALE;
+      ? (deviceLocale.languageTag ?? FALLBACK_DATE_LOCALES[language])
+      : FALLBACK_DATE_LOCALES[language];
 
   const t = useCallback(
     (key: TranslationKey, params?: Record<string, string | number>) => {

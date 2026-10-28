@@ -52,6 +52,10 @@ const makeStyles = (c: ThemeColors) => ({
     fontFamily: Typography.body.fontFamily,
     fontSize: Typography.body.fontSize,
   },
+  inputMultiline: {
+    minHeight: 96,
+    textAlignVertical: "top" as const,
+  },
   toggle: {
     width: 44,
     height: 44,
@@ -104,7 +108,7 @@ const TextField = ({
         )}
 
         <TextInputComponent
-          style={styles.input}
+          style={[styles.input, props.multiline && styles.inputMultiline]}
           placeholderTextColor={theme.textTertiary}
           secureTextEntry={secureEntry && !visible}
           autoCapitalize="none"

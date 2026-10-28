@@ -11,6 +11,7 @@ import { useT } from "@/i18n";
 import { capitalize } from "@/lib/text";
 import { useDialog } from "@/providers/DialogProvider";
 import SetEditor from "./SetEditor";
+import SetsReadList from "./SetsReadList";
 
 interface IProps {
   routineExercise: RoutineExercise;
@@ -54,18 +55,6 @@ const makeStyles = (c: ThemeColors) => ({
     paddingHorizontal: Spacing.two,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-  },
-  setsReadList: {
-    gap: Spacing.two,
-  },
-  setReadRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: Spacing.tight,
-  },
-  setIndex: {
-    width: 20,
-    textAlign: "right" as const,
   },
 });
 
@@ -158,42 +147,7 @@ const RoutineExerciseDetailComponent = ({
       </View>
 
       {!editing ? (
-        <View style={styles.setsReadList}>
-          {sets.map((s, i) => {
-            const reps =
-              s.min_reps === s.max_reps
-                ? `${s.min_reps}`
-                : `${s.min_reps}-${s.max_reps}`;
-            return (
-              <View
-                key={s.id ?? i}
-                style={styles.setReadRow}
-                accessible={true}
-                accessibilityLabel={
-                  s.weight != null
-                    ? t("routineDetails.setA11yWithWeight", {
-                        n: i + 1,
-                        reps,
-                        weight: s.weight,
-                      })
-                    : t("routineDetails.setA11y", { n: i + 1, reps })
-                }
-              >
-                <ThemedText type="caption" tone="secondary" tabular style={styles.setIndex}>
-                  {i + 1}
-                </ThemedText>
-                <ThemedText type="label" tone="secondary" tabular>
-                  {t("routineDetails.reps", { reps })}
-                </ThemedText>
-                {s.weight != null && (
-                  <ThemedText type="label" tone="secondary" tabular>
-                    {t("routineDetails.weight", { weight: s.weight })}
-                  </ThemedText>
-                )}
-              </View>
-            );
-          })}
-        </View>
+        <SetsReadList sets={sets} />
       ) : (
         <SetEditor
           initialSets={sets}

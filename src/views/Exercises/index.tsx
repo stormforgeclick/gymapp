@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -18,6 +19,7 @@ type ExerciseFilters = {
 };
 
 const ExercisesScreen = () => {
+  const router = useRouter();
   const [selectedFilters, setSelectedFilters] = useState<ExerciseFilters>({});
   const [search, setSearch] = useState("");
 
@@ -54,8 +56,8 @@ const ExercisesScreen = () => {
   };
 
   return (
-    <ScreenContainer>
-      <ScreenHeader title={t("exercises.title")} />
+    <ScreenContainer edges={["top", "bottom"]}>
+      <ScreenHeader title={t("exercises.title")} onBack={() => router.back()} />
       <View style={styles.container}>
         <SearchInput
           value={search}

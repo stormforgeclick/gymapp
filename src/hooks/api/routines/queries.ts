@@ -10,6 +10,17 @@ export type Routine = {
   tags: string[];
 };
 
+/** Who may see a routine: only its owner, the owner's gymbros, or anyone. */
+export type RoutinePrivacy = "private" | "gymbros" | "public";
+
+export type RoutineSharing = {
+  id: string;
+  name: string;
+  color: string;
+  privacy: RoutinePrivacy;
+  quantity: number;
+};
+
 export type CreateRoutineInput = { name: string; color: string };
 export type UpdateRoutineInput = { id: string; name: string; color: string };
 
@@ -36,6 +47,26 @@ export async function updateRoutine(input: UpdateRoutineInput): Promise<Routine>
   });
   if (error) throw error;
   return data?.[0] as Routine;
+}
+
+export async function getRoutineSharing(): Promise<RoutineSharing[]> {
+  const { data, error } = await supabase.rpc("get_routine_sharing");
+  if (error) throw error;
+  return (data ?? []) as RoutineSharing[];
+}
+
+export async function setRoutinePrivacy(
+  id: string,
+  privacy: RoutinePrivacy
+): Promise<void> {
+  // `.single()` turns "no row matched" (not the owner) into an error.
+  const { error } = await supabase
+    .from("routines")
+    .update({ privacy })
+    .eq("id", id)
+    .select("id")
+    .single();
+  if (error) throw error;
 }
 
 export async function deleteRoutine(id: string): Promise<string> {

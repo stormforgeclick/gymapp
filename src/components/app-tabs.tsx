@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
+import { usePendingRequestCount } from "@/hooks/api/gymbros";
 import { useTheme } from "@/hooks/use-theme";
 import { useT } from "@/i18n";
 import { TabBarButton } from "./ui/TabBarButton";
@@ -8,6 +9,7 @@ import { TabBarButton } from "./ui/TabBarButton";
 export default function AppTabs() {
   const colors = useTheme();
   const { t } = useT();
+  const { data: pendingRequests = 0 } = usePendingRequestCount();
 
   return (
     <Tabs
@@ -41,12 +43,28 @@ export default function AppTabs() {
           ),
         }}
       />
+
       <Tabs.Screen
-        name="exercises"
+        name="gymbros"
         options={{
-          title: t("tabs.exercises"),
+          title: t("tabs.gymbros"),
+          tabBarBadge: pendingRequests > 0 ? pendingRequests : undefined,
+          tabBarAccessibilityLabel:
+            pendingRequests > 0
+              ? t("tabs.gymbrosPending", { count: pendingRequests })
+              : undefined,
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="list-box" size={size} color={color} />
+            <MaterialCommunityIcons name="account-group" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t("tabs.profile"),
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="account-circle" size={size} color={color} />
           ),
         }}
       />

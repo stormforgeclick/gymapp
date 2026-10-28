@@ -39,6 +39,14 @@
         }
       ],
       "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Gymbro necesita acceder a tus fotos para que elijas tu foto de perfil.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
       "expo-web-browser",
       "expo-localization"
     ],

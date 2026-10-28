@@ -27,6 +27,11 @@ const makeStyles = () => ({
     flex: 1,
     justifyContent: "center" as const,
   },
+  headerActions: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: Spacing.one,
+  },
 });
 
 const RoutinesScreen = () => {
@@ -57,12 +62,19 @@ const RoutinesScreen = () => {
       <ScreenHeader
         title={t("routines.title")}
         right={
-          <IconButton
-            icon="plus"
-            variant="filled"
-            onPress={() => setShowAdd(true)}
-            accessibilityLabel={t("routines.create")}
-          />
+          <View style={styles.headerActions}>
+            <IconButton
+              icon="magnify"
+              onPress={() => router.push("/exercises")}
+              accessibilityLabel={t("routines.browseExercises")}
+            />
+            <IconButton
+              icon="plus"
+              variant="filled"
+              onPress={() => setShowAdd(true)}
+              accessibilityLabel={t("routines.create")}
+            />
+          </View>
         }
       />
 
