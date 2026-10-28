@@ -2,8 +2,10 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Pill from "@/components/ui/Pill";
 import { Opacity, Radius, Spacing, type ThemeColors } from "@/constants/theme";
+import { useRoutineColor } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
+import { capitalize } from "@/lib/text";
 import type { IRoutineResponse } from "@/types/routine";
 import { Pressable, View } from "react-native";
 
@@ -34,8 +36,9 @@ const makeStyles = (c: ThemeColors) => ({
   },
 });
 
-const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
+const RoutineComponent = ({ name, quantity, color: storedColor, tags, action }: IProps) => {
   const styles = useThemedStyles(makeStyles);
+  const color = useRoutineColor(storedColor);
   const { t } = useT();
   const exerciseCount = t("routines.exercises", { count: quantity });
 
@@ -61,7 +64,7 @@ const RoutineComponent = ({ name, quantity, color, tags, action }: IProps) => {
 
         <View style={styles.tagsSection}>
           {tags.map((tag) => (
-            <Pill label={tag} key={tag} backgroundColor={color} />
+            <Pill label={capitalize(tag)} key={tag} backgroundColor={color} />
           ))}
         </View>
       </ThemedView>

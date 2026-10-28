@@ -55,7 +55,7 @@ export const es = {
   },
 
   home: {
-    heading: "LISTO PARA\nENTRENAR",
+    heading: "¿LISTO PARA\nENTRENAR?",
     suggested: "Sugerida para hoy",
     yourRoutines: "Tus rutinas",
     start: "Empezar",
@@ -84,6 +84,8 @@ export const es = {
       deleteConfirmTitle: "Eliminar rutina",
       deleteConfirmMessage:
         "¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer.",
+      deleteConfirmActive:
+        "Tienes un entrenamiento en curso con esta rutina. También se descartará. Esta acción no se puede deshacer.",
     },
     toast: {
       created: "Rutina creada",

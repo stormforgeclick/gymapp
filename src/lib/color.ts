@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/theme";
+import { Colors, RoutineColors, RoutineColorsLight } from "@/constants/theme";
 
 const MIN_TEXT_CONTRAST = 4.5;
 
@@ -39,6 +39,20 @@ export function contrastRatio(a: string, b: string): number | null {
     (x, y) => y - x
   );
   return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * Color to paint a stored routine color with. The stored values are neons made
+ * for the dark theme; on the light theme each one maps to its darker tone.
+ * Colors that aren't routine colors are returned as they are.
+ */
+export function routineTone(hex: string, mode: "light" | "dark"): string {
+  if (mode === "dark") return hex;
+
+  const key = (Object.keys(RoutineColors) as (keyof typeof RoutineColors)[]).find(
+    (name) => RoutineColors[name].toLowerCase() === hex.toLowerCase()
+  );
+  return key ? RoutineColorsLight[key] : hex;
 }
 
 /**

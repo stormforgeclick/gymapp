@@ -8,6 +8,7 @@ import type { RoutineExercise, SetInput } from "@/hooks/api/routineExercises/que
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
+import { capitalize } from "@/lib/text";
 import { useDialog } from "@/providers/DialogProvider";
 import SetEditor from "./SetEditor";
 
@@ -109,9 +110,11 @@ const RoutineExerciseDetailComponent = ({
       <View style={styles.headerSection}>
         <View style={styles.titleRow}>
           <ThemedText type="titleSm" style={styles.title} numberOfLines={1}>
-            {name}
+            {capitalize(name)}
           </ThemedText>
-          {muscle_group && <Pill label={muscle_group} backgroundColor={color} />}
+          {muscle_group && (
+            <Pill label={capitalize(muscle_group)} backgroundColor={color} />
+          )}
         </View>
 
         {!editing && (

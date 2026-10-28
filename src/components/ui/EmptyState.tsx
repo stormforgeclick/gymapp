@@ -43,6 +43,11 @@ const makeStyles = (c: ThemeColors) => ({
   centered: {
     textAlign: "center" as const,
   },
+  // An auto-width Button aligns itself to the start, which would override the
+  // container's centering.
+  action: {
+    alignSelf: "center" as const,
+  },
 });
 
 const EmptyState = ({
@@ -90,6 +95,7 @@ const EmptyState = ({
           variant={actionVariant}
           fullWidth={false}
           onPress={onAction}
+          style={styles.action}
         />
       )}
     </View>

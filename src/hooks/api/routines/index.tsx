@@ -37,6 +37,11 @@ export const useDeleteRoutine = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteRoutine(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["routines"] }),
+    // Deleting also discards the routine's workout in progress.
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ["routines"] }),
+        qc.invalidateQueries({ queryKey: ["activeWorkout"] }),
+      ]),
   });
 };

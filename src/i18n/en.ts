@@ -81,6 +81,8 @@ export const en: Translations = {
       deleteConfirmTitle: "Delete routine",
       deleteConfirmMessage:
         "Are you sure you want to delete this routine? This can't be undone.",
+      deleteConfirmActive:
+        "You have a workout in progress with this routine. It will be discarded too. This can't be undone.",
     },
     toast: {
       created: "Routine created",

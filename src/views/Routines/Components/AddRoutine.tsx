@@ -5,12 +5,14 @@ import TextField from "@/components/ui/TextField";
 import {
   IconSize,
   RoutineColors,
+  RoutineColorsLight,
   Spacing,
   type ThemeColors,
 } from "@/constants/theme";
 import { useCreateRoutine, useDeleteRoutine, useUpdateRoutine } from "@/hooks/api/routines";
 import type { Routine } from "@/hooks/api/routines/queries";
-import { useTheme } from "@/hooks/use-theme";
+import { useActiveWorkout } from "@/hooks/api/workouts";
+import { useTheme, useThemeMode } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
 import { useDialog } from "@/providers/DialogProvider";
@@ -28,6 +30,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 interface IProps {
   setShowAdd: (status: boolean) => void;
   routineToEdit?: Routine | null;
+  /** Called once the routine has been deleted, e.g. to leave its detail screen. */
+  onDeleted?: () => void;
 }
 
 const makeStyles = (c: ThemeColors) => ({
@@ -69,15 +73,18 @@ const makeStyles = (c: ThemeColors) => ({
   },
 });
 
-const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
+const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const { bottom } = useSafeAreaInsets();
   const theme = useTheme();
+  // Painted with the light tones on the light theme; `RoutineColors` is stored.
+  const palette = useThemeMode() === "light" ? RoutineColorsLight : RoutineColors;
   const styles = useThemedStyles(makeStyles);
   const sheet = useSheetStyles();
   const { t } = useT();
   const toast = useToast();
   const dialog = useDialog();
+  const { data: activeWorkout } = useActiveWorkout();
 
   const initialColor =
     (Object.entries(RoutineColors).find(
@@ -131,9 +138,14 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
 
   const handleDelete = () => {
     if (!routineToEdit) return;
+    const hasActiveWorkout = activeWorkout?.routine_id === routineToEdit.id;
     dialog.show({
       title: t("routines.sheet.deleteConfirmTitle"),
-      message: t("routines.sheet.deleteConfirmMessage"),
+      message: t(
+        hasActiveWorkout
+          ? "routines.sheet.deleteConfirmActive"
+          : "routines.sheet.deleteConfirmMessage"
+      ),
       actions: [
         { label: t("common.cancel"), variant: "cancel" },
         {
@@ -144,6 +156,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
               onSuccess: () => {
                 toast.show(t("routines.toast.deleted"));
                 dismiss();
+                onDeleted?.();
               },
             }),
         },
@@ -183,7 +196,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
               {t("routines.sheet.color")}
             </ThemedText>
             <View style={styles.colorsContainer}>
-              {Object.entries(RoutineColors).map(([key, color]) => {
+              {Object.entries(palette).map(([key, color]) => {
                 const colorKey = key as keyof typeof RoutineColors;
                 const isSelected = selectedColor === colorKey;
 
@@ -233,7 +246,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit }: IProps) => {
           <View>
             <Button
               label={isEditing ? t("routines.sheet.save") : t("routines.sheet.create")}
-              color={RoutineColors[selectedColor]}
+              color={palette[selectedColor]}
               onPress={handleSubmit}
               loading={isSubmitting && !deleteMut.isPending}
               disabled={!trimmedName || isSubmitting}

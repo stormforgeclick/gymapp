@@ -11,6 +11,7 @@ import {
 } from "@/hooks/api/routineExercises";
 import type { SetInput } from "@/hooks/api/routineExercises/queries";
 import { useRoutines } from "@/hooks/api/routines";
+import { useRoutineColor } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useStartRoutineWorkout } from "@/hooks/useStartRoutineWorkout";
 import { useT } from "@/i18n";
@@ -51,7 +52,9 @@ const RoutineDetail = () => {
 
   const { data: routines } = useRoutines(language);
   const routine = routines?.find((r) => r.id === id);
-  const routineColor = routine?.color ?? RoutineColors.routineOne;
+  const routineColor = useRoutineColor(
+    routine?.color ?? RoutineColors.routineOne
+  );
 
   const {
     data: exercises,
@@ -202,7 +205,11 @@ const RoutineDetail = () => {
       )}
 
       {showEdit && routine && (
-        <AddRoutineComponent setShowAdd={setShowEdit} routineToEdit={routine} />
+        <AddRoutineComponent
+          setShowAdd={setShowEdit}
+          routineToEdit={routine}
+          onDeleted={() => router.back()}
+        />
       )}
     </ScreenContainer>
   );

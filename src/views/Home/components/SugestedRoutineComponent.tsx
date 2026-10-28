@@ -4,6 +4,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Button from "@/components/ui/Button";
 import { Radius, Spacing, type ThemeColors } from "@/constants/theme";
+import { useRoutineColor } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
 
@@ -31,12 +32,13 @@ const makeStyles = (c: ThemeColors) => ({
 });
 
 const SugestedRoutineComponent = ({
-  color,
+  color: storedColor,
   title,
   subtitle,
   action,
 }: IProps) => {
   const styles = useThemedStyles(makeStyles);
+  const color = useRoutineColor(storedColor);
   const { t } = useT();
 
   return (

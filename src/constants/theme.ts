@@ -46,6 +46,19 @@ export const RoutineColors = {
   routineSeven: "#FFB300",
 };
 
+// Same hues for the light theme, darkened to at least 3:1 against the page
+// background while keeping 4.5:1 for `onPrimary` text on top. `RoutineColors`
+// is what gets stored; this is only how it is painted.
+export const RoutineColorsLight: Record<keyof typeof RoutineColors, string> = {
+  routineOne: "#6B8B00",
+  routineTwo: "#078CA8",
+  routineThree: "#E14F0D",
+  routineFour: "#B44DFF",
+  routineFive: "#FF2D78",
+  routineSix: "#049265",
+  routineSeven: "#AA7605",
+};
+
 export const Spacing = {
   half: 2,
   one: 4,

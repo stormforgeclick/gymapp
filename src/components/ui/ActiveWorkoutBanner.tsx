@@ -13,7 +13,7 @@ import {
 } from "@/constants/theme";
 import { useRoutines } from "@/hooks/api/routines";
 import { useActiveWorkout } from "@/hooks/api/workouts";
-import { useTheme } from "@/hooks/use-theme";
+import { useRoutineColor, useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
 
@@ -23,7 +23,6 @@ const makeStyles = (c: ThemeColors) => ({
     alignItems: "center" as const,
     gap: Spacing.tight,
     marginBottom: Spacing.tight,
-    paddingVertical: Spacing.tight,
     paddingRight: Spacing.three,
     borderRadius: Radius.md,
     borderWidth: 1,
@@ -31,12 +30,14 @@ const makeStyles = (c: ThemeColors) => ({
     backgroundColor: c.surface,
     overflow: "hidden" as const,
   },
+  // Spans the card's full height, so the vertical padding lives on `texts`.
   stripe: {
     alignSelf: "stretch" as const,
     width: 6,
   },
   texts: {
     flex: 1,
+    paddingVertical: Spacing.tight,
   },
   action: {
     flexDirection: "row" as const,
@@ -54,9 +55,11 @@ const ActiveWorkoutBanner = () => {
   const { data: workout } = useActiveWorkout();
   const { data: routines } = useRoutines(language);
 
+  const routine = routines?.find((r) => r.id === workout?.routine_id);
+  const color = useRoutineColor(routine?.color ?? RoutineColors.routineOne);
+
   if (!workout) return null;
 
-  const routine = routines?.find((r) => r.id === workout.routine_id);
   const name = routine?.name ?? t("workout.title");
 
   return (
@@ -68,9 +71,7 @@ const ActiveWorkoutBanner = () => {
       accessibilityLabel={`${t("workout.inProgress")}. ${name}. ${t("workout.continue")}`}
       style={({ pressed }) => [styles.card, pressed && { opacity: Opacity.pressed }]}
     >
-      <View
-        style={[styles.stripe, { backgroundColor: routine?.color ?? RoutineColors.routineOne }]}
-      />
+      <View style={[styles.stripe, { backgroundColor: color }]} />
 
       <View style={styles.texts}>
         <ThemedText type="overline" tone="secondary">

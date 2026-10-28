@@ -37,7 +37,7 @@ import type {
   WorkoutExercise,
   WorkoutSetPatch,
 } from "@/hooks/api/workouts/queries";
-import { useTheme } from "@/hooks/use-theme";
+import { useRoutineColor, useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
 import { useDialog } from "@/providers/DialogProvider";
@@ -45,6 +45,7 @@ import { useToast } from "@/providers/ToastProvider";
 import ExerciseTabs from "./components/ExerciseTabs";
 import ProgressBar from "./components/ProgressBar";
 import SetsTable from "./components/SetsTable";
+import { getResumeIndex } from "./utils/getResumeIndex";
 
 const GIF_SIZE = 180;
 
@@ -150,13 +151,18 @@ const WorkoutScreen = () => {
   const discardWorkout = useDiscardWorkout();
 
   const exercises = useMemo(() => exerciseData ?? [], [exerciseData]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  // null until the data arrives, so the workout opens where it was left off.
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+
+  if (selectedIndex === null && exerciseData) {
+    setSelectedIndex(getResumeIndex(exerciseData));
+  }
 
   const routine = routines?.find(
     (r) => r.id === (activeWorkout?.id === workoutId ? activeWorkout.routine_id : null)
   );
-  const color = routine?.color ?? RoutineColors.routineOne;
+  const color = useRoutineColor(routine?.color ?? RoutineColors.routineOne);
   const title = routine?.name ?? t("workout.title");
 
   const { done, total } = useMemo(() => {
@@ -164,7 +170,7 @@ const WorkoutScreen = () => {
     return { done: sets.filter((set) => set.completed).length, total: sets.length };
   }, [exercises]);
 
-  const index = Math.min(selectedIndex, Math.max(exercises.length - 1, 0));
+  const index = Math.min(selectedIndex ?? 0, Math.max(exercises.length - 1, 0));
   const exercise: WorkoutExercise | undefined = exercises[index];
   const isLastExercise = index >= exercises.length - 1;
 

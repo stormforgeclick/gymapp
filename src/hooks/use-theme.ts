@@ -7,8 +7,18 @@ import { useMemo } from 'react';
 
 import { Colors, type ThemeColors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { readableAccent } from '@/lib/color';
+import { readableAccent, routineTone } from '@/lib/color';
 import { useAccent } from '@/providers/AccentProvider';
+
+export function useThemeMode(): 'light' | 'dark' {
+  const scheme = useColorScheme();
+  return scheme === 'dark' ? 'dark' : 'light';
+}
+
+/** A stored routine color, as it should be painted in the current color scheme. */
+export function useRoutineColor(hex: string): string {
+  return routineTone(hex, useThemeMode());
+}
 
 /**
  * The palette for the current color scheme. While there is a routine of the
@@ -16,13 +26,13 @@ import { useAccent } from '@/providers/AccentProvider';
  * for text and icons), so everything built on those tokens follows it.
  */
 export function useTheme(): ThemeColors {
-  const scheme = useColorScheme();
-  const mode = scheme === 'unspecified' ? 'light' : scheme;
+  const mode = useThemeMode();
   const accent = useAccent();
 
   return useMemo(() => {
     const base = Colors[mode];
     if (!accent) return base;
-    return { ...base, primary: accent, accentText: readableAccent(accent, mode) };
+    const tone = routineTone(accent, mode);
+    return { ...base, primary: tone, accentText: readableAccent(tone, mode) };
   }, [mode, accent]);
 }
