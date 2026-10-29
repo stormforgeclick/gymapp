@@ -19,6 +19,8 @@ type Exercise = {
   category: string;
   equipment: string;
   image: string;
+  gif_url?: string | null;
+  target?: string | null;
 };
 
 type ListComponentType = ComponentType<FlatListProps<Exercise>>;

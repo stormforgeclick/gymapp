@@ -93,7 +93,7 @@ export const useImportRoutine = () => {
     onSuccess: () =>
       Promise.all([
         qc.invalidateQueries({ queryKey: ["routines"] }),
-        qc.invalidateQueries({ queryKey: ["routineSharing"] }),
+        qc.invalidateQueries({ queryKey: ["splits"] }),
       ]),
   });
 };

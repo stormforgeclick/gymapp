@@ -20,15 +20,15 @@ import {
   useUploadAvatar,
 } from "@/hooks/api/profile";
 import type { ProfilePrivacy } from "@/hooks/api/profile/queries";
-import { useRoutineSharing, useSetRoutinePrivacy } from "@/hooks/api/routines";
-import type { RoutinePrivacy } from "@/hooks/api/routines/queries";
+import { useSetSplitPrivacy, useSplits } from "@/hooks/api/splits";
+import type { SplitPrivacy } from "@/hooks/api/splits/queries";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
 import { displayName } from "@/lib/profile";
 import { useDialog } from "@/providers/DialogProvider";
 import { useToast } from "@/providers/ToastProvider";
-import SharingRow from "./components/SharingRow";
+import SplitSharingRow from "./components/SplitSharingRow";
 
 const AVATAR_SIZE = 96;
 
@@ -95,8 +95,8 @@ const ProfileScreen = () => {
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
   const removeAvatar = useRemoveAvatar();
-  const { data: sharing } = useRoutineSharing();
-  const setRoutinePrivacy = useSetRoutinePrivacy();
+  const { data: splits } = useSplits();
+  const setSplitPrivacy = useSetSplitPrivacy();
 
   const privacyOptions: { value: ProfilePrivacy; label: string }[] = [
     { value: "public", label: t("profile.privacy.public") },
@@ -170,8 +170,8 @@ const ProfileScreen = () => {
       }
     );
 
-  const changeRoutinePrivacy = (id: string, privacy: RoutinePrivacy) =>
-    setRoutinePrivacy.mutate(
+  const changeSplitPrivacy = (id: string, privacy: SplitPrivacy) =>
+    setSplitPrivacy.mutate(
       { id, privacy },
       {
         onError: () =>
@@ -297,19 +297,13 @@ const ProfileScreen = () => {
               : t("profile.sharing.help")}
           </ThemedText>
 
-          {sharing && sharing.length === 0 ? (
-            <ThemedText type="label" tone="secondary">
-              {t("profile.sharing.empty")}
-            </ThemedText>
-          ) : (
-            sharing?.map((routine) => (
-              <SharingRow
-                key={routine.id}
-                routine={routine}
-                onChange={(privacy) => changeRoutinePrivacy(routine.id, privacy)}
-              />
-            ))
-          )}
+          {splits?.map((split) => (
+            <SplitSharingRow
+              key={split.id}
+              split={split}
+              onChange={(privacy) => changeSplitPrivacy(split.id, privacy)}
+            />
+          ))}
         </Section>
       </ScrollView>
     );

@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { AccessibilityInfo, ActivityIndicator, Pressable, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import Pill from "@/components/ui/Pill";
@@ -10,6 +9,7 @@ import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
 import { capitalize } from "@/lib/text";
 import { useDialog } from "@/providers/DialogProvider";
+import DragHandle from "./DragHandle";
 import SetEditor from "./SetEditor";
 import SetsReadList from "./SetsReadList";
 
@@ -21,6 +21,14 @@ interface IProps {
   isSaving: boolean;
   saveError: string | null;
   isDeleting: boolean;
+  editing: boolean;
+  onEditingChange: (editing: boolean) => void;
+  /** Position in the routine, for the screen reader and its move actions. */
+  index: number;
+  total: number;
+  /** Whether the card can be moved now; the screen decides, see `canDrag`. */
+  canMove: boolean;
+  onMove: (to: number) => void;
 }
 
 const makeStyles = (c: ThemeColors) => ({
@@ -66,6 +74,12 @@ const RoutineExerciseDetailComponent = ({
   isSaving,
   saveError,
   isDeleting,
+  editing,
+  onEditingChange,
+  index,
+  total,
+  canMove,
+  onMove,
 }: IProps) => {
   const { name, muscle_group, sets } = routineExercise;
   const theme = useTheme();
@@ -73,15 +87,28 @@ const RoutineExerciseDetailComponent = ({
   const { t } = useT();
   const dialog = useDialog();
 
-  const [editing, setEditing] = useState(false);
+  // Dragging is the visual way to reorder; this is the one for screen readers.
+  const moveActions = canMove
+    ? [
+        ...(index > 0
+          ? [{ name: "moveUp", label: t("routineDetails.reorder.moveUp") }]
+          : []),
+        ...(index < total - 1
+          ? [{ name: "moveDown", label: t("routineDetails.reorder.moveDown") }]
+          : []),
+      ]
+    : [];
 
-  const prevSavingRef = useRef(false);
-  useEffect(() => {
-    if (prevSavingRef.current && !isSaving && !saveError) {
-      setEditing(false);
-    }
-    prevSavingRef.current = isSaving;
-  }, [isSaving, saveError]);
+  const move = (to: number) => {
+    onMove(to);
+    AccessibilityInfo.announceForAccessibility(
+      t("routineDetails.reorder.moved", {
+        name: capitalize(name),
+        n: to + 1,
+        total,
+      })
+    );
+  };
 
   const handleDeletePress = () => {
     dialog.show({
@@ -97,7 +124,24 @@ const RoutineExerciseDetailComponent = ({
   return (
     <ThemedView type="surface" style={styles.container}>
       <View style={styles.headerSection}>
-        <View style={styles.titleRow}>
+        <View
+          style={styles.titleRow}
+          accessible
+          accessibilityLabel={t("routineDetails.reorder.rowA11y", {
+            name: capitalize(name),
+            n: index + 1,
+            total,
+          })}
+          accessibilityHint={
+            moveActions.length > 0 ? t("routineDetails.reorder.a11yHint") : undefined
+          }
+          accessibilityActions={moveActions}
+          onAccessibilityAction={(event) => {
+            if (event.nativeEvent.actionName === "moveUp") move(index - 1);
+            if (event.nativeEvent.actionName === "moveDown") move(index + 1);
+          }}
+        >
+          {total >= 2 && <DragHandle enabled={canMove} color={color} />}
           <ThemedText type="titleSm" style={styles.title} numberOfLines={1}>
             {capitalize(name)}
           </ThemedText>
@@ -109,7 +153,7 @@ const RoutineExerciseDetailComponent = ({
         {!editing && (
           <View style={styles.actionsRow}>
             <Pressable
-              onPress={() => setEditing(true)}
+              onPress={() => onEditingChange(true)}
               accessibilityRole="button"
               accessibilityLabel={t("routineDetails.editExercise", { name })}
               style={({ pressed }) => [
@@ -155,7 +199,7 @@ const RoutineExerciseDetailComponent = ({
           isSaving={isSaving}
           saveError={saveError}
           onSave={onSave}
-          onCancel={() => setEditing(false)}
+          onCancel={() => onEditingChange(false)}
         />
       )}
     </ThemedView>

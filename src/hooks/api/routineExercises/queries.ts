@@ -51,6 +51,18 @@ export async function addRoutineExercises(
   return (data ?? []) as string[];
 }
 
+/** `orderedIds` must be every exercise of the routine, in the new order. */
+export async function reorderRoutineExercises(
+  routineId: string,
+  orderedIds: string[]
+): Promise<void> {
+  const { error } = await supabase.rpc("reorder_routine_exercises", {
+    p_routine_id: routineId,
+    p_ids: orderedIds,
+  });
+  if (error) throw error;
+}
+
 export async function deleteRoutineExercise(id: string): Promise<string> {
   const { data, error } = await supabase.rpc("delete_routine_exercise", {
     p_id: id,

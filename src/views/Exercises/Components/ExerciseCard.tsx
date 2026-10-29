@@ -16,11 +16,18 @@ type Exercise = {
   image: string;
   category: string;
   equipment: string;
+  gif_url?: string | null;
+  /** Primary muscle. */
+  target?: string | null;
 };
 
 interface ExerciseCardProps {
   exercise: Exercise;
   onPress?: () => void;
+  /** Press and hold started: show a preview. Ends with `onPeekEnd`. */
+  onPeekStart?: () => void;
+  /** The finger lifted or the touch was taken over by a scroll. */
+  onPeekEnd?: () => void;
   rightSlot?: ReactNode;
   disabled?: boolean;
   dimmed?: boolean;
@@ -72,6 +79,8 @@ const makeStyles = (c: ThemeColors) => ({
 const ExerciseCard = ({
   exercise,
   onPress,
+  onPeekStart,
+  onPeekEnd,
   rightSlot,
   disabled,
   dimmed,
@@ -96,6 +105,11 @@ const ExerciseCard = ({
         pressed && !disabled && { opacity: Opacity.pressed },
       ]}
       onPress={handlePress}
+      // React Native doesn't fire `onPress` after a long press, so holding to
+      // peek never adds the exercise.
+      onLongPress={onPeekStart}
+      delayLongPress={250}
+      onPressOut={onPeekEnd}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? exercise.name}

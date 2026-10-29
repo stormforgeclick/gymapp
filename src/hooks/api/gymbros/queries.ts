@@ -37,6 +37,9 @@ export type GymbroProfile = Person & {
   can_view_full: boolean;
 };
 
+/** A routine someone shares, with the split it belongs to. */
+export type ProfileRoutine = Routine & { split_name: string };
+
 /** Someone else's routine, with who made it. */
 export type SharedRoutine = {
   id: string;
@@ -121,13 +124,13 @@ export async function removeGymbro(userId: string): Promise<void> {
 export async function getProfileRoutines(
   userId: string,
   language: Language
-): Promise<Routine[]> {
+): Promise<ProfileRoutine[]> {
   const { data, error } = await supabase.rpc("get_profile_routines", {
     p_user_id: userId,
     p_language: language,
   });
   if (error) throw error;
-  return (data ?? []) as Routine[];
+  return (data ?? []) as ProfileRoutine[];
 }
 
 /** Null when the routine doesn't exist or isn't shared with the viewer. */

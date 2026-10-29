@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Image } from "expo-image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import {
@@ -7,6 +9,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/themed-text";
+import IconButton from "@/components/ui/IconButton";
 import SearchInput from "@/components/ui/SearchInput";
 import { renderSheetBackdrop, useSheetStyles } from "@/components/ui/sheet";
 import { IconSize, Spacing, type ThemeColors } from "@/constants/theme";
@@ -23,6 +26,8 @@ import ExerciseCard from "@/views/Exercises/Components/ExerciseCard";
 import ExercisesList from "@/views/Exercises/Components/ExercisesList";
 import Filter from "@/views/Exercises/Components/Filter";
 import { useRowMutationState } from "../hooks/useRowMutationState";
+import ExerciseInlineDetails from "./ExerciseInlineDetails";
+import ExercisePeek from "./ExercisePeek";
 
 type Exercise = {
   id: string;
@@ -30,7 +35,12 @@ type Exercise = {
   image: string;
   category: string;
   equipment: string;
+  gif_url?: string | null;
+  target?: string | null;
 };
+
+/** Set once the user has held an exercise to preview it, so the hint stops showing. */
+const PEEK_HINT_KEY = "gymbro.hints.exercisePeek";
 
 interface IProps {
   routineId: string;
@@ -58,6 +68,11 @@ const makeStyles = (c: ThemeColors) => ({
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.one,
   },
+  rightSlot: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: Spacing.one,
+  },
 });
 
 const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
@@ -71,6 +86,11 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string | undefined>();
   const [adding, setAdding] = useState<Set<string>>(new Set());
+  // The exercise being held down, and the one whose details are open in its row.
+  const [peek, setPeek] = useState<Exercise | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  // Starts hidden so the hint doesn't flash before the saved choice is read.
+  const [hintSeen, setHintSeen] = useState(true);
 
   const { data: routineExercises } = useRoutineExercises(routineId, language);
   const addedIds = useMemo(
@@ -102,6 +122,20 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
   useEffect(() => {
     ref.current?.present();
   }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem(PEEK_HINT_KEY)
+      .then((value) => setHintSeen(value === "1"))
+      .catch(() => {});
+  }, []);
+
+  const startPeek = (exercise: Exercise) => {
+    // Warm the GIF while the card appears.
+    if (exercise.gif_url) Image.prefetch(exercise.gif_url);
+    setPeek(exercise);
+    // Saved now, hidden next time: hiding it here would shift the rows under the finger.
+    AsyncStorage.setItem(PEEK_HINT_KEY, "1").catch(() => {});
+  };
 
   const handleTap = async (gymbroExerciseId: string) => {
     if (addedIds.has(gymbroExerciseId) || adding.has(gymbroExerciseId)) return;
@@ -191,6 +225,11 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
                 allLabel={t("common.all")}
               />
             )}
+            {!hintSeen && (
+              <ThemedText type="caption" tone="secondary">
+                {t("routineDetails.picker.peekHint")}
+              </ThemedText>
+            )}
           </View>
         }
         renderItem={({ item }) => {
@@ -203,19 +242,45 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
               ? t("routineDetails.picker.alreadyAdded")
               : t("routineDetails.picker.add");
 
+          const expanded = expandedId === item.id;
+
           return (
             <View>
+              {/* Not `disabled` when added: an added exercise can still be previewed. */}
               <ExerciseCard
                 exercise={item}
                 onPress={() => handleTap(item.id)}
-                disabled={isAdded || isInFlight}
+                onPeekStart={() => startPeek(item)}
+                onPeekEnd={() => setPeek(null)}
                 dimmed={isAdded}
                 accessibilityLabel={t("routineDetails.picker.rowA11y", {
                   name: item.name,
                   state: a11yState,
                 })}
-                rightSlot={renderRightSlot(isInFlight, isAdded)}
+                rightSlot={
+                  <View style={styles.rightSlot}>
+                    <IconButton
+                      icon={expanded ? "chevron-up" : "information-outline"}
+                      onPress={() => setExpandedId(expanded ? null : item.id)}
+                      accessibilityLabel={t(
+                        expanded
+                          ? "routineDetails.picker.hideDetailsA11y"
+                          : "routineDetails.picker.detailsA11y",
+                        { name: item.name }
+                      )}
+                    />
+                    {renderRightSlot(isInFlight, isAdded)}
+                  </View>
+                }
               />
+              {expanded && (
+                <ExerciseInlineDetails
+                  exerciseId={item.id}
+                  isAdded={isAdded}
+                  isAdding={isInFlight}
+                  onAdd={() => handleTap(item.id)}
+                />
+              )}
               {rowError && (
                 <ThemedText
                   type="caption"
@@ -231,6 +296,8 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
           );
         }}
       />
+
+      {peek && <ExercisePeek exercise={peek} />}
     </BottomSheetModal>
   );
 };

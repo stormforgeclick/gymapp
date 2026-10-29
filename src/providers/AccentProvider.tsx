@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import { useRoutines } from "@/hooks/api/routines";
+import { useActiveSplitRoutines } from "@/hooks/api/splits";
 import { useActiveWorkout, useLastWorkouts } from "@/hooks/api/workouts";
 import { useT } from "@/i18n";
 import { suggestRoutine } from "@/lib/suggestRoutine";
@@ -24,14 +25,18 @@ export const useAccent = () => useContext(AccentContext);
  */
 function AccentSource({ onChange }: { onChange: (color: string | null) => void }) {
   const { language } = useT();
+  // A workout in progress may belong to another split, so it is looked up
+  // among every routine; the suggestion only considers the active split.
   const { data: routines } = useRoutines(language);
+  const { data: activeSplitRoutines } = useActiveSplitRoutines(language);
   const { data: activeWorkout } = useActiveWorkout();
   const { data: finishedWorkouts } = useLastWorkouts();
 
-  // Wait for all three so the color doesn't settle on a suggestion and then
+  // Wait for all of them so the color doesn't settle on a suggestion and then
   // jump to the active workout's routine.
   const ready =
     routines !== undefined &&
+    activeSplitRoutines !== undefined &&
     activeWorkout !== undefined &&
     finishedWorkouts !== undefined;
 
@@ -40,7 +45,7 @@ function AccentSource({ onChange }: { onChange: (color: string | null) => void }
     color = activeWorkout
       ? (routines.find((routine) => routine.id === activeWorkout.routine_id)
           ?.color ?? null)
-      : (suggestRoutine(routines, finishedWorkouts)?.color ?? null);
+      : (suggestRoutine(activeSplitRoutines, finishedWorkouts)?.color ?? null);
   }
 
   useEffect(() => onChange(color), [color, onChange]);
@@ -52,9 +57,13 @@ export function AccentProvider({ children }: { children: ReactNode }) {
   const { session } = useAuth();
   const [color, setColor] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!session) setColor(null);
-  }, [session]);
+  // Signing out clears the color, so the next account never sees the last one's.
+  const signedIn = !!session;
+  const [wasSignedIn, setWasSignedIn] = useState(signedIn);
+  if (wasSignedIn !== signedIn) {
+    setWasSignedIn(signedIn);
+    if (!signedIn) setColor(null);
+  }
 
   return (
     <AccentContext.Provider value={session ? color : null}>

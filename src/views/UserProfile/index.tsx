@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Fragment } from "react";
 import { ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -106,6 +107,8 @@ const UserProfileScreen = () => {
   const { data: profile, isLoading, isError, refetch } = useGymbroProfile(userId);
   const canSeeRoutines = !!profile?.can_view_full && !profile.is_self;
   const routines = useProfileRoutines(userId, language, canSeeRoutines);
+  const severalSplits =
+    new Set(routines.data?.map((routine) => routine.split_id)).size > 1;
   const send = useSendGymbroRequest();
   const respond = useRespondToRequest();
   const cancel = useCancelRequest();
@@ -326,17 +329,29 @@ const UserProfileScreen = () => {
               </ThemedText>
             ) : routines.data && routines.data.length > 0 ? (
               <View style={styles.routines}>
-                {routines.data.map((routine) => (
-                  <RoutineComponent
-                    key={routine.id}
-                    {...routine}
-                    action={() =>
-                      router.push({
-                        pathname: "/shared-routine/[id]",
-                        params: { id: routine.id },
-                      })
-                    }
-                  />
+                {routines.data.map((routine, index) => (
+                  <Fragment key={routine.id}>
+                    {/* Routines come ordered by split, so a header marks each new one. */}
+                    {severalSplits &&
+                      routine.split_id !== routines.data[index - 1]?.split_id && (
+                        <ThemedText
+                          type="overline"
+                          tone="tertiary"
+                          accessibilityRole="header"
+                        >
+                          {routine.split_name}
+                        </ThemedText>
+                      )}
+                    <RoutineComponent
+                      {...routine}
+                      action={() =>
+                        router.push({
+                          pathname: "/shared-routine/[id]",
+                          params: { id: routine.id },
+                        })
+                      }
+                    />
+                  </Fragment>
                 ))}
               </View>
             ) : (

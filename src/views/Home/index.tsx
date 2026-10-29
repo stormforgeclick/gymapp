@@ -7,13 +7,14 @@ import EmptyState from "@/components/ui/EmptyState";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { Spacing } from "@/constants/theme";
-import { useRoutines } from "@/hooks/api/routines";
+import { useActiveSplitRoutines } from "@/hooks/api/splits";
 import { useActiveWorkout, useLastWorkouts } from "@/hooks/api/workouts";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useStartRoutineWorkout } from "@/hooks/useStartRoutineWorkout";
 import { useT } from "@/i18n";
 import { suggestRoutine } from "@/lib/suggestRoutine";
 import RoutineSkeleton from "@/views/Routines/Components/RoutineSkeleton";
+import SplitSwitcher from "@/views/Splits/SplitSwitcher";
 import DayRoutineComponent from "./components/DayRoutineComponent";
 import SugestedRoutineComponent from "./components/SugestedRoutineComponent";
 
@@ -45,7 +46,7 @@ const HomeScreen = () => {
     isLoading: routinesLoading,
     isError,
     refetch,
-  } = useRoutines(language);
+  } = useActiveSplitRoutines(language);
   const { data: activeWorkout, isLoading: activeLoading } = useActiveWorkout();
   const { data: finishedWorkouts, isLoading: historyLoading } = useLastWorkouts();
   const { start, isStarting, activeRoutineId } = useStartRoutineWorkout();
@@ -93,7 +94,7 @@ const HomeScreen = () => {
       return (
         <EmptyState
           icon="dumbbell"
-          title={t("routines.empty")}
+          title={t("splits.emptyRoutines")}
           actionLabel={t("routines.createFirst")}
           actionVariant="primary"
           onAction={() => router.push("/(tabs)/routines")}
@@ -127,6 +128,8 @@ const HomeScreen = () => {
     <ScreenContainer>
       <View style={styles.container}>
         <ScreenHeader overline={today} title={t("home.heading")} />
+
+        <SplitSwitcher />
 
         <ActiveWorkoutBanner />
 

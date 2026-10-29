@@ -4,6 +4,8 @@ import { renderSheetBackdrop, useSheetStyles } from "@/components/ui/sheet";
 import TextField from "@/components/ui/TextField";
 import {
   IconSize,
+  Opacity,
+  Radius,
   RoutineColors,
   RoutineColorsLight,
   Spacing,
@@ -11,6 +13,7 @@ import {
 } from "@/constants/theme";
 import { useCreateRoutine, useDeleteRoutine, useUpdateRoutine } from "@/hooks/api/routines";
 import type { Routine } from "@/hooks/api/routines/queries";
+import { useActiveSplit, useMoveRoutine, useSplits } from "@/hooks/api/splits";
 import { useActiveWorkout } from "@/hooks/api/workouts";
 import { useTheme, useThemeMode } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
@@ -71,6 +74,20 @@ const makeStyles = (c: ThemeColors) => ({
   deleteButton: {
     marginTop: Spacing.three,
   },
+  splitRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: Spacing.two,
+    minHeight: 48,
+    paddingHorizontal: Spacing.three,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.surfaceInput,
+  },
+  splitName: {
+    flex: 1,
+  },
 });
 
 const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) => {
@@ -85,6 +102,16 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
   const toast = useToast();
   const dialog = useDialog();
   const { data: activeWorkout } = useActiveWorkout();
+  const { activeSplit } = useActiveSplit();
+  const { data: splits } = useSplits();
+  const moveMut = useMoveRoutine();
+
+  const currentSplit = splits?.find(
+    (split) => split.id === routineToEdit?.split_id
+  );
+  const otherSplits = splits?.filter(
+    (split) => split.id !== routineToEdit?.split_id
+  );
 
   const initialColor =
     (Object.entries(RoutineColors).find(
@@ -100,7 +127,10 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
   const deleteMut = useDeleteRoutine();
 
   const isSubmitting =
-    createMut.isPending || updateMut.isPending || deleteMut.isPending;
+    createMut.isPending ||
+    updateMut.isPending ||
+    deleteMut.isPending ||
+    moveMut.isPending;
   const errorMsg =
     createMut.error?.message ??
     updateMut.error?.message ??
@@ -130,10 +160,39 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
       );
     } else {
       createMut.mutate(
-        { name: trimmed, color },
+        { name: trimmed, color, splitId: activeSplit?.id },
         { onSuccess: done(t("routines.toast.created")) }
       );
     }
+  };
+
+  const handleMove = () => {
+    if (!routineToEdit || !otherSplits?.length) return;
+
+    dialog.show({
+      title: t("splits.moveTitle"),
+      message: t("splits.moveMessage", { name: routineToEdit.name }),
+      actions: [
+        ...otherSplits.map((split) => ({
+          // The routine is seen according to the destination split's privacy.
+          label: `${split.name} · ${t(`splits.visibility.${split.privacy}`)}`,
+          variant: "secondary" as const,
+          onPress: () =>
+            moveMut.mutate(
+              { routineId: routineToEdit.id, splitId: split.id },
+              {
+                onSuccess: () => {
+                  toast.show(t("splits.moved", { split: split.name }));
+                  dismiss();
+                },
+                onError: () =>
+                  toast.show(t("splits.errorGeneric"), { tone: "error" }),
+              }
+            ),
+        })),
+        { label: t("common.cancel"), variant: "cancel" as const },
+      ],
+    });
   };
 
   const handleDelete = () => {
@@ -190,6 +249,35 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
             autoCapitalize="sentences"
             TextInputComponent={BottomSheetTextInput as any}
           />
+
+          {isEditing && currentSplit && !!otherSplits?.length && (
+            <View style={styles.colorSection}>
+              <ThemedText type="overline" tone="secondary">
+                {t("splits.moveRow")}
+              </ThemedText>
+              <Pressable
+                onPress={handleMove}
+                disabled={isSubmitting}
+                accessibilityRole="button"
+                accessibilityLabel={t("splits.moveA11y", { name: currentSplit.name })}
+                style={({ pressed }) => [
+                  styles.splitRow,
+                  pressed && { opacity: Opacity.pressed },
+                ]}
+              >
+                <ThemedText type="bodyStrong" numberOfLines={1} style={styles.splitName}>
+                  {currentSplit.name}
+                </ThemedText>
+                <MaterialCommunityIcons
+                  name="swap-horizontal"
+                  size={IconSize.md}
+                  color={theme.textSecondary}
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
+                />
+              </Pressable>
+            </View>
+          )}
 
           <View style={styles.colorSection}>
             <ThemedText type="overline" tone="secondary">

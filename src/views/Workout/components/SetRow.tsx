@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pressable, TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -95,10 +95,18 @@ const SetRow = ({ set, number, placeholderReps, onChange }: SetRowProps) => {
 
   const [weightText, setWeightText] = useState(format(set.weight));
   const [repsText, setRepsText] = useState(format(set.reps));
+  const [syncedWeight, setSyncedWeight] = useState(set.weight);
+  const [syncedReps, setSyncedReps] = useState(set.reps);
 
   // Pick up server-side changes, e.g. a failed save being rolled back.
-  useEffect(() => setWeightText(format(set.weight)), [set.weight]);
-  useEffect(() => setRepsText(format(set.reps)), [set.reps]);
+  if (syncedWeight !== set.weight) {
+    setSyncedWeight(set.weight);
+    setWeightText(format(set.weight));
+  }
+  if (syncedReps !== set.reps) {
+    setSyncedReps(set.reps);
+    setRepsText(format(set.reps));
+  }
 
   const commitWeight = () => {
     const value = parseNumber(weightText, false);

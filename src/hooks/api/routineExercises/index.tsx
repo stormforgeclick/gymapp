@@ -3,7 +3,9 @@ import {
   addRoutineExercises,
   deleteRoutineExercise,
   getRoutineExercises,
+  reorderRoutineExercises,
   replaceRoutineExerciseSets,
+  type RoutineExercise,
   type SetInput,
 } from "./queries";
 
@@ -49,6 +51,47 @@ export const useAddRoutineExercise = (routineId: string) => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["routineExercises", routineId] });
       qc.invalidateQueries({ queryKey: ["routines"] });
+    },
+  });
+};
+
+/**
+ * The new order shows right away and is rolled back if saving fails. The list
+ * is only refetched once the last pending reorder is done, so a quick second
+ * drag isn't undone by the answer to the first.
+ */
+export const useReorderRoutineExercises = (
+  routineId: string,
+  language: Language
+) => {
+  const qc = useQueryClient();
+  const key = ["routineExercises", routineId, language] as const;
+  const mutationKey = ["reorderRoutineExercises", routineId] as const;
+
+  return useMutation({
+    mutationKey,
+    mutationFn: (orderedIds: string[]) =>
+      reorderRoutineExercises(routineId, orderedIds),
+    onMutate: async (orderedIds) => {
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<RoutineExercise[]>(key);
+      qc.setQueryData<RoutineExercise[]>(key, (data) => {
+        if (!data) return data;
+        const byId = new Map(data.map((exercise) => [exercise.id, exercise]));
+        return orderedIds.flatMap((id, index) => {
+          const exercise = byId.get(id);
+          return exercise ? [{ ...exercise, position: index + 1 }] : [];
+        });
+      });
+      return { previous };
+    },
+    onError: (_error, _ids, context) => {
+      if (context?.previous) qc.setQueryData(key, context.previous);
+    },
+    onSettled: () => {
+      if (qc.isMutating({ mutationKey }) <= 1) {
+        qc.invalidateQueries({ queryKey: ["routineExercises", routineId] });
+      }
     },
   });
 };

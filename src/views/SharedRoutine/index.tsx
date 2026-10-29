@@ -17,6 +17,7 @@ import {
   useSharedRoutine,
   useSharedRoutineExercises,
 } from "@/hooks/api/gymbros";
+import { useActiveSplit } from "@/hooks/api/splits";
 import { useRoutineColor } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
@@ -73,6 +74,7 @@ const SharedRoutineScreen = () => {
   const { data: exercises, isLoading: exercisesLoading } =
     useSharedRoutineExercises(routineId, language);
   const importRoutine = useImportRoutine();
+  const { activeSplit } = useActiveSplit();
 
   const color = useRoutineColor(routine?.color ?? RoutineColors.routineOne);
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -84,7 +86,11 @@ const SharedRoutineScreen = () => {
     importRoutine.mutate(routineId, {
       onSuccess: (newId) => {
         setSavedId(newId);
-        toast.show(t("sharedRoutine.saved"));
+        toast.show(
+          activeSplit
+            ? t("sharedRoutine.savedIn", { split: activeSplit.name })
+            : t("sharedRoutine.saved")
+        );
       },
       onError: () =>
         toast.show(t("sharedRoutine.saveError"), { tone: "error" }),

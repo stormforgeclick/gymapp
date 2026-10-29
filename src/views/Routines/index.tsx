@@ -4,7 +4,7 @@ import IconButton from "@/components/ui/IconButton";
 import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { Spacing } from "@/constants/theme";
-import { useRoutines } from "@/hooks/api/routines";
+import { useActiveSplitRoutines } from "@/hooks/api/splits";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
@@ -14,6 +14,7 @@ import { FlatList, RefreshControl, View } from "react-native";
 import AddRoutineComponent from "./Components/AddRoutine";
 import RoutineComponent from "./Components/Routine";
 import RoutineSkeleton from "./Components/RoutineSkeleton";
+import SplitSwitcher from "@/views/Splits/SplitSwitcher";
 
 const makeStyles = () => ({
   list: {
@@ -26,6 +27,9 @@ const makeStyles = () => ({
   centered: {
     flex: 1,
     justifyContent: "center" as const,
+  },
+  switcher: {
+    marginBottom: Spacing.tight,
   },
   headerActions: {
     flexDirection: "row" as const,
@@ -48,7 +52,7 @@ const RoutinesScreen = () => {
     isError,
     isRefetching,
     refetch,
-  } = useRoutines(language);
+  } = useActiveSplitRoutines(language);
 
   const handleRoutinePress = useCallback(
     (routineId: string) => {
@@ -78,6 +82,10 @@ const RoutinesScreen = () => {
         }
       />
 
+      <View style={styles.switcher}>
+        <SplitSwitcher />
+      </View>
+
       <ActiveWorkoutBanner />
 
       {isLoading && (
@@ -104,7 +112,7 @@ const RoutinesScreen = () => {
         <View style={styles.centered}>
           <EmptyState
             icon="dumbbell"
-            title={t("routines.empty")}
+            title={t("splits.emptyRoutines")}
             actionLabel={t("routines.createFirst")}
             actionVariant="primary"
             onAction={() => setShowAdd(true)}
