@@ -10,6 +10,7 @@ import {
 } from "@/constants/theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
+import { capitalize } from "@/lib/text";
 
 interface ExerciseTabsProps {
   names: string[];
@@ -43,9 +44,6 @@ const makeStyles = (c: ThemeColors) => ({
     textAlign: "center" as const,
   },
 });
-
-const capitalize = (text: string) =>
-  text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
 
 const ExerciseTabs = ({ names, selectedIndex, onSelect, color }: ExerciseTabsProps) => {
   const styles = useThemedStyles(makeStyles);

@@ -3,6 +3,7 @@ import CustomImage from "@/components/ui/CustomImage";
 import { IconSize, Opacity, Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { capitalize } from "@/lib/text";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -25,11 +26,6 @@ interface ExerciseCardProps {
   dimmed?: boolean;
   accessibilityLabel?: string;
 }
-
-const capitalizeFirstLetter = (str: string) => {
-  if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
 
 const makeStyles = (c: ThemeColors) => ({
   card: {
@@ -117,11 +113,11 @@ const ExerciseCard = ({
             tone={dimmed ? "tertiary" : "default"}
             numberOfLines={2}
           >
-            {capitalizeFirstLetter(exercise.name)}
+            {capitalize(exercise.name)}
           </ThemedText>
           <ThemedText type="label" tone="secondary">
-            {capitalizeFirstLetter(exercise.category)}
-            {exercise.equipment ? ` • ${capitalizeFirstLetter(exercise.equipment)}` : ""}
+            {capitalize(exercise.category)}
+            {exercise.equipment ? ` • ${capitalize(exercise.equipment)}` : ""}
           </ThemedText>
         </View>
 

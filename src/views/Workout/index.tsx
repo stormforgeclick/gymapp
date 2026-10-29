@@ -40,6 +40,7 @@ import type {
 import { useRoutineColor, useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
+import { capitalize } from "@/lib/text";
 import { useDialog } from "@/providers/DialogProvider";
 import { useToast } from "@/providers/ToastProvider";
 import ExerciseTabs from "./components/ExerciseTabs";
@@ -48,9 +49,6 @@ import SetsTable from "./components/SetsTable";
 import { getResumeIndex } from "./utils/getResumeIndex";
 
 const GIF_SIZE = 180;
-
-const capitalize = (text: string) =>
-  text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
 
 const makeStyles = (c: ThemeColors) => ({
   flex: {

@@ -8,14 +8,10 @@ import { useExercise } from "@/hooks/api/exercises";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
+import { capitalize } from "@/lib/text";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import ExerciseDetailsSkeleton from "./components/ExerciseDetails";
-
-const capitalizeString = (str: string) => {
-  if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
 
 const makeStyles = (c: ThemeColors) => ({
   backButton: {
@@ -108,19 +104,19 @@ const ExerciseDetailsScreen = () => {
           </View>
 
           <ThemedText type="display" accessibilityRole="header">
-            {capitalizeString(exercise.name)}
+            {capitalize(exercise.name)}
           </ThemedText>
 
           <View style={styles.tagsContainer}>
             <Pill
-              label={capitalizeString(exercise.category)}
+              label={capitalize(exercise.category)}
               backgroundColor={theme.accentText}
               textColor={theme.accentText}
             />
 
-            <Pill label={capitalizeString(exercise.equipment)} />
+            <Pill label={capitalize(exercise.equipment)} />
 
-            <Pill label={capitalizeString(exercise.target)} />
+            <Pill label={capitalize(exercise.target)} />
           </View>
 
           <View style={styles.coachingContainer}>

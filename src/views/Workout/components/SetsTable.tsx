@@ -73,7 +73,12 @@ const SetsTable = ({
 
   // Sets added during the workout have no planned reps, so they inherit the
   // hint from the set above.
+  const placeholders: (number | null)[] = [];
   let fallbackReps: number | null = null;
+  for (const set of exercise.sets) {
+    fallbackReps = set.target_min_reps ?? set.reps ?? fallbackReps;
+    placeholders.push(fallbackReps);
+  }
 
   return (
     <View style={styles.card}>
@@ -90,20 +95,15 @@ const SetsTable = ({
         <View style={styles.headerCheck} />
       </View>
 
-      {exercise.sets.map((set, index) => {
-        const placeholderReps = set.target_min_reps ?? set.reps ?? fallbackReps;
-        fallbackReps = placeholderReps;
-
-        return (
-          <SetRow
-            key={set.id}
-            set={set}
-            number={index + 1}
-            placeholderReps={placeholderReps}
-            onChange={(patch) => onUpdateSet(set.id, patch)}
-          />
-        );
-      })}
+      {exercise.sets.map((set, index) => (
+        <SetRow
+          key={set.id}
+          set={set}
+          number={index + 1}
+          placeholderReps={placeholders[index]}
+          onChange={(patch) => onUpdateSet(set.id, patch)}
+        />
+      ))}
 
       <View style={styles.footer}>
         <View style={styles.footerSpacer} />
