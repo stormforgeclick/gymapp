@@ -32,3 +32,9 @@ Las decisiones que más preguntas generan, con su porqué. Si piensas cambiar un
 - **Decisión:** el onboarding usa Supabase en Docker; nadie recibe claves del proyecto real.
 - **Por qué:** el proyecto real tiene cuentas de verdad. Cualquier prueba o error en local no puede tocarlas, y no hay claves que se filtren.
 - **Costo:** el E2E con Maestro todavía corre contra producción (es solo para mantenedores) y las imágenes del catálogo se cargan del Storage real. Un proyecto de staging lo resolvería.
+
+## 6. El proyecto de Expo vive en una organización, no en una cuenta personal
+
+- **Decisión:** el proyecto es `@stormforge/gymbro-app`, de la organización `stormforge`; `app.json` lo declara con `owner`. Se transfirió conservando su ID, así que la URL de actualizaciones sigue valiendo.
+- **Por qué:** los builds, las firmas de Android y las variables de EAS son del proyecto; en una cuenta personal solo las ve una persona. En una organización las ve el equipo, y quien se vaya no se lleva la firma de la app.
+- **Costo:** cada persona que construya necesita ser miembro de la organización y entrar con `eas login`. La firma de Android se creó para el paquete `com.stormforgeclick.gymbro` dentro de la organización; si se pierde, no se pueden publicar actualizaciones de la misma app en Google Play.

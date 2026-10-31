@@ -66,3 +66,6 @@ Instalaste una librería con código nativo o cambiaste `app.json`. Corre `npm r
 
 **Una prueba dentro de `src/app/` aparece como ruta.**
 Expo Router trata todo archivo de `src/app/` como una ruta. Las pruebas van en `__tests__/` junto al código, fuera de `src/app/`.
+
+**Una actualización OTA no llega al teléfono.**
+Lo más probable es que la huella nativa (*fingerprint*) del build instalado y la del momento de publicar no coincidan: se instaló una librería nativa, se cambió `app.json` o `eas.json`, o se actualizó el SDK después de construir. Compara `npx expo-updates fingerprint:generate --platform android` con el build y, si cambió, construye de nuevo. Ver [lanzamiento.md](lanzamiento.md#actualizaciones-ota-sin-reinstalar).
