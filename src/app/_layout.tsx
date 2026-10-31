@@ -25,6 +25,7 @@ import ErrorFallback from "@/components/ui/ErrorFallback";
 import { Colors } from "@/constants/theme";
 import { queryClient } from "@/lib/queryClient";
 import { devConsoleReporter, setErrorReporter } from "@/lib/report";
+import { initSentry } from "@/lib/sentry";
 import { AccentProvider } from "@/providers/AccentProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { DialogProvider } from "@/providers/DialogProvider";
@@ -37,8 +38,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
-// Until a crash reporting service is connected, errors only show up while developing.
+// Development prints errors to the console; a build with a Sentry DSN sends them there.
 if (__DEV__) setErrorReporter(devConsoleReporter);
+initSentry();
 
 const navigationThemes = {
   dark: {
