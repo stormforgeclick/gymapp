@@ -48,3 +48,6 @@ android/
 ios/
 
 .env
+
+# End-to-end test account credentials (see scripts/e2e-user.ts)
+.maestro/.env.e2e

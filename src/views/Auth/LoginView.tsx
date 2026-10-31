@@ -111,6 +111,7 @@ export function LoginView() {
 
           <View style={styles.form}>
             <TextField
+              testID="login-email"
               label={t("auth.email")}
               icon="email-outline"
               value={email}
@@ -122,6 +123,7 @@ export function LoginView() {
             />
 
             <TextField
+              testID="login-password"
               label={t("auth.password")}
               icon="lock-outline"
               value={password}
@@ -136,6 +138,7 @@ export function LoginView() {
 
           <View style={styles.actions}>
             <Button
+              testID="login-submit"
               label={t("auth.login.submit")}
               onPress={handleLogin}
               loading={isPending}

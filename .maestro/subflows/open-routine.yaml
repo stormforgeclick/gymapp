@@ -1,0 +1,13 @@
+# From any screen of a signed-in app, opens the routine named ROUTINE_NAME.
+appId: com.anonymous.gymbroapp
+---
+- tapOn:
+    id: tab-routines
+- extendedWaitUntil:
+    visible: ".*${ROUTINE_NAME}.*"
+    timeout: 30000
+- tapOn: ".*${ROUTINE_NAME}.*"
+- extendedWaitUntil:
+    visible:
+      id: screen-routine-details
+    timeout: 30000

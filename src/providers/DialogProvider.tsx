@@ -147,6 +147,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
                   <Button
                     key={index}
                     label={action.label}
+                    testID={`dialog-action-${action.variant ?? "primary"}`}
                     variant={BUTTON_VARIANT[action.variant ?? "primary"]}
                     onPress={() => run(action)}
                   />

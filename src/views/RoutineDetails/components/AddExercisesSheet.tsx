@@ -248,6 +248,7 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
             <View>
               {/* Not `disabled` when added: an added exercise can still be previewed. */}
               <ExerciseCard
+                testID="picker-exercise-row"
                 exercise={item}
                 onPress={() => handleTap(item.id)}
                 onPeekStart={() => startPeek(item)}

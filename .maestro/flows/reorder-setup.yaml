@@ -1,0 +1,8 @@
+# Leaves ROUTINE_NAME open with three exercises, ready for the drag.
+appId: com.anonymous.gymbroapp
+---
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/add-routine-with-exercises.yaml
+- assertVisible:
+    id: routine-exercise-title
+    index: 2

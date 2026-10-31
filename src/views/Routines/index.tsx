@@ -62,7 +62,7 @@ const RoutinesScreen = () => {
   );
 
   return (
-    <ScreenContainer>
+    <ScreenContainer testID="screen-routines">
       <ScreenHeader
         title={t("routines.title")}
         right={
@@ -75,6 +75,7 @@ const RoutinesScreen = () => {
             <IconButton
               icon="plus"
               variant="filled"
+              testID="add-routine-button"
               onPress={() => setShowAdd(true)}
               accessibilityLabel={t("routines.create")}
             />

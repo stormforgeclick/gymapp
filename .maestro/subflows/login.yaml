@@ -1,0 +1,23 @@
+# Starts from a clean install and signs in with the test account.
+# Needs E2E_EMAIL and E2E_PASSWORD (scripts/e2e.ts passes them).
+appId: com.anonymous.gymbroapp
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: login-email
+    timeout: 45000
+- tapOn:
+    id: login-email
+- inputText: ${E2E_EMAIL}
+- tapOn:
+    id: login-password
+- inputText: ${E2E_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: login-submit
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 45000

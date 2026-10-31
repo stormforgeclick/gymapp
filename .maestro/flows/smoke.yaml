@@ -1,0 +1,20 @@
+# Signs in and visits the four tabs.
+appId: com.anonymous.gymbroapp
+---
+- runFlow: ../subflows/login.yaml
+- tapOn:
+    id: tab-routines
+- assertVisible:
+    id: screen-routines
+- tapOn:
+    id: tab-gymbros
+- assertVisible:
+    id: screen-gymbros
+- tapOn:
+    id: tab-profile
+- assertVisible:
+    id: screen-profile
+- tapOn:
+    id: tab-home
+- assertVisible:
+    id: screen-home

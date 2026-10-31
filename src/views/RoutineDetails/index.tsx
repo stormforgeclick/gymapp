@@ -215,7 +215,7 @@ const RoutineDetail = () => {
   };
 
   return (
-    <ScreenContainer edges={["top", "bottom"]}>
+    <ScreenContainer edges={["top", "bottom"]} testID="screen-routine-details">
       <ScreenHeader
         title={routine?.name ?? ""}
         size="headline"
@@ -224,6 +224,7 @@ const RoutineDetail = () => {
         right={
           <IconButton
             icon="pencil"
+            testID="edit-routine-button"
             variant="filled"
             color={routineColor}
             onPress={() => setShowEdit(true)}
@@ -320,6 +321,7 @@ const RoutineDetail = () => {
           )}
 
           <Button
+            testID="add-exercise-button"
             label={t("routineDetails.addExercise")}
             variant="outline"
             dashed

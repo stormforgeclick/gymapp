@@ -1,0 +1,14 @@
+# On a routine's detail screen, deletes it and checks it left the list.
+appId: com.anonymous.gymbroapp
+---
+- tapOn:
+    id: edit-routine-button
+- tapOn:
+    id: routine-delete-button
+- tapOn:
+    id: dialog-action-destructive
+- extendedWaitUntil:
+    visible:
+      id: screen-routines
+    timeout: 30000
+- assertNotVisible: ".*${ROUTINE_NAME}.*"

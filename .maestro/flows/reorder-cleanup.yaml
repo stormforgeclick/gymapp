@@ -1,0 +1,10 @@
+# Deletes ROUTINE_NAME after the reorder checks.
+appId: com.anonymous.gymbroapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: screen-home
+    timeout: 45000
+- runFlow: ../subflows/open-routine.yaml
+- runFlow: ../subflows/delete-open-routine.yaml

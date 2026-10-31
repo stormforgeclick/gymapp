@@ -1,0 +1,12 @@
+# Creates a routine, adds three exercises and deletes it.
+appId: com.anonymous.gymbroapp
+---
+- runFlow: ../subflows/login.yaml
+- runFlow: ../subflows/add-routine-with-exercises.yaml
+- assertVisible:
+    id: routine-exercise-title
+    index: 2
+- assertNotVisible:
+    id: routine-exercise-title
+    index: 3
+- runFlow: ../subflows/delete-open-routine.yaml

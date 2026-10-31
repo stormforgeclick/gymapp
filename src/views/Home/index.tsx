@@ -125,7 +125,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer testID="screen-home">
       <View style={styles.container}>
         <ScreenHeader overline={today} title={t("home.heading")} />
 

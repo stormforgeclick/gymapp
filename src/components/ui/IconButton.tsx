@@ -15,6 +15,7 @@ interface IconButtonProps {
   /** Glyph color; defaults to `onPrimary` when filled, `text` otherwise. */
   iconColor?: string;
   disabled?: boolean;
+  testID?: string;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -26,6 +27,7 @@ const IconButton = ({
   color,
   iconColor,
   disabled = false,
+  testID,
   style,
 }: IconButtonProps) => {
   const theme = useTheme();
@@ -35,6 +37,7 @@ const IconButton = ({
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}

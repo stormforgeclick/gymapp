@@ -34,3 +34,26 @@ Los builds se hacen en la nube de Expo (EAS) y tardan unos minutos. Al terminar,
 - `preview`: APK normal, sin servidor de desarrollo. Sube el número de versión solo en cada build para poder instalarlo encima del anterior.
 - `production`: para las tiendas; hoy no se usa.
 - `development-simulator`: solo para el simulador de iOS en un Mac.
+
+## Pruebas
+
+No hay Jest por ahora. Hay dos tipos de pruebas:
+
+### De punta a punta (Maestro + emulador Android)
+
+Abren la app real, entran con una cuenta de pruebas y la usan: pestañas, crear una rutina con ejercicios y reordenarlos arrastrando (el orden se comprueba también después de reabrir la app).
+
+1. Instala [Maestro](https://docs.maestro.dev/getting-started/installing-maestro/windows) (Java 17 o más). El script lo busca en `~/maestro/bin` o en el PATH; si está en otro lugar, define `MAESTRO_BIN`.
+2. Arranca el emulador (`emulator -avd Medium_Phone_API_35`) o conecta un teléfono con depuración USB.
+3. Instala un build **release** (lleva el JavaScript dentro, no necesita `npm start`): `npx expo run:android --variant release`. Hazlo otra vez cuando cambies código de la app.
+4. `npm run e2e` corre todo; `npm run e2e -- smoke` (o `routine-crud`, `reorder`) corre uno solo.
+
+La cuenta `e2e@gymbro.test` vive en el proyecto real de Supabase; `npm run e2e:user` la crea y guarda sus credenciales en `.maestro/.env.e2e` (ignorado por git; usa `SUPABASE_SERVICE_ROLE_KEY` de tu `.env`). Cada prueba crea una rutina "E2E …" y la elimina al terminar.
+
+Maestro no sabe mantener presionado y arrastrar, así que `scripts/e2e.ts` hace el arrastre con `adb shell input draganddrop` y lee el orden de las tarjetas con `uiautomator dump`.
+
+### De base de datos (`supabase/tests/`)
+
+SQL que comprueba las reglas que protegen los datos: privacidad por split, reordenar, archivar rutinas, gymbros y qué puede hacer un usuario sin sesión. Cada archivo crea sus propios usuarios dentro de una transacción y termina con `ROLLBACK_TEST`, así que no deja nada: un error que empieza con `ROLLBACK_TEST` significa que **todo pasó**; cualquier otro error es un fallo.
+
+Se corren con `psql -f` (primero `_helpers.sql`, en la misma sesión que el archivo) o pidiéndoselo a Claude, que los ejecuta por el conector de Supabase.

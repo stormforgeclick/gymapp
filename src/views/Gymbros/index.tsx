@@ -338,7 +338,7 @@ const GymbrosScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer testID="screen-gymbros">
       <ScreenHeader title={t("gymbros.title")} />
 
       <View style={styles.searchBox}>

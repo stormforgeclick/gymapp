@@ -126,6 +126,7 @@ const RoutineExerciseDetailComponent = ({
       <View style={styles.headerSection}>
         <View
           style={styles.titleRow}
+          testID="routine-exercise-title"
           accessible
           accessibilityLabel={t("routineDetails.reorder.rowA11y", {
             name: capitalize(name),

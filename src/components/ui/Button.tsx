@@ -30,6 +30,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  testID?: string;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -54,6 +55,7 @@ const Button = ({
   fullWidth = true,
   accessibilityLabel,
   accessibilityHint,
+  testID,
   style,
 }: ButtonProps) => {
   const theme = useTheme();
@@ -92,6 +94,7 @@ const Button = ({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
+      testID={testID}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       hitSlop={size === "sm" ? 4 : undefined}
       style={({ pressed }) => [

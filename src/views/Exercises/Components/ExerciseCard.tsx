@@ -32,6 +32,7 @@ interface ExerciseCardProps {
   disabled?: boolean;
   dimmed?: boolean;
   accessibilityLabel?: string;
+  testID?: string;
 }
 
 const makeStyles = (c: ThemeColors) => ({
@@ -85,6 +86,7 @@ const ExerciseCard = ({
   disabled,
   dimmed,
   accessibilityLabel,
+  testID,
 }: ExerciseCardProps) => {
   const router = useRouter();
   const theme = useTheme();
@@ -111,6 +113,7 @@ const ExerciseCard = ({
       delayLongPress={250}
       onPressOut={onPeekEnd}
       disabled={disabled}
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? exercise.name}
       accessibilityState={{ disabled: !!disabled }}

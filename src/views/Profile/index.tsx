@@ -310,7 +310,7 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer testID="screen-profile">
       <ScreenHeader
         title={t("profile.title")}
         right={

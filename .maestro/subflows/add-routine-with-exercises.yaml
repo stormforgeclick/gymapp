@@ -1,0 +1,39 @@
+# From the home screen, creates the routine ROUTINE_NAME, opens it and adds the
+# first three exercises of the picker. Ends on the routine's detail screen.
+appId: com.anonymous.gymbroapp
+---
+- tapOn:
+    id: tab-routines
+- tapOn:
+    id: add-routine-button
+- tapOn:
+    id: routine-name-input
+- inputText: ${ROUTINE_NAME}
+- hideKeyboard
+- tapOn:
+    id: routine-submit-button
+- runFlow: open-routine.yaml
+- tapOn:
+    id: add-exercise-button
+- extendedWaitUntil:
+    visible:
+      id: picker-exercise-row
+      index: 2
+    timeout: 30000
+- tapOn:
+    id: picker-exercise-row
+    index: 0
+- tapOn:
+    id: picker-exercise-row
+    index: 1
+- tapOn:
+    id: picker-exercise-row
+    index: 2
+# The sheet closes by tapping the scrim above it.
+- tapOn:
+    point: 50%,4%
+- extendedWaitUntil:
+    visible:
+      id: routine-exercise-title
+      index: 2
+    timeout: 30000

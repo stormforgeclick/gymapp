@@ -210,14 +210,21 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
         {
           label: t("common.delete"),
           variant: "destructive",
-          onPress: () =>
-            deleteMut.mutate(routineToEdit.id, {
-              onSuccess: () => {
-                toast.show(t("routines.toast.deleted"));
-                dismiss();
-                onDeleted?.();
-              },
-            }),
+          onPress: async () => {
+            // Awaited rather than `mutate(..., { onSuccess })`: once the routine
+            // leaves the list, the screen that shows this sheet drops it, and a
+            // callback of an unmounted component never runs, so the user would
+            // be left on the deleted routine's screen. The error, if any, is
+            // shown in the sheet by `deleteMut.error`.
+            try {
+              await deleteMut.mutateAsync(routineToEdit.id);
+            } catch {
+              return;
+            }
+            toast.show(t("routines.toast.deleted"));
+            dismiss();
+            onDeleted?.();
+          },
         },
       ],
     });
@@ -242,6 +249,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
           </ThemedText>
 
           <TextField
+            testID="routine-name-input"
             label={t("routines.sheet.name")}
             value={name}
             onChangeText={setName}
@@ -333,6 +341,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
 
           <View>
             <Button
+              testID="routine-submit-button"
               label={isEditing ? t("routines.sheet.save") : t("routines.sheet.create")}
               color={palette[selectedColor]}
               onPress={handleSubmit}
@@ -342,6 +351,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
 
             {isEditing && (
               <Button
+                testID="routine-delete-button"
                 label={t("routines.sheet.delete")}
                 variant="danger"
                 onPress={handleDelete}

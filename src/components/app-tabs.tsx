@@ -27,6 +27,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="index"
         options={{
+          tabBarButtonTestID: "tab-home",
           title: t("tabs.home"),
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" size={size} color={color} />
@@ -37,6 +38,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="routines"
         options={{
+          tabBarButtonTestID: "tab-routines",
           title: t("tabs.routines"),
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="dumbbell" size={size} color={color} />
@@ -47,6 +49,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="gymbros"
         options={{
+          tabBarButtonTestID: "tab-gymbros",
           title: t("tabs.gymbros"),
           tabBarBadge: pendingRequests > 0 ? pendingRequests : undefined,
           tabBarAccessibilityLabel:
@@ -62,6 +65,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="profile"
         options={{
+          tabBarButtonTestID: "tab-profile",
           title: t("tabs.profile"),
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="account-circle" size={size} color={color} />
