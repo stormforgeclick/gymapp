@@ -106,6 +106,7 @@ const RoutineDetail = () => {
   useEffect(() => {
     AsyncStorage.getItem(REORDER_HINT_KEY)
       .then((value) => setHintSeen(value === "1"))
+      // Best effort: if it can't be read, the hint stays hidden.
       .catch(() => {});
   }, []);
 
@@ -166,6 +167,7 @@ const RoutineDetail = () => {
 
     if (!hintSeen) {
       setHintSeen(true);
+      // Best effort: at worst the hint shows once more.
       AsyncStorage.setItem(REORDER_HINT_KEY, "1").catch(() => {});
     }
   };

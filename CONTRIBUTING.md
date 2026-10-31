@@ -8,7 +8,7 @@ Gracias por sumarte. Esta guía explica cómo trabajar sin romper nada y qué es
 2. **Escribe la prueba primero** (TDD). Mírala fallar, escribe lo mínimo para que pase, y limpia. Detalles y un ejemplo en [docs/pruebas.md](docs/pruebas.md).
 3. **Haz commits pequeños** con mensajes como los del historial (abajo).
 4. **Corre todo en local** antes de abrir el PR (checklist abajo).
-5. **Abre el PR** contra `main` explicando *qué* cambia y *por qué*. La CI corre sola.
+5. **Abre el PR** contra `main`. GitHub te da una plantilla: explica *qué* cambia y *por qué*, y marca el checklist. La CI corre sola.
 6. Atiende la revisión con commits nuevos; no reescribas la historia de un PR que ya tiene comentarios.
 
 No hagas push directo a `main`.
@@ -22,7 +22,7 @@ El título dice qué; el cuerpo (si hace falta) dice **por qué**. El código y 
 ## Checklist del PR
 
 - [ ] Hay pruebas para lo nuevo y se vio fallar la prueba antes de escribir el código.
-- [ ] `npm test` y `npx tsc --noEmit` y `npm run lint` pasan.
+- [ ] `npm run test:coverage`, `npx tsc --noEmit` y `npm run lint` pasan. Si mejoraste la cobertura de un área, sube su piso en `package.json`.
 - [ ] Si tocaste la base: `npx supabase db reset` y `npm run test:db` pasan, hay una migración **nueva** (no editaste una ya aplicada), y corriste `npm run db:types` y commiteaste el resultado.
 - [ ] Si agregaste texto visible: está en `src/i18n/es.ts` **y** en `src/i18n/en.ts`.
 - [ ] Si cambiaste un comando, un script o la estructura: actualizaste la documentación (la prueba `docs.test.ts` te avisa de enlaces y rutas rotas).
@@ -45,6 +45,16 @@ El título dice qué; el cuerpo (si hace falta) dice **por qué**. El código y 
 - Un cambio de esquema es una **migración nueva** en `supabase/migrations/`, con su prueba SQL escrita antes. El paso a paso está en [docs/base-de-datos.md](docs/base-de-datos.md#cambiar-el-esquema-con-tdd).
 - **Tú no aplicas migraciones a producción.** Lo hace una persona mantenedora tras revisar el PR. No uses el editor SQL del Dashboard ni herramientas externas para cambiar el esquema.
 - Las funciones auxiliares de permisos viven en el esquema `private`; no las muevas a `public`.
+
+## Ajustes de GitHub (mantenedores)
+
+Estas reglas se configuran en el sitio de GitHub, no en el repo:
+
+1. **Proteger `main`**: Settings → Branches → Add branch ruleset (o *branch protection rule*) para `main`, con *Require a pull request before merging* (1 aprobación y *Dismiss stale approvals*), *Require status checks to pass* con `app` y `database` (aparecen en la lista después de la primera ejecución de la CI) y *Block force pushes*.
+2. **Alertas de seguridad**: Settings → Code security → activar *Dependabot alerts*, *Secret scanning* con *Push protection*, y *Private vulnerability reporting*.
+3. **CODEOWNERS**: cuando el equipo esté definido, agrega un archivo `CODEOWNERS` dentro de `.github/` con los usuarios de GitHub que deben revisar cada carpeta (`supabase/` y `.github/` son las más delicadas).
+
+Dependabot y CodeQL ya vienen configurados en `.github/`. Dependabot no actualiza los paquetes que gobierna Expo: esos se suben juntos con `npx expo install` (ver [docs/decisiones.md](docs/decisiones.md)).
 
 ## Qué nunca se sube
 

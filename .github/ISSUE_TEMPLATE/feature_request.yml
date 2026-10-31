@@ -1,0 +1,21 @@
+name: Idea o mejora
+description: Algo que la app o el proyecto debería hacer
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qué problema resuelve
+      description: Cuéntalo desde quien usa la app o trabaja en el proyecto, no desde la solución.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Qué propones
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas que consideraste

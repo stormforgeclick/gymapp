@@ -13,6 +13,8 @@ Esta carpeta es la guía para quien se incorpora al proyecto. Se mantiene junto 
 | Tocar la base de datos, una migración o los permisos | [base-de-datos.md](base-de-datos.md) |
 | Escribir pruebas, entender la CI o saber qué corre antes de un PR | [pruebas.md](pruebas.md) |
 | Mandar tu primer PR | [CONTRIBUTING.md](../CONTRIBUTING.md) |
+| Construir y repartir una versión a testers (mantenedores) | [lanzamiento.md](lanzamiento.md) |
+| Entender por qué se hizo algo de cierta manera | [decisiones.md](decisiones.md) |
 | Resolver un error raro de instalación, Supabase o npm | [problemas-conocidos.md](problemas-conocidos.md) |
 
 Orden recomendado para tu primer día: **empezar → arquitectura → CONTRIBUTING**. El resto, cuando lo necesites.

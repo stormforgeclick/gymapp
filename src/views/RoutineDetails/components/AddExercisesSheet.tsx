@@ -1,11 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { SheetFlatList, SheetTextInput } from "@/components/ui/sheet-inputs";
 import { ActivityIndicator, View } from "react-native";
 import {
-  BottomSheetFlatList,
   BottomSheetModal,
-  BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/themed-text";
@@ -126,6 +125,7 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
   useEffect(() => {
     AsyncStorage.getItem(PEEK_HINT_KEY)
       .then((value) => setHintSeen(value === "1"))
+      // Best effort: if it can't be read, the hint stays hidden.
       .catch(() => {});
   }, []);
 
@@ -134,6 +134,7 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
     if (exercise.gif_url) Image.prefetch(exercise.gif_url);
     setPeek(exercise);
     // Saved now, hidden next time: hiding it here would shift the rows under the finger.
+    // Best effort: at worst the hint shows once more.
     AsyncStorage.setItem(PEEK_HINT_KEY, "1").catch(() => {});
   };
 
@@ -203,7 +204,7 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
         fetchNextPage={fetchNextPage}
         isError={isError && !data}
         onRetry={() => refetch()}
-        ListComponent={BottomSheetFlatList as any}
+        ListComponent={SheetFlatList}
         stickyHeaderIndices={[0]}
         contentContainerStyle={{ paddingBottom: bottom + Spacing.three }}
         ListHeaderComponent={
@@ -215,7 +216,7 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
               value={search}
               onChangeText={setSearch}
               placeholder={t("routineDetails.picker.searchPlaceholder")}
-              TextInputComponent={BottomSheetTextInput as any}
+              TextInputComponent={SheetTextInput}
             />
             {categories.length > 0 && (
               <Filter

@@ -56,7 +56,6 @@
     "start": "expo start",
     "build:dev": "npx eas-cli@latest build --platform android --profile development",
     "build:preview": "npx eas-cli@latest build --platform android --profile preview",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
@@ -65,15 +64,43 @@
     "e2e:user": "tsx scripts/e2e-user.ts",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "test:db": "tsx scripts/test-db.ts",
     "db:types": "supabase gen types typescript --local --schema public > src/types/database.ts"
   },
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "jest": {
     "preset": "jest-expo",
     "moduleNameMapper": {
       "^@/assets/(.*)$": "<rootDir>/assets/$1",
       "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/__tests__/**",
+      "!src/**/*.d.ts",
+      "!src/types/database.ts",
+      "!src/test-utils/**"
+    ],
+    "coverageReporters": [
+      "text-summary"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 4,
+        "branches": 3,
+        "functions": 5,
+        "lines": 4
+      },
+      "./src/lib/": {
+        "statements": 90,
+        "branches": 95,
+        "functions": 95,
+        "lines": 90
+      }
     }
   },
   "allowScripts": {
