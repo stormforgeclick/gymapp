@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Type check, lint and unit tests: nothing here needs the network or a secret.
+  app:
+    name: app
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test -- --ci
+
+  # SQL tests against a local Supabase (Docker), built from supabase/migrations
+  # and supabase/seed.sql. Production is never touched.
+  database:
+    name: database
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,mailpit,realtime,storage-api,supavisor
+
+      - name: SQL tests
+        run: npm run test:db
+
+      # Fails when the schema changed and src/types/database.ts was not regenerated.
+      - name: Generated types are up to date
+        run: |
+          npm run db:types
+          git diff --exit-code src/types/database.ts
+
+      - name: Diagnostics
+        if: failure()
+        run: |
+          docker ps -a
+          docker logs supabase_db_gymapp --tail 100
