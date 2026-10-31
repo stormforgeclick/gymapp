@@ -1,5 +1,5 @@
 # Deletes ROUTINE_NAME after the reorder checks.
-appId: com.anonymous.gymbroapp
+appId: com.stormforgeclick.gymbro
 ---
 - launchApp
 - extendedWaitUntil:

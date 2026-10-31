@@ -1,6 +1,6 @@
 # Restarts the app (the session is kept) and reopens ROUTINE_NAME, to check the
 # order was saved.
-appId: com.anonymous.gymbroapp
+appId: com.stormforgeclick.gymbro
 ---
 - launchApp
 - extendedWaitUntil:

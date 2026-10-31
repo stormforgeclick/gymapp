@@ -2,6 +2,7 @@
   "expo": {
     "name": "gymbro-app",
     "slug": "gymbro-app",
+    "owner": "stormforge",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -18,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.gymbroapp"
+      "package": "com.stormforgeclick.gymbro"
     },
     "web": {
       "output": "static",

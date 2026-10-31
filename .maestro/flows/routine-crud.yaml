@@ -1,5 +1,5 @@
 # Creates a routine, adds three exercises and deletes it.
-appId: com.anonymous.gymbroapp
+appId: com.stormforgeclick.gymbro
 ---
 - runFlow: ../subflows/login.yaml
 - runFlow: ../subflows/add-routine-with-exercises.yaml
