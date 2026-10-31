@@ -1,8 +1,7 @@
 import type { RoutineExercise } from "@/hooks/api/routineExercises/queries";
 import type { Routine } from "@/hooks/api/routines/queries";
 import { supabase } from "@/lib/supabase";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 /** How the signed-in user stands with another person. */
 export type Relation =
@@ -66,7 +65,7 @@ export async function searchProfiles(query: string): Promise<SearchResult[]> {
 export async function getGymbros(): Promise<Person[]> {
   const { data, error } = await supabase.rpc("get_gymbros");
   if (error) throw error;
-  return (data ?? []) as Person[];
+  return data ?? [];
 }
 
 export async function getGymbroRequests(): Promise<GymbroRequest[]> {
@@ -130,7 +129,7 @@ export async function getProfileRoutines(
     p_language: language,
   });
   if (error) throw error;
-  return (data ?? []) as ProfileRoutine[];
+  return data ?? [];
 }
 
 /** Null when the routine doesn't exist or isn't shared with the viewer. */
@@ -141,7 +140,7 @@ export async function getSharedRoutine(
     p_routine_id: routineId,
   });
   if (error) throw error;
-  return ((data ?? []) as SharedRoutine[])[0] ?? null;
+  return (data ?? [])[0] ?? null;
 }
 
 export async function getSharedRoutineExercises(

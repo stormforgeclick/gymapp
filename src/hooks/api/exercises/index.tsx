@@ -4,8 +4,7 @@ import {
   getExercisesFilters,
 } from "@/hooks/api/exercises/queries";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 export function useExercises(
   selectedFilters: Record<string, string | undefined>,

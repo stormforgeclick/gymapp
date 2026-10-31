@@ -36,7 +36,7 @@ begin
     'not found or unavailable');
   perform pg_temp.expect_error(c, format($q$select public.respond_to_friendship(%L, 'accepted')$q$, v_request),
     'not found or unavailable');
-  perform pg_temp.assert_eq('not gymbros yet', public.is_gymbro(a, b)::text, 'false');
+  perform pg_temp.assert_eq('not gymbros yet', private.is_gymbro(a, b)::text, 'false');
   perform pg_temp.assert_eq('a profile for gymbros stays hidden from a stranger',
     pg_temp.scalar_as(c, format($q$select count(*) from public.custom_users where id = %L$q$, b)), '0');
 
@@ -49,7 +49,7 @@ begin
 
   -- b accepts: they are gymbros both ways, and b's profile opens up to a.
   perform pg_temp.scalar_as(b, format($q$select (public.respond_to_friendship(%L, 'accepted')).status$q$, v_request));
-  perform pg_temp.assert_eq('now gymbros', public.is_gymbro(a, b)::text, 'true');
+  perform pg_temp.assert_eq('now gymbros', private.is_gymbro(a, b)::text, 'true');
   perform pg_temp.assert_eq('a lists b',
     pg_temp.scalar_as(a, $q$select count(*) from public.get_gymbros()$q$), '1');
   perform pg_temp.assert_eq('b lists a',
@@ -60,7 +60,7 @@ begin
 
   -- Removing a gymbro ends it for both.
   perform pg_temp.scalar_as(a, format($q$select public.remove_gymbro(%L)$q$, b));
-  perform pg_temp.assert_eq('no longer gymbros', public.is_gymbro(a, b)::text, 'false');
+  perform pg_temp.assert_eq('no longer gymbros', private.is_gymbro(a, b)::text, 'false');
 
   -- A rejection can not be pushed through by the one who asked...
   perform pg_temp.scalar_as(a, format($q$select public.send_gymbro_request(%L)$q$, d));

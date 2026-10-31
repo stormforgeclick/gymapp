@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { reorderByIds } from "./cache";
 import {
   addRoutineExercises,
   deleteRoutineExercise,
@@ -8,8 +9,7 @@ import {
   type RoutineExercise,
   type SetInput,
 } from "./queries";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 export const useRoutineExercises = (routineId: string, language: Language = "es") =>
   useQuery({
@@ -45,7 +45,7 @@ export const useAddRoutineExercise = (routineId: string) => {
   return useMutation({
     mutationFn: async (gymbroExerciseId: string) => {
       const ids = await addRoutineExercises(routineId, [gymbroExerciseId]);
-      if (!ids[0]) throw new Error("No se pudo crear el ejercicio");
+      if (!ids[0]) throw new Error("add_routine_exercises returned no id");
       return ids[0];
     },
     onSuccess: () => {
@@ -75,14 +75,10 @@ export const useReorderRoutineExercises = (
     onMutate: async (orderedIds) => {
       await qc.cancelQueries({ queryKey: key });
       const previous = qc.getQueryData<RoutineExercise[]>(key);
-      qc.setQueryData<RoutineExercise[]>(key, (data) => {
-        if (!data) return data;
-        const byId = new Map(data.map((exercise) => [exercise.id, exercise]));
-        return orderedIds.flatMap((id, index) => {
-          const exercise = byId.get(id);
-          return exercise ? [{ ...exercise, position: index + 1 }] : [];
-        });
-      });
+      qc.setQueryData<RoutineExercise[]>(
+        key,
+        (data) => data && reorderByIds(data, orderedIds)
+      );
       return { previous };
     },
     onError: (_error, _ids, context) => {

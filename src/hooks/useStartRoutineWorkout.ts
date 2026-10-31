@@ -7,6 +7,7 @@ import {
   useStartWorkout,
 } from "@/hooks/api/workouts";
 import { useT } from "@/i18n";
+import { errorKind } from "@/lib/errors";
 import { useDialog } from "@/providers/DialogProvider";
 import { useToast } from "@/providers/ToastProvider";
 
@@ -67,7 +68,7 @@ export function useStartRoutineWorkout() {
       onError: (error) => {
         // The routine was emptied after the list was fetched; the database
         // is the last line of defense.
-        if (String(error?.message ?? "").includes("has no exercises")) {
+        if (errorKind(error) === "routineEmpty") {
           showEmptyRoutine(routine, onAddExercises);
         } else {
           showStartError();

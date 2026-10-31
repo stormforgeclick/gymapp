@@ -17,12 +17,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
 import { defaultDraftSet } from "../utils/defaultDraftSet";
-
-type DraftSet = {
-  id?: string;
-  reps: string;
-  weight: string;
-};
+import { parseDraftSets, type DraftSet } from "../utils/parseDraftSets";
 
 function toDraft(sets: RoutineExerciseSet[]): DraftSet[] {
   if (sets.length === 0) {
@@ -116,27 +111,15 @@ const SetEditor = ({
   };
 
   const handleSave = () => {
-    const parsed: SetInput[] = [];
-    for (const d of draft) {
-      const reps = Number(d.reps);
-      if (!Number.isInteger(reps) || reps <= 0) {
-        setValidationError(t("sets.repsError"));
-        return;
-      }
-      const trimmedWeight = d.weight.trim();
-      let weight: number | null = null;
-      if (trimmedWeight !== "") {
-        const w = Number(trimmedWeight);
-        if (!Number.isFinite(w) || w < 0) {
-          setValidationError(t("sets.weightError"));
-          return;
-        }
-        weight = w;
-      }
-      parsed.push({ id: d.id, min_reps: reps, max_reps: reps, weight });
+    const parsed = parseDraftSets(draft);
+    if ("error" in parsed) {
+      setValidationError(
+        t(parsed.error === "reps" ? "sets.repsError" : "sets.weightError")
+      );
+      return;
     }
     setValidationError(null);
-    onSave(parsed);
+    onSave(parsed.sets);
   };
 
   const errorToShow = validationError ?? saveError;

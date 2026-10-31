@@ -47,6 +47,7 @@ import ExerciseTabs from "./components/ExerciseTabs";
 import ProgressBar from "./components/ProgressBar";
 import SetsTable from "./components/SetsTable";
 import { getResumeIndex } from "./utils/getResumeIndex";
+import { countSets, nextSetDefaults } from "./utils/workoutSets";
 
 const GIF_SIZE = 180;
 
@@ -163,10 +164,7 @@ const WorkoutScreen = () => {
   const color = useRoutineColor(routine?.color ?? RoutineColors.routineOne);
   const title = routine?.name ?? t("workout.title");
 
-  const { done, total } = useMemo(() => {
-    const sets = exercises.flatMap((exercise) => exercise.sets);
-    return { done: sets.filter((set) => set.completed).length, total: sets.length };
-  }, [exercises]);
+  const { done, total } = useMemo(() => countSets(exercises), [exercises]);
 
   const index = Math.min(selectedIndex ?? 0, Math.max(exercises.length - 1, 0));
   const exercise: WorkoutExercise | undefined = exercises[index];
@@ -195,14 +193,8 @@ const WorkoutScreen = () => {
 
   const handleAddSet = () => {
     if (!exercise) return;
-    const last = exercise.sets[exercise.sets.length - 1];
     addSet.mutate(
-      {
-        workoutExerciseId: exercise.id,
-        position: Math.max(0, ...exercise.sets.map((set) => set.position)) + 1,
-        weight: last?.weight ?? null,
-        reps: last?.reps ?? last?.target_min_reps ?? null,
-      },
+      { workoutExerciseId: exercise.id, ...nextSetDefaults(exercise) },
       { onError: showSaveError }
     );
   };

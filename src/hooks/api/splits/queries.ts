@@ -1,3 +1,4 @@
+import { errorKind } from "@/lib/errors";
 import { supabase } from "@/lib/supabase";
 
 /** Who may see the routines of a split: only the owner, the owner's gymbros, or anyone. */
@@ -79,7 +80,4 @@ export async function moveRoutineToSplit(
 }
 
 /** The database rejects a name another of the user's splits already has. */
-export const isNameTaken = (error: unknown) =>
-  String((error as { message?: string })?.message ?? "").includes(
-    "already exists"
-  );
+export const isNameTaken = (error: unknown) => errorKind(error) === "nameTaken";

@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 export type RoutineExerciseSet = {
   id?: string;
@@ -48,7 +47,7 @@ export async function addRoutineExercises(
     p_gymbro_exercise_ids: gymbroExerciseIds,
   });
   if (error) throw error;
-  return (data ?? []) as string[];
+  return data ?? [];
 }
 
 /** `orderedIds` must be every exercise of the routine, in the new order. */
@@ -80,5 +79,5 @@ export async function replaceRoutineExerciseSets(
     p_sets: sets,
   });
   if (error) throw error;
-  return (data ?? []) as RoutineExerciseSet[];
+  return data ?? [];
 }

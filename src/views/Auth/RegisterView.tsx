@@ -11,27 +11,14 @@ import { IconSize, Radius, Spacing, type ThemeColors } from "@/constants/theme";
 import { useRegister } from "@/hooks/api/auth";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
-import { useT, type TranslationKey } from "@/i18n";
+import { useT } from "@/i18n";
 
-type FieldName = "email" | "password" | "confirmPassword";
-// Validators return translation keys so the message follows the device language.
-type FieldErrors = Partial<Record<FieldName, TranslationKey>>;
-
-const validators: Record<
-  FieldName,
-  (values: { email: string; password: string; confirmPassword: string }) => TranslationKey | undefined
-> = {
-  email: ({ email }) =>
-    !email.trim().includes("@") || !email.trim().includes(".")
-      ? "auth.register.errors.invalidEmail"
-      : undefined,
-  password: ({ password }) =>
-    password.length < 8 ? "auth.register.errors.passwordTooShort" : undefined,
-  confirmPassword: ({ password, confirmPassword }) =>
-    password !== confirmPassword
-      ? "auth.register.errors.passwordMismatch"
-      : undefined,
-};
+import {
+  validateAll,
+  validators,
+  type FieldErrors,
+  type FieldName,
+} from "./validators";
 
 const makeStyles = (c: ThemeColors) => ({
   flex: {
@@ -112,11 +99,7 @@ export function RegisterView() {
   }
 
   function handleRegister() {
-    const nextErrors: FieldErrors = {};
-    (Object.keys(validators) as FieldName[]).forEach((field) => {
-      const message = validators[field](values);
-      if (message) nextErrors[field] = message;
-    });
+    const nextErrors = validateAll(values);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 

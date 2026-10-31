@@ -14,8 +14,7 @@ import {
   type Split,
   type SplitPrivacy,
 } from "./queries";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 const SPLITS_KEY = ["splits"] as const;
 
