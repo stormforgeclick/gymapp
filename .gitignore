@@ -47,7 +47,8 @@ node_modules
 android/
 ios/
 
-.env
+.env*
+!.env.example
 
 # End-to-end test account credentials (see scripts/e2e-user.ts)
 .maestro/.env.e2e
