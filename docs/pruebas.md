@@ -8,6 +8,7 @@ El proyecto se desarrolla con **TDD**: primero la prueba, la ves fallar, y solo 
 |---|---|---|---|
 | **Jest** | Lógica pura, hooks y funciones de acceso a datos | `npm test` | Solo Node |
 | **SQL** | Reglas de la base: RLS, funciones RPC, privacidad | `npm run test:db` | Supabase local (Docker) |
+| **Cobertura** | Qué parte del código ejercen las pruebas, con pisos que no pueden bajar | `npm run test:coverage` | Solo Node |
 | **Tipos y lint** | Que todo compile y siga el estilo | `npx tsc --noEmit` y `npm run lint` | Solo Node |
 | **E2E (Maestro)** | La app real en un emulador | `npm run e2e` | Emulador, build release, cuenta de pruebas (solo mantenedores) |
 
@@ -40,6 +41,12 @@ Se quería aceptar la coma decimal al escribir un peso (`12,5`). Tres pasos:
 
 Al arreglar un error el orden es el mismo: primero una prueba que lo reproduce.
 
+## Cobertura
+
+`npm run test:coverage` corre Jest y mide **todo** `src/` (no solo lo que las pruebas importan). Hoy la lógica pura está muy cubierta (`src/lib` ronda el 93 %), pero las pantallas, los componentes de `src/components/ui`, los providers y casi todos los hooks de `src/hooks/api` casi no tienen pruebas: en conjunto, alrededor de un 8 %.
+
+Los **pisos** viven en `package.json` (`jest.coverageThreshold`): uno para `src/lib/` (90 %) y uno global muy bajo para el resto. Sirven para que la cobertura no retroceda, no como meta. Cuando mejores un área, **sube el piso** en el mismo PR.
+
 ## Pruebas SQL
 
 - Viven en `supabase/tests/*.sql` y se corren contra tu Supabase local: `npx supabase db reset` (base limpia) y `npm run test:db`. `npm run test:db -- rpc_flows` corre solo los archivos cuyo nombre contenga ese texto.
@@ -59,10 +66,10 @@ Dos pruebas de Jest que no prueban código sino el repo:
 
 | Trabajo | Qué corre |
 |---|---|
-| `app` | `npx tsc --noEmit`, `npm run lint`, `npm test -- --ci` |
+| `app` | `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage -- --ci` (con los pisos de cobertura) y una auditoría de dependencias informativa que no bloquea |
 | `database` | Levanta Supabase local (migraciones y seed), `npm run test:db`, y comprueba que `src/types/database.ts` esté al día |
 
-Para reproducir un fallo, corre lo mismo en tu equipo. Fallos típicos:
+Además corre **CodeQL** (análisis de seguridad del código) en cada PR a `main` y una vez por semana, y **Dependabot** abre PRs semanales para dependencias que no gobierna Expo. Para reproducir un fallo, corre lo mismo en tu equipo. Fallos típicos:
 
 - **"Generated types are up to date" falla:** cambiaste el esquema y no regeneraste. Corre `npm run db:types` y commitea el resultado.
 - **`database` falla solo en CI:** mira el último paso (`Diagnostics`), que imprime los contenedores y los últimos registros de la base.

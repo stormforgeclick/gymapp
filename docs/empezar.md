@@ -7,7 +7,7 @@ Al terminar tendrás el proyecto instalado, una base de datos **propia** corrien
 ## 1. Requisitos
 
 - **Git**.
-- **Node.js 24** (la CI usa esa versión) con npm. Comprueba con `node --version`.
+- **Node.js 24** (la versión está en `.nvmrc`, que la CI también usa) con npm. Comprueba con `node --version`; con `nvm` basta `nvm use`.
 - **Docker Desktop**, abierto y corriendo: la base de datos local vive en contenedores.
 - Para ver la app en pantalla (paso 6): un teléfono Android o un emulador de Android Studio. Para los pasos 1 a 5 no hace falta.
 
