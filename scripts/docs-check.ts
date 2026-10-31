@@ -83,6 +83,21 @@ function linksOf(file: string, markdown: string): Link[] {
   return links;
 }
 
+/**
+ * An `exists` for a list of tracked files: true for each file and for every folder
+ * that holds one. It answers the way a fresh checkout would, unlike the disk of a
+ * machine that also has ignored folders and generated files.
+ */
+export function existsIn(files: string[]): (path: string) => boolean {
+  const known = new Set<string>();
+  for (const file of files) {
+    known.add(file);
+    const parts = file.split("/");
+    for (let i = 1; i < parts.length; i++) known.add(parts.slice(0, i).join("/"));
+  }
+  return (path) => known.has(path);
+}
+
 /** Finds links, npm scripts and repository paths in the documentation that no longer exist. */
 export function checkDocs({ files, exists, scripts, allowMissing }: DocsInput): Problem[] {
   const problems: Problem[] = [];
