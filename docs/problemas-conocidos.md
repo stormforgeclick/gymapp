@@ -4,8 +4,8 @@ Trampas que ya nos mordieron, con su síntoma, su causa y qué hacer. Si encuent
 
 ## Instalación y herramientas
 
-**`npm install` falla con `ERESOLVE` al instalar `jest-expo`.**
-`jest-expo` desde la 57.0.5 pide `react-native@0.86.3` y la app usa `0.86.2`. Por eso está fijado en `57.0.4` en `package.json`, sin `~` ni `^`. No lo aflojes ni uses `--legacy-peer-deps`: súbelo solo junto con React Native, en un cambio que ya requiere reconstruir la app.
+**`npm install` falla con `ERESOLVE` al subir `react-native` o `jest-expo`.**
+`jest-expo` y `react-native` se piden entre sí la misma versión de `@react-native/jest-preset`. Súbelos juntos con `npx expo install --fix` y, si npm sigue sin resolver, instala esa dependencia con la versión de React Native: `npm install --save-dev @react-native/jest-preset@<versión de react-native>`. No uses `--legacy-peer-deps`. Ver [decisiones.md](decisiones.md#4-los-paquetes-que-gobierna-expo-se-actualizan-juntos-con-npx-expo-install).
 
 **`npx expo install … --dev` deja la librería en `dependencies`.**
 Para herramientas de desarrollo usa `npm install --save-dev <paquete>`.
