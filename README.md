@@ -1,5 +1,7 @@
 # gymapp
 
+> **¿Primer día en el proyecto?** Empieza por [docs/README.md](docs/README.md): cómo levantar la app con tu propia base de datos local, cómo está organizado el código y cómo mandar tu primer PR. Este README es la guía rápida de comandos y de builds con EAS.
+
 ## Qué comando uso
 
 | Quiero... | Comando | Cuándo |
@@ -13,7 +15,9 @@ Los builds se hacen en la nube de Expo (EAS) y tardan unos minutos. Al terminar,
 
 **Regla simple:** JS/TS cambia → `npm start`, no rebuild. Algo nativo cambia → `npm run build:dev`. Quieres la app final → `npm run build:preview`.
 
-## Primera vez
+## Primera vez con EAS (mantenedores)
+
+Solo para quien construye y distribuye la app con la cuenta de Expo y el proyecto real de Supabase. Quien solo desarrolla **no necesita estas claves**: usa su propia base local (ver [docs/empezar.md](docs/empezar.md)).
 
 1. `npm install --global eas-cli` y `eas login` (cuenta de expo.dev).
 2. Cargar las variables de Supabase **una vez por entorno**. El archivo `.env` no se sube a la nube, así que los builds no lo ven. Copia los valores de tu `.env` (solo las dos `EXPO_PUBLIC_*`):
