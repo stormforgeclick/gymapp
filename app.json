@@ -4,6 +4,12 @@
     "slug": "gymbro-app",
     "owner": "stormforge",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/288dfe74-4832-498a-ae91-16d94e385eb2"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "gymbroapp",
