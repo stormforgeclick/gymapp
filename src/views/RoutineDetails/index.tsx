@@ -16,6 +16,7 @@ import { useRoutineColor, useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useStartRoutineWorkout } from "@/hooks/useStartRoutineWorkout";
 import { useT } from "@/i18n";
+import { moveItem } from "@/lib/array";
 import { useToast } from "@/providers/ToastProvider";
 import AddRoutineComponent from "@/views/Routines/Components/AddRoutine";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -64,13 +65,6 @@ const makeStyles = () => ({
 const REORDER_HINT_KEY = "gymbro.hints.reorderExercises";
 
 const getExerciseKey = (exercise: RoutineExercise) => exercise.id;
-
-const moveItem = <T,>(list: T[], from: number, to: number) => {
-  const next = [...list];
-  const [item] = next.splice(from, 1);
-  next.splice(to, 0, item);
-  return next;
-};
 
 const RoutineDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();

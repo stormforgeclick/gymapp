@@ -8,8 +8,7 @@ import {
   type CreateRoutineInput,
   type UpdateRoutineInput,
 } from "./queries";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 export const useRoutines = (language: Language = "es") =>
   useQuery({

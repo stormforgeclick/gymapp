@@ -20,6 +20,7 @@ import {
   useSearchProfiles,
   useSendGymbroRequest,
 } from "@/hooks/api/gymbros";
+import { gymbroErrorKey } from "@/hooks/api/gymbros/errors";
 import type { GymbroRequest, Person } from "@/hooks/api/gymbros/queries";
 import { useMyProfile } from "@/hooks/api/profile";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
@@ -109,13 +110,8 @@ const GymbrosScreen = () => {
   const openProfile = (userId: string) =>
     router.push({ pathname: "/user/[id]", params: { id: userId } });
 
-  const showError = (error: unknown) => {
-    const message = String((error as { message?: string })?.message ?? "");
-    toast.show(
-      t(message.includes("unavailable") ? "gymbros.errorUnavailable" : "gymbros.errorGeneric"),
-      { tone: "error" }
-    );
-  };
+  const showError = (error: unknown) =>
+    toast.show(t(gymbroErrorKey(error)), { tone: "error" });
 
   const add = (userId: string) =>
     send.mutate(userId, {

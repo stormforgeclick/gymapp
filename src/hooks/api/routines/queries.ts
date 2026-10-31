@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 export type Routine = {
   id: string;
@@ -22,17 +21,17 @@ export type UpdateRoutineInput = { id: string; name: string; color: string };
 export async function getRoutines(language: Language = "es"): Promise<Routine[]> {
   const { data, error } = await supabase.rpc("get_routines", { p_language: language });
   if (error) throw error;
-  return (data ?? []) as Routine[];
+  return data ?? [];
 }
 
 export async function createRoutine(input: CreateRoutineInput): Promise<Routine> {
   const { data, error } = await supabase.rpc("create_routine", {
     p_name: input.name,
     p_color: input.color,
-    p_split_id: input.splitId ?? null,
+    p_split_id: input.splitId,
   });
   if (error) throw error;
-  return data?.[0] as Routine;
+  return data[0];
 }
 
 export async function updateRoutine(input: UpdateRoutineInput): Promise<Routine> {
@@ -42,7 +41,7 @@ export async function updateRoutine(input: UpdateRoutineInput): Promise<Routine>
     p_color: input.color,
   });
   if (error) throw error;
-  return data?.[0] as Routine;
+  return data[0];
 }
 
 export async function deleteRoutine(id: string): Promise<string> {

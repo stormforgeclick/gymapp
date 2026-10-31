@@ -20,6 +20,7 @@ import {
   useRespondToRequest,
   useSendGymbroRequest,
 } from "@/hooks/api/gymbros";
+import { gymbroErrorKey } from "@/hooks/api/gymbros/errors";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
@@ -117,13 +118,8 @@ const UserProfileScreen = () => {
   const busy =
     send.isPending || respond.isPending || cancel.isPending || remove.isPending;
 
-  const showError = (error: unknown) => {
-    const message = String((error as { message?: string })?.message ?? "");
-    toast.show(
-      t(message.includes("unavailable") ? "gymbros.errorUnavailable" : "gymbros.errorGeneric"),
-      { tone: "error" }
-    );
-  };
+  const showError = (error: unknown) =>
+    toast.show(t(gymbroErrorKey(error)), { tone: "error" });
 
   const renderBody = () => {
     if (isLoading) {

@@ -145,8 +145,8 @@ const AddExercisesSheet = ({ routineId, onClose }: IProps) => {
 
     try {
       await addMut.mutateAsync(gymbroExerciseId);
-    } catch (e: any) {
-      errors.fail(gymbroExerciseId, e?.message ?? t("routineDetails.picker.addError"));
+    } catch {
+      errors.fail(gymbroExerciseId, t("routineDetails.picker.addError"));
     } finally {
       setAdding((prev) => {
         const next = new Set(prev);

@@ -15,6 +15,7 @@ import type { WorkoutSet, WorkoutSetPatch } from "@/hooks/api/workouts/queries";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useT } from "@/i18n";
+import { parseNumber } from "@/lib/numbers";
 
 interface SetRowProps {
   set: WorkoutSet;
@@ -23,16 +24,6 @@ interface SetRowProps {
   /** Planned reps shown as a hint while the field is empty. */
   placeholderReps: number | null;
   onChange: (patch: WorkoutSetPatch) => void;
-}
-
-/** `null` = empty field, `undefined` = not a valid value. */
-function parseNumber(text: string, integer: boolean): number | null | undefined {
-  const normalized = text.trim().replace(",", ".");
-  if (normalized === "") return null;
-  const value = Number(normalized);
-  if (!Number.isFinite(value) || value < 0) return undefined;
-  if (integer && !Number.isInteger(value)) return undefined;
-  return value;
 }
 
 const format = (value: number | null) => (value === null ? "" : String(value));
@@ -109,7 +100,7 @@ const SetRow = ({ set, number, placeholderReps, onChange }: SetRowProps) => {
   }
 
   const commitWeight = () => {
-    const value = parseNumber(weightText, false);
+    const value = parseNumber(weightText);
     if (value === undefined) {
       setWeightText(format(set.weight));
       return;
@@ -118,7 +109,7 @@ const SetRow = ({ set, number, placeholderReps, onChange }: SetRowProps) => {
   };
 
   const commitReps = () => {
-    const value = parseNumber(repsText, true);
+    const value = parseNumber(repsText, { integer: true });
     if (value === undefined) {
       setRepsText(format(set.reps));
       return;
@@ -136,10 +127,11 @@ const SetRow = ({ set, number, placeholderReps, onChange }: SetRowProps) => {
 
     const patch: WorkoutSetPatch = { completed: true };
 
-    const weight = parseNumber(weightText, false);
+    const weight = parseNumber(weightText);
     if (weight !== undefined && weight !== set.weight) patch.weight = weight;
 
-    const reps = parseNumber(repsText, true) ?? set.reps ?? placeholderReps;
+    const reps =
+      parseNumber(repsText, { integer: true }) ?? set.reps ?? placeholderReps;
     if (reps !== null && reps !== set.reps) {
       patch.reps = reps;
       setRepsText(format(reps));

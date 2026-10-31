@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 export type ProfilePrivacy = "public" | "gymbros" | "private";
 
@@ -34,7 +33,7 @@ export async function getMyProfile(userId: string): Promise<Profile> {
     .eq("id", userId)
     .single();
   if (error) throw error;
-  return data as Profile;
+  return data;
 }
 
 export async function updateMyProfile(
@@ -48,7 +47,7 @@ export async function updateMyProfile(
     .select(PROFILE_COLUMNS)
     .single();
   if (error) throw error;
-  return data as Profile;
+  return data;
 }
 
 /** Keeps the language stored with the account in step with the app's. */

@@ -21,6 +21,7 @@ import {
   searchProfiles,
   sendGymbroRequest,
 } from "./queries";
+import type { Language } from "@/i18n";
 
 const GYMBROS_KEY = ["gymbros"] as const;
 
@@ -53,8 +54,6 @@ export const useGymbroProfile = (userId: string) =>
     queryFn: () => getProfile(userId),
     enabled: !!userId,
   });
-
-type Language = "en" | "es";
 
 /** `enabled` is off while the viewer can't see the profile's routines anyway. */
 export const useProfileRoutines = (

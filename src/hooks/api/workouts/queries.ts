@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 export type WorkoutSet = {
   id: string;
@@ -49,7 +48,7 @@ export async function getActiveWorkout(): Promise<ActiveWorkout | null> {
     .is("finished_at", null)
     .maybeSingle();
   if (error) throw error;
-  return data as ActiveWorkout | null;
+  return data;
 }
 
 /** Most recent finished workouts first; enough history to rank routines by staleness. */
@@ -61,7 +60,7 @@ export async function getLastWorkouts(limit = 100): Promise<FinishedWorkout[]> {
     .order("finished_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data ?? []) as FinishedWorkout[];
+  return data ?? [];
 }
 
 export async function getWorkoutExercises(

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { appendSet, applySetPatch, removeSet } from "./cache";
 import {
   addWorkoutSet,
   deleteWorkoutSet,
@@ -13,8 +14,7 @@ import {
   type WorkoutSet,
   type WorkoutSetPatch,
 } from "./queries";
-
-type Language = "en" | "es";
+import type { Language } from "@/i18n";
 
 const workoutKey = (workoutId: string, language: Language) =>
   ["workoutExercises", workoutId, language] as const;
@@ -83,13 +83,9 @@ export const useUpdateWorkoutSet = (workoutId: string, language: Language) => {
     onMutate: async ({ setId, patch }) => {
       await qc.cancelQueries({ queryKey: key });
       const previous = qc.getQueryData<WorkoutExercise[]>(key);
-      qc.setQueryData<WorkoutExercise[]>(key, (data) =>
-        data?.map((exercise) => ({
-          ...exercise,
-          sets: exercise.sets.map((set) =>
-            set.id === setId ? { ...set, ...patch } : set
-          ),
-        }))
+      qc.setQueryData<WorkoutExercise[]>(
+        key,
+        (data) => data && applySetPatch(data, setId, patch)
       );
       return { previous };
     },
@@ -106,12 +102,9 @@ export const useAddWorkoutSet = (workoutId: string, language: Language) => {
   return useMutation({
     mutationFn: addWorkoutSet,
     onSuccess: (created: WorkoutSet, { workoutExerciseId }) => {
-      qc.setQueryData<WorkoutExercise[]>(key, (data) =>
-        data?.map((exercise) =>
-          exercise.id === workoutExerciseId
-            ? { ...exercise, sets: [...exercise.sets, created] }
-            : exercise
-        )
+      qc.setQueryData<WorkoutExercise[]>(
+        key,
+        (data) => data && appendSet(data, workoutExerciseId, created)
       );
     },
   });
@@ -126,11 +119,9 @@ export const useDeleteWorkoutSet = (workoutId: string, language: Language) => {
     onMutate: async (setId) => {
       await qc.cancelQueries({ queryKey: key });
       const previous = qc.getQueryData<WorkoutExercise[]>(key);
-      qc.setQueryData<WorkoutExercise[]>(key, (data) =>
-        data?.map((exercise) => ({
-          ...exercise,
-          sets: exercise.sets.filter((set) => set.id !== setId),
-        }))
+      qc.setQueryData<WorkoutExercise[]>(
+        key,
+        (data) => data && removeSet(data, setId)
       );
       return { previous };
     },
