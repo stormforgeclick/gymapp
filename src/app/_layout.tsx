@@ -9,14 +9,22 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
+import {
+  DarkTheme,
+  DefaultTheme,
+  Stack,
+  ThemeProvider,
+  type ErrorBoundaryProps,
+} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
+import ErrorFallback from "@/components/ui/ErrorFallback";
 import { Colors } from "@/constants/theme";
 import { queryClient } from "@/lib/queryClient";
+import { devConsoleReporter, setErrorReporter } from "@/lib/report";
 import { AccentProvider } from "@/providers/AccentProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { DialogProvider } from "@/providers/DialogProvider";
@@ -28,6 +36,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
+
+// Until a crash reporting service is connected, errors only show up while developing.
+if (__DEV__) setErrorReporter(devConsoleReporter);
 
 const navigationThemes = {
   dark: {
@@ -53,6 +64,11 @@ const navigationThemes = {
     },
   },
 };
+
+/** Expo Router draws this when a screen throws while rendering. */
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+  return <ErrorFallback {...props} />;
+}
 
 export default function RootLayout() {
   return (

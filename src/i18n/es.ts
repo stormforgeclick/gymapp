@@ -14,6 +14,13 @@ export const es = {
     all: "Todos",
   },
 
+  errors: {
+    boundary: {
+      title: "Algo salió mal",
+      message: "Esta pantalla tuvo un problema inesperado. Puedes intentarlo de nuevo.",
+    },
+  },
+
   tabs: {
     home: "Inicio",
     routines: "Rutinas",
