@@ -19,7 +19,10 @@ export function resolveLanguage(
 function resolve(dictionary: Translations, key: string): string | PluralEntry {
   return key
     .split(".")
-    .reduce<any>((node, part) => node?.[part], dictionary);
+    .reduce<unknown>(
+      (node, part) => (node as Record<string, unknown> | undefined)?.[part],
+      dictionary
+    ) as string | PluralEntry;
 }
 
 function interpolate(template: string, params?: Record<string, string | number>) {

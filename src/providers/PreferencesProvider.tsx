@@ -52,6 +52,7 @@ function parse(raw: string | null): Preferences {
         : DEFAULTS.language,
     };
   } catch {
+    // Unreadable saved value: start from the defaults.
     return DEFAULTS;
   }
 }
@@ -67,12 +68,14 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => setPreferences(parse(raw)))
+      // Best effort: without the saved choices the defaults apply.
       .catch(() => {})
       .finally(() => setIsLoaded(true));
   }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
+    // Best effort: the choice still applies for this session if saving fails.
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(preferences)).catch(() => {});
   }, [preferences, isLoaded]);
 

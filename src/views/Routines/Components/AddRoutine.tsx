@@ -22,11 +22,11 @@ import { useDialog } from "@/providers/DialogProvider";
 import { useToast } from "@/providers/ToastProvider";
 import {
   BottomSheetModal,
-  BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
+import { SheetTextInput } from "@/components/ui/sheet-inputs";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -255,7 +255,7 @@ const AddRoutineComponent = ({ setShowAdd, routineToEdit, onDeleted }: IProps) =
             onChangeText={setName}
             placeholder={t("routines.sheet.namePlaceholder")}
             autoCapitalize="sentences"
-            TextInputComponent={BottomSheetTextInput as any}
+            TextInputComponent={SheetTextInput}
           />
 
           {isEditing && currentSplit && !!otherSplits?.length && (

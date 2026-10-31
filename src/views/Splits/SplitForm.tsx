@@ -1,4 +1,4 @@
-import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { SheetTextInput } from "@/components/ui/sheet-inputs";
 import { useState } from "react";
 import { View } from "react-native";
 
@@ -163,7 +163,7 @@ const SplitForm = ({ mode, onBack, onDone, showToast }: SplitFormProps) => {
         error={nameTaken ? t("splits.nameTaken") : null}
         returnKeyType="done"
         onSubmitEditing={submit}
-        TextInputComponent={BottomSheetTextInput as any}
+        TextInputComponent={SheetTextInput}
       />
 
       <Button
