@@ -11,6 +11,13 @@ export const en: Translations = {
     all: "All",
   },
 
+  errors: {
+    boundary: {
+      title: "Something went wrong",
+      message: "This screen ran into an unexpected problem. You can try again.",
+    },
+  },
+
   tabs: {
     home: "Home",
     routines: "Routines",

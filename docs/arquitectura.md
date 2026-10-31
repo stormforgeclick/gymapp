@@ -107,6 +107,7 @@ Pantalla (views)
 - Valores por defecto de la caché: datos frescos 5 minutos, 30 minutos en memoria, un reintento.
 - **Actualizaciones optimistas.** Editar una serie del entrenamiento o reordenar ejercicios cambia la caché al instante y se deshace si falla el guardado. Los cambios en sí están en funciones puras (`cache.ts`: `applySetPatch`, `removeSet`, `appendSet`, `reorderByIds`), que se prueban sin red.
 - **Errores.** La base reporta ciertos casos solo por el texto de su excepción ("has no exercises", "already exists", "unavailable"). `src/lib/errors.ts` (`errorKind`) los traduce a un tipo para que las pantallas no comparen texto. Si agregas un caso nuevo, agrégalo ahí y con prueba.
+- **Errores inesperados.** Todo fallo que nadie maneja pasa por `reportError` (`src/lib/report.ts`), que **ignora los casos que ya explicamos a la persona** (los de `errorKind`) y entrega el resto a un *reporter* que se conecta con `setErrorReporter`. Hoy, en desarrollo, ese reporter escribe en la consola; conectar un servicio de reporte de fallos es cambiar esa línea. Lo llaman las consultas y mutaciones (`createQueryClient` en `src/lib/queryClient.ts`) y la pantalla de error. Si una pantalla se rompe al dibujarse, Expo Router muestra `ErrorFallback` (`src/components/ui/ErrorFallback.tsx`) mediante el `ErrorBoundary` exportado en `src/app/_layout.tsx`: un mensaje con botón de reintentar, sin mostrar el error técnico. Como puede dibujarse fuera de los providers, usa solo lo que funciona con sus valores por defecto.
 
 ## Internacionalización
 

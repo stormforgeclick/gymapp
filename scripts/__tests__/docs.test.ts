@@ -1,7 +1,8 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, posix } from "node:path";
 
-import { checkDocs, githubSlug, type DocsInput } from "../docs-check";
+import { checkDocs, existsIn, githubSlug, type DocsInput } from "../docs-check";
 
 const ROOT = join(__dirname, "..", "..");
 
@@ -144,6 +145,24 @@ describe("checkDocs", () => {
   });
 });
 
+describe("existsIn", () => {
+  const exists = existsIn(["docs/README.md", "src/lib/text.ts"]);
+
+  it("finds a tracked file", () => {
+    expect(exists("src/lib/text.ts")).toBe(true);
+  });
+
+  it("finds a folder that holds a tracked file", () => {
+    expect(exists("src/lib")).toBe(true);
+    expect(exists("src")).toBe(true);
+  });
+
+  it("does not find what is not tracked", () => {
+    expect(exists("supabase/.temp")).toBe(false);
+    expect(exists("src/li")).toBe(false);
+  });
+});
+
 describe("the repository documentation", () => {
   const REQUIRED = [
     "docs/README.md",
@@ -156,29 +175,44 @@ describe("the repository documentation", () => {
     ".env.example",
   ];
 
-  const markdown = (dir: string): string[] =>
+  // What a fresh checkout has: the files git tracks. Anything else (ignored folders,
+  // generated files) exists on a developer's machine but not in the CI, so the docs
+  // must not depend on it.
+  const tracked = (() => {
+    try {
+      return execFileSync("git", ["ls-files"], { cwd: ROOT, encoding: "utf8" })
+        .split("\n")
+        .filter(Boolean);
+    } catch {
+      return null; // Not a git checkout (a downloaded archive): fall back to the disk.
+    }
+  })();
+  const exists = tracked ? existsIn(tracked) : (path: string) => existsSync(join(ROOT, path));
+
+  const markdownOnDisk = (dir: string): string[] =>
     readdirSync(join(ROOT, dir)).flatMap((name) => {
       const path = posix.join(dir, name);
-      return statSync(join(ROOT, path)).isDirectory() ? markdown(path) : name.endsWith(".md") ? [path] : [];
+      return statSync(join(ROOT, path)).isDirectory() ? markdownOnDisk(path) : name.endsWith(".md") ? [path] : [];
     });
+  const isDoc = (path: string) =>
+    path === "README.md" || path === "CONTRIBUTING.md" || (path.startsWith("docs/") && path.endsWith(".md"));
+  const docPaths = tracked ? tracked.filter(isDoc) : ["README.md", "CONTRIBUTING.md", ...markdownOnDisk("docs")];
 
   it.each(REQUIRED)("has %s", (path) => {
-    expect(existsSync(join(ROOT, path))).toBe(true);
+    expect(exists(path)).toBe(true);
   });
 
   it("has no broken links, unknown scripts or missing paths", () => {
-    const paths = ["README.md", "CONTRIBUTING.md", ...(existsSync(join(ROOT, "docs")) ? markdown("docs") : [])].filter(
-      (path) => existsSync(join(ROOT, path))
-    );
-    const files = Object.fromEntries(paths.map((path) => [path, readFileSync(join(ROOT, path), "utf8")]));
+    const files = Object.fromEntries(docPaths.map((path) => [path, readFileSync(join(ROOT, path), "utf8")]));
     const scripts = Object.keys(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).scripts);
 
     const problems = checkDocs({
       files,
-      exists: (path) => existsSync(join(ROOT, path)),
+      exists,
       scripts,
-      // Ignored by git on purpose (see .gitignore).
-      allowMissing: ["supabase/seed.full.sql"],
+      // Named on purpose but ignored by git (see .gitignore): the full catalog seed a
+      // developer keeps locally, and the folder the Supabase CLI creates when it links.
+      allowMissing: ["supabase/seed.full.sql", "supabase/.temp/"],
     });
 
     expect(problems.map((problem) => `${problem.file}: ${problem.message}`)).toEqual([]);
