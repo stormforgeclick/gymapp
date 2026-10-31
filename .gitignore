@@ -51,3 +51,9 @@ ios/
 
 # End-to-end test account credentials (see scripts/e2e-user.ts)
 .maestro/.env.e2e
+
+# Full exercise catalog for local use (the committed seed is a small slice)
+supabase/seed.full.sql
+
+# Scratch space for one-off scripts
+.tmp-seed/
