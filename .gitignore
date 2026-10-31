@@ -58,3 +58,6 @@ supabase/seed.full.sql
 
 # Scratch space for one-off scripts
 .tmp-seed/
+
+# Jest coverage report
+coverage/

@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci
@@ -34,8 +34,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Coverage floors live in package.json (jest.coverageThreshold).
       - name: Unit tests
-        run: npm test -- --ci
+        run: npm run test:coverage -- --ci
+
+      # Informational: most findings come from Expo's build tooling, which does not
+      # ship in the app, and are closed by `npx expo install --check`.
+      - name: Dependency audit (informational)
+        continue-on-error: true
+        run: npm audit --omit=dev
 
   # SQL tests against a local Supabase (Docker), built from supabase/migrations
   # and supabase/seed.sql. Production is never touched.
@@ -48,7 +55,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci
