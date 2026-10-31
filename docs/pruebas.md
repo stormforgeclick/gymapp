@@ -43,9 +43,9 @@ Al arreglar un error el orden es el mismo: primero una prueba que lo reproduce.
 
 ## Cobertura
 
-`npm run test:coverage` corre Jest y mide **todo** `src/` (no solo lo que las pruebas importan). Hoy la lógica pura está muy cubierta (`src/lib` ronda el 93 %), pero las pantallas, los componentes de `src/components/ui`, los providers y casi todos los hooks de `src/hooks/api` casi no tienen pruebas: en conjunto, alrededor de un 8 %.
+`npm run test:coverage` corre Jest y mide **todo** `src/` (no solo lo que las pruebas importan). Hoy la lógica pura está muy cubierta (`src/lib` ronda el 95 %), pero las pantallas, los componentes de `src/components/ui`, los providers y casi todos los hooks de `src/hooks/api` casi no tienen pruebas: en conjunto, alrededor de un 13 %.
 
-Los **pisos** viven en `package.json` (`jest.coverageThreshold`): uno para `src/lib/` (90 %) y uno global muy bajo para el resto. Sirven para que la cobertura no retroceda, no como meta. Cuando mejores un área, **sube el piso** en el mismo PR.
+Los **pisos** viven en `package.json` (`jest.coverageThreshold`): uno para `src/lib/` (alrededor de 94 %) y uno global muy bajo para el resto. Sirven para que la cobertura no retroceda, no como meta. Cuando mejores un área, **sube el piso** en el mismo PR.
 
 ## Pruebas SQL
 

@@ -54,7 +54,7 @@ Cada punto necesita una decisión o una acción de una persona mantenedora:
 |---|---|---|
 | Nombre de paquete definitivo (hoy `com.anonymous.gymbroapp`) | Cambiarlo después obliga a reinstalar y rompe la firma | Decidir el identificador antes de repartir |
 | Actualizaciones OTA (`expo-updates`, canales) | Corregir JavaScript sin que cada tester instale un APK | Reconstruir la app de desarrollo |
-| Reporte de fallos | Enterarse de cuándo se cae la app en el teléfono de alguien | Una cuenta del servicio y reconstruir |
+| Reporte de fallos | Enterarse de cuándo se cae la app en el teléfono de alguien | Ya hay una pantalla de error con reintento y un punto único para reportar errores (`src/lib/report.ts`); falta conectar un servicio (Sentry), que requiere una cuenta y reconstruir la app |
 | Paquetes de Expo al día (`npx expo install --check`) | Cierra avisos de seguridad y permite soltar el pin de `jest-expo` | Reconstruir y probar en un teléfono |
 | Política de privacidad y términos reales | La pantalla de registro hoy menciona documentos que no existen | Redactarlos y publicarlos |
 | Copias de seguridad y contraseñas filtradas en Supabase | Proteger las cuentas reales | Revisar el plan y activar el ajuste en el Dashboard |
