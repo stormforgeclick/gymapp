@@ -59,6 +59,15 @@ describe("over-the-air updates", () => {
     expect(config).toContain("PackageJsonScriptsAll");
   });
 
+  // .gitignore is a fingerprint source by default, so adding a line to it (say
+  // `.env.local`) changes the hash and stops an update from reaching the builds
+  // that are already installed, though no native code changed.
+  it("does not let a change to .gitignore count as a native change", () => {
+    const config = readFileSync(join(ROOT, "fingerprint.config.js"), "utf8");
+
+    expect(config).toContain("GitIgnore");
+  });
+
   it.each(["development", "development-simulator"])(
     "keeps the %s build out of the channels: it loads its code from the dev server",
     (profile) => {
