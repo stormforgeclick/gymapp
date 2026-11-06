@@ -3,12 +3,14 @@ import { join } from "node:path";
 
 const config = readFileSync(join(__dirname, "..", "..", ".github", "dependabot.yml"), "utf8");
 
+const escapeRegExp = (value: string) => value.replace(/[\\^$.*+?()[\]{}|/]/g, "\\$&");
+
 const ignoresAlways = (name: string) =>
-  new RegExp(`dependency-name:\\s*"${name.replace(/[*/]/g, "\\$&")}"\\s*(\\n\\s*-|\\n\\s*groups:|\\n\\s*[a-z-]+:|$)`).test(config);
+  new RegExp(`dependency-name:\\s*"${escapeRegExp(name)}"\\s*(\\n\\s*-|\\n\\s*groups:|\\n\\s*[a-z-]+:|$)`).test(config);
 
 const ignoresMajorsOf = (name: string) =>
   new RegExp(
-    `dependency-name:\\s*"${name}"\\s*\\n\\s*update-types:\\s*\\["version-update:semver-major"\\]`
+    `dependency-name:\\s*"${escapeRegExp(name)}"\\s*\\n\\s*update-types:\\s*\\["version-update:semver-major"\\]`
   ).test(config);
 
 /**
