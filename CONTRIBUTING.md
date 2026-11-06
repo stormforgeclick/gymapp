@@ -54,7 +54,7 @@ Estas reglas se configuran en el sitio de GitHub, no en el repo:
 2. **Alertas de seguridad**: Settings → Code security → activar *Dependabot alerts*, *Secret scanning* con *Push protection*, y *Private vulnerability reporting*.
 3. **CODEOWNERS**: cuando el equipo esté definido, agrega un archivo `CODEOWNERS` dentro de `.github/` con los usuarios de GitHub que deben revisar cada carpeta (`supabase/` y `.github/` son las más delicadas).
 
-Dependabot y CodeQL ya vienen configurados en `.github/`. Dependabot no actualiza los paquetes que gobierna Expo: esos se suben juntos con `npx expo install` (ver [docs/decisiones.md](docs/decisiones.md)).
+Dependabot y CodeQL ya vienen configurados en `.github/`. Dependabot no actualiza los paquetes que gobierna Expo: esos se suben juntos con `npx expo install` (ver [docs/decisiones.md](docs/decisiones.md)). Tampoco abre PRs de una versión mayor nueva de `jest` ni de `eslint`: `jest-expo` está construido sobre Jest 29 y los plugins de `eslint-config-expo` llegan hasta ESLint 9, así que esos saltos esperan a que ellos los admitan.
 
 ## Qué nunca se sube
 
