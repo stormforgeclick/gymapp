@@ -17,9 +17,9 @@ Los builds se hacen en la nube de Expo (EAS) y tardan unos minutos. Al terminar,
 
 ## Primera vez con EAS (mantenedores)
 
-Solo para quien construye y distribuye la app con la cuenta de Expo y el proyecto real de Supabase. Quien solo desarrolla **no necesita estas claves**: usa su propia base local (ver [docs/empezar.md](docs/empezar.md)).
+Solo para quien construye y distribuye la app: el proyecto de Expo es `@stormforge/gymbro-app` (de la organización `stormforge`) y usa el proyecto real de Supabase. Quien solo desarrolla **no necesita estas claves**: usa su propia base local (ver [docs/empezar.md](docs/empezar.md)).
 
-1. `npm install --global eas-cli` y `eas login` (cuenta de expo.dev).
+1. `npm install --global eas-cli` y `eas login` con una cuenta de expo.dev que sea miembro de la organización `stormforge`.
 2. Cargar las variables de Supabase **una vez por entorno**. El archivo `.env` no se sube a la nube, así que los builds no lo ven. Copia los valores de tu `.env` (solo las dos `EXPO_PUBLIC_*`):
 
    ```
@@ -35,8 +35,8 @@ Solo para quien construye y distribuye la app con la cuenta de Expo y el proyect
 ## Perfiles (`eas.json`)
 
 - `development`: APK con `expo-dev-client`, se conecta a `npm start`.
-- `preview`: APK normal, sin servidor de desarrollo. Sube el número de versión solo en cada build para poder instalarlo encima del anterior.
-- `production`: para las tiendas; hoy no se usa.
+- `preview`: APK normal, sin servidor de desarrollo; recibe actualizaciones OTA del canal `preview`. Sube el número de versión solo en cada build para poder instalarlo encima del anterior.
+- `production`: para las tiendas (canal `production`); hoy no se usa.
 - `development-simulator`: solo para el simulador de iOS en un Mac.
 
 ## Pruebas

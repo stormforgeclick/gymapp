@@ -2,15 +2,17 @@
 
 Cómo se construye, se reparte y se revierte una versión de la app. Es para **personas mantenedoras**: usa la cuenta de Expo y toca el proyecto real de Supabase. Hoy el reparto es por APK a un grupo cerrado de testers; no hay publicación en tiendas ni actualizaciones OTA todavía.
 
-> Lo que no está montado aún (nombre de paquete definitivo, actualizaciones OTA, reporte de fallos) y qué lo bloquea está en la lista de pendientes del final.
+> Lo que falta para un lanzamiento cómodo (reporte de fallos con Sentry, política de privacidad, copias de seguridad) está en la lista de pendientes del final.
 
 ## Perfiles de build (`eas.json`)
 
-| Perfil | Para qué | Quién lo usa |
-|---|---|---|
-| `development` | App de desarrollo (`expo-dev-client`): se conecta a `npm start` | Desarrolladores, nunca testers |
-| `preview` | APK normal, sin servidor: el que se reparte a testers. Sube el número de versión solo en cada build | Testers |
-| `production` | Para las tiendas. **No está configurado ni se usa** | — |
+| Perfil | Canal OTA | Para qué | Quién lo usa |
+|---|---|---|---|
+| `development` | — | App de desarrollo (`expo-dev-client`): se conecta a `npm start` | Desarrolladores, nunca testers |
+| `preview` | `preview` | APK normal, sin servidor: el que se reparte a testers. Sube el número de versión solo en cada build | Testers |
+| `production` | `production` | Para las tiendas. **No se usa todavía** | — |
+
+La app es `com.stormforgeclick.gymbro`, del proyecto `@stormforge/gymbro-app` en Expo (organización `stormforge`). El nombre de paquete **no se cambia** una vez repartido un APK.
 
 ## Antes de construir
 
@@ -40,9 +42,24 @@ Como `preview` sube el número de versión en cada build, un APK nuevo se instal
 
 Acompaña cada reparto de una nota breve (un GitHub Release o un mensaje) con qué cambia y qué conviene probar.
 
+## Actualizaciones OTA (sin reinstalar)
+
+Un arreglo que solo toca JavaScript, estilos, textos o imágenes llega a los teléfonos sin un APK nuevo:
+
+```
+eas update --channel preview --message "qué cambia" --environment preview
+```
+
+El teléfono la descarga al abrir la app y la aplica la **segunda** vez que se abre.
+
+- **Solo encaja con builds de la misma base nativa.** Cada build lleva un *fingerprint* (una huella de su código nativo) y una actualización solo se ofrece a los que coinciden. Si instalas una librería con código nativo, cambias `app.json`, `eas.json` o actualizas el SDK, la huella cambia y hace falta un **build nuevo** antes de publicar actualizaciones.
+- **Para ver la huella actual:** `npx expo-updates fingerprint:generate --platform android`. La carpeta `android/` generada en tu equipo y los scripts de `package.json` no cuentan (ver `.fingerprintignore` y `fingerprint.config.js`), para que tu máquina y EAS calculen lo mismo.
+- **Cambios de base de datos primero:** la misma regla de orden de arriba. Una actualización OTA con código que espera una columna que aún no existe rompe a quien la reciba.
+- **No verificado en dispositivo:** que la huella calculada aquí coincida con la de EAS y que un teléfono reciba la actualización. Se comprueba con la primera actualización de prueba.
+
 ## Si algo sale mal
 
-- **La app nueva falla:** pide a los testers volver a instalar el APK anterior: guarda siempre el APK que repartes, porque los builds de EAS no se conservan para siempre. No hay forma de revertir a distancia hasta que existan las actualizaciones OTA.
+- **La app nueva falla:** si el arreglo es de JavaScript, publica una actualización OTA con el arreglo (o con la versión anterior del código). Si no, pide a los testers volver a instalar el APK anterior: guarda siempre el APK que repartes, porque los builds de EAS no se conservan para siempre. No hay forma de revertir a distancia hasta que existan las actualizaciones OTA.
 - **Una migración sale mal:** usa su script de reversa de `supabase/rollbacks/` si existe. Para una migración nueva, escribe y prueba la reversa **antes** de aplicarla.
 - **Un dato se corrompe:** depende de las copias de seguridad de Supabase. Confirma cuáles tiene el plan del proyecto *antes* de necesitarlas (pendiente abajo).
 
@@ -52,10 +69,8 @@ Cada punto necesita una decisión o una acción de una persona mantenedora:
 
 | Pendiente | Por qué importa | Qué lo bloquea |
 |---|---|---|
-| Nombre de paquete definitivo (hoy `com.anonymous.gymbroapp`) | Cambiarlo después obliga a reinstalar y rompe la firma | Decidir el identificador antes de repartir |
-| Actualizaciones OTA (`expo-updates`, canales) | Corregir JavaScript sin que cada tester instale un APK | Reconstruir la app de desarrollo |
-| Reporte de fallos | Enterarse de cuándo se cae la app en el teléfono de alguien | Ya hay una pantalla de error con reintento y un punto único para reportar errores (`src/lib/report.ts`); falta conectar un servicio (Sentry), que requiere una cuenta y reconstruir la app |
-| Paquetes de Expo al día (`npx expo install --check`) | Cierra avisos de seguridad y permite soltar el pin de `jest-expo` | Reconstruir y probar en un teléfono |
+| Reporte de fallos (Sentry) | Enterarse de cuándo se cae la app en el teléfono de alguien | El código ya está (`src/lib/sentry.ts`) y se activa con `EXPO_PUBLIC_SENTRY_DSN`. Falta una cuenta y un proyecto de React Native en Sentry, el DSN, el token como secreto de EAS (`SENTRY_AUTH_TOKEN`), el plugin con la organización y el proyecto en `app.json` (para leer los errores con el código original) y reconstruir |
+| Reconstruir la app de desarrollo y probarla en un teléfono | Cambió el paquete de Android y el SDK de Expo se actualizó: hasta que se construya y se pruebe, nada de esto está verificado en un dispositivo | Hacer `npm run build:dev` e instalar el APK nuevo |
 | Política de privacidad y términos reales | La pantalla de registro hoy menciona documentos que no existen | Redactarlos y publicarlos |
 | Copias de seguridad y contraseñas filtradas en Supabase | Proteger las cuentas reales | Revisar el plan y activar el ajuste en el Dashboard |
 

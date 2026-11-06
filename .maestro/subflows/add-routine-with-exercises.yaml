@@ -1,6 +1,6 @@
 # From the home screen, creates the routine ROUTINE_NAME, opens it and adds the
 # first three exercises of the picker. Ends on the routine's detail screen.
-appId: com.anonymous.gymbroapp
+appId: com.stormforgeclick.gymbro
 ---
 - tapOn:
     id: tab-routines

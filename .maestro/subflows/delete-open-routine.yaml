@@ -1,5 +1,5 @@
 # On a routine's detail screen, deletes it and checks it left the list.
-appId: com.anonymous.gymbroapp
+appId: com.stormforgeclick.gymbro
 ---
 - tapOn:
     id: edit-routine-button

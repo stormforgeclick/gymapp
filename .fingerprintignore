@@ -1,0 +1,6 @@
+# The fingerprint says which native code an app build has, so an update is only
+# offered to builds that match it. Native folders are generated here (prebuild) and
+# git ignores them: EAS builds from a clean checkout without them, so they must not
+# change the hash computed on a developer's machine when publishing an update.
+android/**/*
+ios/**/*
