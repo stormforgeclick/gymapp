@@ -40,6 +40,19 @@ describe("over-the-air updates", () => {
     expect(ignored).toContain("ios/**/*");
   });
 
+  // eas update exports every platform unless told otherwise, web included, and the
+  // web export renders the app in Node, where the Supabase client reads `window`
+  // and fails. The app only ships on Android, so that is all the update exports.
+  it("has a script that publishes to the preview channel for Android only", () => {
+    const publish = packageJson.scripts["update:preview"] as string | undefined;
+
+    expect(publish).toBeDefined();
+    expect(publish).toMatch(/eas-cli(@\S+)? update\b/);
+    expect(publish).toMatch(/--channel preview\b/);
+    expect(publish).toMatch(/--environment preview\b/);
+    expect(publish).toMatch(/--platform android\b/);
+  });
+
   it("does not let a change to the npm scripts count as a native change", () => {
     const config = readFileSync(join(ROOT, "fingerprint.config.js"), "utf8");
 

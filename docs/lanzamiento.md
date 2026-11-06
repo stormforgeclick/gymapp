@@ -47,17 +47,21 @@ Acompaña cada reparto de una nota breve (un GitHub Release o un mensaje) con qu
 Un arreglo que solo toca JavaScript, estilos, textos o imágenes llega a los teléfonos sin un APK nuevo:
 
 ```
-eas update --channel preview --message "qué cambia" --environment preview
+npm run update:preview -- --message "qué cambia"
 ```
 
-El teléfono la descarga al abrir la app y la aplica la **segunda** vez que se abre.
+(Sin `--message`, EAS te lo pregunta.) El teléfono la descarga al abrir la app y la aplica la **segunda** vez que se abre.
+
+- **Solo Android, a propósito.** `eas update` exporta todas las plataformas si no se le dice otra cosa, y la exportación web renderiza la app en Node, donde el cliente de Supabase busca `window` y falla (`ReferenceError: window is not defined`). La app no se publica en la web, así que el script ya trae `--platform android`. Si lo escribes a mano, no te olvides de ese parámetro.
 
 - **Solo encaja con builds de la misma base nativa.** Cada build lleva un *fingerprint* (una huella de su código nativo) y una actualización solo se ofrece a los que coinciden. Si instalas una librería con código nativo, cambias `app.json`, `eas.json` o actualizas el SDK, la huella cambia y hace falta un **build nuevo** antes de publicar actualizaciones.
-- **Para ver la huella actual:** `npx expo-updates fingerprint:generate --platform android`. La carpeta `android/` generada en tu equipo y los scripts de `package.json` no cuentan (ver `.fingerprintignore` y `fingerprint.config.js`), para que tu máquina y EAS calculen lo mismo.
+- **Para ver la huella actual:** `npx expo-updates fingerprint:generate --platform android`. La carpeta `android/` generada en tu equipo y los scripts de `package.json` no cuentan (ver `.fingerprintignore` y `fingerprint.config.js`), para que tu máquina y EAS calculen lo mismo. En cambio **`.gitignore` sí cuenta**: añadir o quitar una línea cambia la huella aunque no toque el código nativo.
+- **Publica desde el mismo commit del build.** Una actualización publicada desde un estado con otra huella se sube sin error pero no se entrega al APK instalado. La salida de `eas update` muestra su *Runtime version*; debe ser la del build.
 - **Cambios de base de datos primero:** la misma regla de orden de arriba. Una actualización OTA con código que espera una columna que aún no existe rompe a quien la reciba.
 - **Si el build se corta con `Runtime version mismatch`**, tu `node_modules` no es el de una instalación limpia: corre `npm ci` y revisa [problemas-conocidos.md](problemas-conocidos.md#instalación-y-herramientas).
 - **Verificado el 2026-11-06:** con un `node_modules` limpio, la huella de Android calculada aquí coincide con la que EAS calculó en sus servidores.
 - **No verificado en dispositivo:** que un teléfono reciba la actualización. Se comprueba con la primera actualización de prueba.
+- **Pendiente, sin resolver:** los mapas de código de Sentry se suben al compilar un build, pero una actualización OTA trae JavaScript nuevo y sus errores llegarían a Sentry sin símbolos legibles hasta que se suban también sus mapas. Se revisa en la documentación de Sentry cuando la primera actualización llegue a un teléfono.
 
 ## Reporte de fallos (Sentry)
 
