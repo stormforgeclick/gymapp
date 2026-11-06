@@ -23,7 +23,7 @@ Las decisiones que más preguntas generan, con su porqué. Si piensas cambiar un
 
 ## 4. Los paquetes que gobierna Expo se actualizan juntos, con `npx expo install`
 
-- **Decisión:** `expo`, `expo-*`, `react-native`, `react-native-*`, `jest-expo` y compañía suben todos a la vez con `npx expo install --fix` (y `npx expo install --check` dice qué falta). Nunca de uno en uno, y Dependabot los ignora.
+- **Decisión:** `expo`, `expo-*`, `react-native`, `react-native-*`, `jest-expo` y compañía suben todos a la vez con `npx expo install --fix` (y `npx expo install --check` dice qué falta). Nunca de uno en uno, y Dependabot los ignora. Con `jest` y `eslint` pasa algo parecido: `jest-expo` 57 usa Jest 29 y `eslint-config-expo` admite hasta ESLint 9, así que Dependabot no abre PRs de sus versiones mayores (sí de las menores y parches).
 - **Por qué:** Expo fija una versión por paquete para cada versión del SDK. Subir uno solo rompe el resto: `jest-expo` desde la 57.0.5 exige `react-native@0.86.3`, y con React Native en 0.86.2 la instalación falla.
 - **Costo:** cada actualización toca código nativo, así que obliga a reconstruir la app de desarrollo y a probarla en un teléfono. `@react-native/jest-preset` figura como dependencia de desarrollo explícita porque, sin ella, npm no lograba resolver a la vez React Native 0.86.3 y `jest-expo`; al actualizar el SDK, su versión debe ser la misma que la de React Native.
 

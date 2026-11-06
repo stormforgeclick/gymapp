@@ -29,6 +29,17 @@ updates:
       - dependency-name: "react-native-*"
       - dependency-name: "@react-native/*"
       - dependency-name: "@react-native-async-storage/async-storage"
+      # jest-expo 57 is built on Jest 29 (it depends on babel-jest, jest-snapshot and
+      # jest-environment-jsdom ^29), so a new major of Jest moves with jest-expo, when
+      # the SDK does. Minor and patch updates still come.
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
+      # eslint-config-expo's plugins (react, import) declare support up to ESLint 9.
+      # A new major comes when eslint-config-expo accepts it.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     groups:
       runtime:
         dependency-type: production
