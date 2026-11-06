@@ -38,3 +38,15 @@ Las decisiones que más preguntas generan, con su porqué. Si piensas cambiar un
 - **Decisión:** el proyecto es `@stormforge/gymbro-app`, de la organización `stormforge`; `app.json` lo declara con `owner`. Se transfirió conservando su ID, así que la URL de actualizaciones sigue valiendo.
 - **Por qué:** los builds, las firmas de Android y las variables de EAS son del proyecto; en una cuenta personal solo las ve una persona. En una organización las ve el equipo, y quien se vaya no se lleva la firma de la app.
 - **Costo:** cada persona que construya necesita ser miembro de la organización y entrar con `eas login`. La firma de Android se creó para el paquete `com.stormforgeclick.gymbro` dentro de la organización; si se pierde, no se pueden publicar actualizaciones de la misma app en Google Play.
+
+## 7. Avisos del asesor de Supabase que se aceptan
+
+El asesor (Dashboard → Advisors, o `get_advisors`) deja estos avisos a propósito. Revísalos al crecer, no cada semana:
+
+- **23 funciones `SECURITY DEFINER` ejecutables por usuarios con sesión.** Son la API de la app (ver la decisión 1): cada una valida con `auth.uid()` dentro y está cerrada para `anon` (lo vigila `anon_privileges`). Las auxiliares de permisos ya viven en `private`.
+- **`exercises` con RLS y sin políticas.** Es lo que se quiere: nadie la lee directo y el catálogo se sirve por RPC (`get_exercises`, `get_exercise`…).
+- **5 tablas con dos políticas de lectura** (una para quien es dueño y otra para quien tiene acceso: compartido o administración). Se podrían fundir en una con `or`, pero cada política dice una sola cosa. Con 4 usuarios el costo es cero; se reconsidera con miles de filas.
+- **9 índices «sin uso».** Con tan pocos datos y consultas, «nunca usado» es lo normal. Borrarlos ahora es adivinar; se revisan con tráfico real.
+- **Protección contra contraseñas filtradas desactivada.** Supabase la ofrece solo en el plan Pro. Es un riesgo aceptado mientras la beta sea cerrada y el proyecto siga en el plan Free; se activa al pasar a Pro.
+
+La lista se hizo el 2026-11-06 con el proyecto en el plan Free. Las claves foráneas sin índice **no** están aquí: se arreglaron (migración `index_foreign_keys`) y una prueba impide que vuelvan.

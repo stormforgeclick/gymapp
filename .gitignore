@@ -61,3 +61,6 @@ supabase/seed.full.sql
 
 # Jest coverage report
 coverage/
+
+# Backups of the production database (supabase db dump): they hold real accounts
+backups/

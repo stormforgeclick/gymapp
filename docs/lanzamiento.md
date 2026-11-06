@@ -79,7 +79,7 @@ Los builds `preview` y `production` envían a Sentry los errores inesperados; el
 
 - **La app nueva falla:** si el arreglo es de JavaScript, publica una actualización OTA con el arreglo (o con la versión anterior del código). Si no, pide a los testers volver a instalar el APK anterior: guarda siempre el APK que repartes, porque los builds de EAS no se conservan para siempre. No hay forma de revertir a distancia hasta que existan las actualizaciones OTA.
 - **Una migración sale mal:** usa su script de reversa de `supabase/rollbacks/` si existe. Para una migración nueva, escribe y prueba la reversa **antes** de aplicarla.
-- **Un dato se corrompe:** depende de las copias de seguridad de Supabase. Confirma cuáles tiene el plan del proyecto *antes* de necesitarlas (pendiente abajo).
+- **Un dato se corrompe:** el plan Free de Supabase no hace copias automáticas, así que depende de la última copia manual que hayas hecho (ver [Copias de seguridad](base-de-datos.md#copias-de-seguridad)). Haz una antes de cada migración en producción.
 
 ## Qué falta para un lanzamiento cómodo
 
@@ -90,6 +90,6 @@ Cada punto necesita una decisión o una acción de una persona mantenedora:
 | Reporte de fallos (Sentry) | Enterarse de cuándo se cae la app en el teléfono de alguien | El código y la configuración ya están. Falta poner `EXPO_PUBLIC_SENTRY_DSN` y `SENTRY_AUTH_TOKEN` en EAS, construir un `preview` y comprobar que llega un error |
 | Reconstruir la app de desarrollo y probarla en un teléfono | Cambió el paquete de Android y el SDK de Expo se actualizó: hasta que se construya y se pruebe, nada de esto está verificado en un dispositivo | Hacer `npm run build:dev` e instalar el APK nuevo |
 | Política de privacidad y términos reales | La pantalla de registro hoy menciona documentos que no existen | Redactarlos y publicarlos |
-| Copias de seguridad y contraseñas filtradas en Supabase | Proteger las cuentas reales | Revisar el plan y activar el ajuste en el Dashboard |
+| Copias de seguridad automáticas y contraseñas filtradas | Proteger las cuentas reales | Las dos son del plan Pro de Supabase. Mientras tanto, la copia manual está documentada y probada en local (falta ensayarla en un proyecto nuevo); lo de las contraseñas es un riesgo aceptado ([decisión 7](decisiones.md#7-avisos-del-asesor-de-supabase-que-se-aceptan)) |
 
 El detalle y la prioridad de cada uno están en el plan de buenas prácticas del proyecto; esta lista es la parte que afecta a repartir versiones.
