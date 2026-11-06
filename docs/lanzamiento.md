@@ -57,6 +57,22 @@ El teléfono la descarga al abrir la app y la aplica la **segunda** vez que se a
 - **Cambios de base de datos primero:** la misma regla de orden de arriba. Una actualización OTA con código que espera una columna que aún no existe rompe a quien la reciba.
 - **No verificado en dispositivo:** que la huella calculada aquí coincida con la de EAS y que un teléfono reciba la actualización. Se comprueba con la primera actualización de prueba.
 
+## Reporte de fallos (Sentry)
+
+Los builds `preview` y `production` envían a Sentry los errores inesperados; el de desarrollo no (ahí salen por la consola). Es la organización `stormforge-p0` (región de EE. UU.) y el proyecto `gymbroapp`.
+
+- **Qué se envía:** el error, de dónde viene (consulta, mutación o pantalla rota) y la clave de la consulta. No se envían datos personales ni trazas de rendimiento. Los errores que la app ya explica a la persona (una rutina vacía, un nombre repetido…) no se reportan.
+- **Dos variables de EAS** por entorno (las pone una persona mantenedora, una sola vez):
+
+  ```
+  eas env:set --name EXPO_PUBLIC_SENTRY_DSN --value <DSN> --environment preview --visibility plaintext
+  eas env:set --name SENTRY_AUTH_TOKEN --value <token> --environment preview --visibility sensitive
+  ```
+
+  El DSN está en Sentry, *Project Settings → Client Keys (DSN)*; solo permite enviar eventos. El token es de organización (*Settings → Developer Settings → Auth Tokens*), es **secreto** y lo usa el build para subir los mapas de código. Repite lo mismo con `--environment production` cuando ese perfil se use.
+- **Sin DSN** la app funciona igual y no reporta nada. **Sin el token**, el build `preview` puede fallar en el paso de subir los mapas.
+- **Cómo comprobarlo** (**no verificado en dispositivo**): construir un `preview`, instalarlo y abrir la app; en Sentry debe aparecer la sesión de esa versión. Para provocar un error real sin tocar el código, abrir un enlace con un id inválido: `adb shell am start -a android.intent.action.VIEW -d "gymbroapp://exercises/xyz"`. La consulta del ejercicio falla, la pantalla muestra su estado de error y el fallo debe llegar a Sentry.
+
 ## Si algo sale mal
 
 - **La app nueva falla:** si el arreglo es de JavaScript, publica una actualización OTA con el arreglo (o con la versión anterior del código). Si no, pide a los testers volver a instalar el APK anterior: guarda siempre el APK que repartes, porque los builds de EAS no se conservan para siempre. No hay forma de revertir a distancia hasta que existan las actualizaciones OTA.
@@ -69,7 +85,7 @@ Cada punto necesita una decisión o una acción de una persona mantenedora:
 
 | Pendiente | Por qué importa | Qué lo bloquea |
 |---|---|---|
-| Reporte de fallos (Sentry) | Enterarse de cuándo se cae la app en el teléfono de alguien | El código ya está (`src/lib/sentry.ts`) y se activa con `EXPO_PUBLIC_SENTRY_DSN`. Falta una cuenta y un proyecto de React Native en Sentry, el DSN, el token como secreto de EAS (`SENTRY_AUTH_TOKEN`), el plugin con la organización y el proyecto en `app.json` (para leer los errores con el código original) y reconstruir |
+| Reporte de fallos (Sentry) | Enterarse de cuándo se cae la app en el teléfono de alguien | El código y la configuración ya están. Falta poner `EXPO_PUBLIC_SENTRY_DSN` y `SENTRY_AUTH_TOKEN` en EAS, construir un `preview` y comprobar que llega un error |
 | Reconstruir la app de desarrollo y probarla en un teléfono | Cambió el paquete de Android y el SDK de Expo se actualizó: hasta que se construya y se pruebe, nada de esto está verificado en un dispositivo | Hacer `npm run build:dev` e instalar el APK nuevo |
 | Política de privacidad y términos reales | La pantalla de registro hoy menciona documentos que no existen | Redactarlos y publicarlos |
 | Copias de seguridad y contraseñas filtradas en Supabase | Proteger las cuentas reales | Revisar el plan y activar el ajuste en el Dashboard |
