@@ -55,7 +55,9 @@ El teléfono la descarga al abrir la app y la aplica la **segunda** vez que se a
 - **Solo encaja con builds de la misma base nativa.** Cada build lleva un *fingerprint* (una huella de su código nativo) y una actualización solo se ofrece a los que coinciden. Si instalas una librería con código nativo, cambias `app.json`, `eas.json` o actualizas el SDK, la huella cambia y hace falta un **build nuevo** antes de publicar actualizaciones.
 - **Para ver la huella actual:** `npx expo-updates fingerprint:generate --platform android`. La carpeta `android/` generada en tu equipo y los scripts de `package.json` no cuentan (ver `.fingerprintignore` y `fingerprint.config.js`), para que tu máquina y EAS calculen lo mismo.
 - **Cambios de base de datos primero:** la misma regla de orden de arriba. Una actualización OTA con código que espera una columna que aún no existe rompe a quien la reciba.
-- **No verificado en dispositivo:** que la huella calculada aquí coincida con la de EAS y que un teléfono reciba la actualización. Se comprueba con la primera actualización de prueba.
+- **Si el build se corta con `Runtime version mismatch`**, tu `node_modules` no es el de una instalación limpia: corre `npm ci` y revisa [problemas-conocidos.md](problemas-conocidos.md#instalación-y-herramientas).
+- **Verificado el 2026-11-06:** con un `node_modules` limpio, la huella de Android calculada aquí coincide con la que EAS calculó en sus servidores.
+- **No verificado en dispositivo:** que un teléfono reciba la actualización. Se comprueba con la primera actualización de prueba.
 
 ## Reporte de fallos (Sentry)
 

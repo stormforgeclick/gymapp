@@ -19,6 +19,9 @@ npm bloquea scripts de instalación que aún no aprobaste. `tsx` y Jest funciona
 **Windows: "Filename too long" al borrar `node_modules` o una copia del proyecto.**
 Las rutas de `node_modules` superan el límite. En PowerShell: `Remove-Item -LiteralPath '\\?\C:\ruta\a\la\carpeta' -Recurse -Force`.
 
+**El build de EAS se corta con `Runtime version mismatch`.**
+EAS calcula la huella del código nativo ([OTA](lanzamiento.md#actualizaciones-ota-sin-reinstalar)) en tu equipo y otra vez en sus servidores, y corta el build si no coinciden. El error trae un diff con el archivo que cambia: su `filePath` dice en qué paquete de `node_modules` tu copia no es la publicada. El 2026-11-06 pasó con `@react-native-masked-view/masked-view`: a su `android/src/main/AndroidManifest.xml` le faltaba el atributo `package` que trae el paquete original (quién lo quitó no se averiguó). EAS instala desde cero, así que no lo tenía. Las carpetas `android/build` de una compilación local **no** son la causa: Expo ya las ignora. Arreglo: `npm ci`, que deja `node_modules` como lo publican los paquetes. Para comprobarlo sin gastar un build: `npx expo-updates fingerprint:generate --platform android` debe dar el mismo hash que EAS dice haber calculado.
+
 **Git avisa "CRLF will be replaced by LF".**
 Es normal: `.gitattributes` fuerza finales de línea LF en el repo. No hace falta tocar nada.
 
