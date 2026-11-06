@@ -51,6 +51,8 @@ Detalles que sorprenden:
 
 Estas reglas las vigilan pruebas SQL: `anon_privileges`, `helpers_not_exposed`, `rls_routine_rows` y `split_privacy`.
 
+**Storage.** Hay tres buckets, todos públicos (una imagen se lee desde su URL sin política): `avatars`, `exercise-images` y `exercise-gifs`. En `avatars` cada persona solo puede subir, ver, reemplazar y borrar su archivo, que va en `<id de usuario>/avatar`; en los otros dos no hay política de escritura, así que solo el rol de servicio sube archivos. El límite de 5 MB y los tipos permitidos (jpeg, png, webp) los aplica la API de Storage, no la base. Los buckets y las políticas están en una migración y los vigila `storage_avatars`.
+
 ## Carpeta `supabase/`
 
 ```
@@ -64,7 +66,9 @@ supabase/
 ```
 
 - `supabase/migrations/20261030000000_baseline.sql` es el esquema de producción al 2026-10-30. Las migraciones que lo construyeron nunca estuvieron en el repo; están en `supabase/history/` para entender de dónde viene cada cosa.
-- Los cambios posteriores son migraciones nuevas (hoy: `move_helpers_to_private` y `drop_duplicate_routine_row_policies`).
+- Los cambios posteriores son migraciones nuevas (hoy: `move_helpers_to_private`, `drop_duplicate_routine_row_policies`, `storage_buckets_and_avatar_policies` e `index_foreign_keys`).
+- La migración base no incluye Storage, porque se generó del esquema `public`; por eso los buckets y las reglas de los avatares viven en su propia migración.
+- Toda clave foránea de `public` lleva un índice que empieza por sus columnas: Postgres no lo crea solo, y sin él borrar o cambiar una fila de la tabla referenciada recorre entera la que la referencia. Si agregas una tabla con una clave foránea, créale el índice en la misma migración; la prueba `foreign_keys_indexed` falla si se te olvida.
 - `supabase/seed.sql` es **un subconjunto pequeño** del catálogo (las tablas de apoyo completas y 40 ejercicios), porque el repo es público. No lleva datos de usuarios, y de `exercises` solo conserva `id` y `name`. Una prueba (`scripts/__tests__/seed.test.ts`) lo exige.
 - Para trabajar con el catálogo completo, pon tu volcado en `supabase/seed.full.sql` (git lo ignora) y apunta `sql_paths` en `[db.seed]` de `supabase/config.toml` a ese archivo. Los volcados `supabase db dump --data-only` traen también `auth.*` y `storage.*` (datos reales): **nunca** los metas al repo; quédate solo con las tablas del catálogo y conviértelas a `INSERT`, porque `db reset` no puede leer `COPY … FROM stdin`.
 - Las imágenes y GIF del seed apuntan al Storage público del proyecto real: se cargan desde internet aunque tu base sea local.
@@ -111,3 +115,30 @@ El proyecto real (`gymbro`) tiene cuentas de personas de verdad. Reglas:
 - El historial de producción quedó alineado el 2026-10-31: una fila para la migración base y una por cada migración posterior. Si ves una diferencia entre `supabase/migrations/` y `npx supabase migration list --linked`, **detente** y consulta antes de forzar nada.
 - Si una migración sale mal, `supabase/rollbacks/20261031_undo_security_fixes.sql` deshace las dos últimas (probado en local). Para una nueva, escribe su reversa **antes** de aplicarla y pruébala igual.
 - Los scripts de `scripts/` que usan `SUPABASE_SERVICE_ROLE_KEY` escriben en producción. No los corras sin saber qué hacen.
+
+### Copias de seguridad
+
+El plan Free de Supabase **no hace copias automáticas** (las diarias son del plan Pro en adelante; la documentación de Supabase recomienda exportar los datos con `db dump` y guardarlos fuera). Hasta que eso cambie, la copia la haces tú:
+
+```
+$env:SUPABASE_DB_PASSWORD="..."      # la escribes tú; no la pegues en chats ni en archivos
+npx supabase db dump --linked --data-only -x storage.buckets,storage.objects -f backups/2026-11-06-datos.sql
+```
+
+- **Cuándo:** antes de cada `db push` a producción y una vez por semana mientras haya testers. Es una recomendación, no algo que el repo imponga.
+- **Qué trae:** los datos de `public` (perfiles, rutinas, entrenamientos…) y de `auth` (las cuentas, con sus contraseñas cifradas). El esquema no hace falta: son las migraciones.
+- **Qué no trae:** los archivos de Storage (los avatares) ni los ajustes del Dashboard (Auth, correo…). Los buckets y sus reglas vuelven con las migraciones; los archivos, no.
+- **Por qué `-x storage.…`:** `storage.objects` guarda solo los metadatos de los archivos, no los archivos; restaurarlos dejaría registros que apuntan a nada. `storage.buckets` ya lo crea la migración y chocaría al restaurar.
+- **Es información de personas reales.** La carpeta `backups/` está en `.gitignore` y una prueba lo exige. Guarda la copia fuera de tu equipo (cifrada si puedes) y borra las viejas.
+
+**Para restaurar** en un proyecto nuevo, o en local para comprobar que la copia sirve: primero las migraciones, sin seed (que crearía filas que chocan), y luego el archivo:
+
+```
+npx supabase db reset --no-seed        # en local; en un proyecto nuevo: db push --linked
+docker cp backups/2026-11-06-datos.sql supabase_db_gymapp:/tmp/restore.sql
+docker exec supabase_db_gymapp psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/restore.sql
+```
+
+El archivo trae `SET session_replication_role = replica`, así que el trigger `on_auth_user_created` no duplica los perfiles al cargar las cuentas. Al terminar, `npx supabase db reset` deja tu base local con el seed de siempre.
+
+**Ensayado el 2026-11-06 solo en local:** una cuenta con su perfil y el catálogo volvieron idénticos (salida 0, sin errores, sin duplicados). **No se ha ensayado contra un proyecto real de Supabase** ni con los datos de producción: haz ese ensayo en un proyecto nuevo antes de necesitar la copia de verdad.
