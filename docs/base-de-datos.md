@@ -113,7 +113,7 @@ El proyecto real (`gymbro`) tiene cuentas de personas de verdad. Reglas:
 - **Solo las personas mantenedoras** aplican migraciones, con el CLI y la contraseña de la base: `npx supabase db push --linked --skip-vault --dry-run` primero, luego sin `--dry-run`. Nunca por el editor SQL del Dashboard ni por herramientas externas: quedarían fuera del repo y el historial se descuadra.
 - Antes de aplicar, la migración se revisa en el PR y se prueba en local con `db reset`.
 - El historial de producción quedó alineado el 2026-10-31: una fila para la migración base y una por cada migración posterior. Si ves una diferencia entre `supabase/migrations/` y `npx supabase migration list --linked`, **detente** y consulta antes de forzar nada.
-- Si una migración sale mal, `supabase/rollbacks/20261031_undo_security_fixes.sql` deshace las dos últimas (probado en local). Para una nueva, escribe su reversa **antes** de aplicarla y pruébala igual.
+- Si una migración sale mal, `supabase/rollbacks/20261031_undo_security_fixes.sql` deshace las de seguridad del 2026-10-31 y `supabase/rollbacks/20261106_undo_index_foreign_keys.sql` quita los once índices de claves foráneas (los dos probados en local). La migración de Storage no tiene reversa a propósito: declara lo que producción ya tenía y borrar esas políticas dejaría los avatares sin protección. Para una nueva, escribe su reversa **antes** de aplicarla y pruébala igual.
 - Los scripts de `scripts/` que usan `SUPABASE_SERVICE_ROLE_KEY` escriben en producción. No los corras sin saber qué hacen.
 
 ### Copias de seguridad
