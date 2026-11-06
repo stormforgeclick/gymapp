@@ -16,6 +16,14 @@ const sentryPlugin = (expo.plugins as Plugin[]).find(
  * together with them. Crash reporting itself works without the plugin.
  */
 describe("Sentry config plugin", () => {
+  it("uploads the source maps to the project of this app in the stormforge-p0 organization", () => {
+    // The organization lives in the US region (its DSN ends in ingest.us.sentry.io).
+    expect(sentryPlugin).toEqual([
+      "@sentry/react-native/expo",
+      { url: "https://sentry.io/", organization: "stormforge-p0", project: "gymbroapp" },
+    ]);
+  });
+
   it("is only enabled together with the organization and project to upload to", () => {
     if (!sentryPlugin) return;
 

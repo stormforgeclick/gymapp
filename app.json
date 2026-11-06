@@ -55,7 +55,15 @@
         }
       ],
       "expo-web-browser",
-      "expo-localization"
+      "expo-localization",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "organization": "stormforge-p0",
+          "project": "gymbroapp"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
