@@ -61,14 +61,8 @@ supabase/seed.full.sql
 
 # Jest coverage report
 coverage/
-<<<<<<< Updated upstream
-=======
 
 # Backups of the production database (supabase db dump): they hold real accounts
 backups/
 
 .env.local
->>>>>>> Stashed changes
-
-# Backups of the production database (supabase db dump): they hold real accounts
-backups/
