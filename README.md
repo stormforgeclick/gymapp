@@ -7,11 +7,13 @@
 | Quiero... | Comando | Cuándo |
 |---|---|---|
 | Programar con recarga en vivo | `npm start` | Todos los días. Abre la app "dev" ya instalada en el teléfono. |
-| Instalar la app **dev** (APK con herramientas de desarrollo) | `npm run build:dev` | Una vez, y otra vez solo si cambias algo nativo (instalar una librería con código nativo, tocar `app.json`, subir de SDK). |
+| Instalar la app **dev** (APK con herramientas de desarrollo) | `npm run build:dev` | Una vez, y otra vez solo si cambias algo nativo (instalar una librería con código nativo, tocar `app.json` o `app.config.js`, subir de SDK). |
 | Una app **normal** para usar o compartir sin la PC (APK) | `npm run build:preview` | Cuando quieres probar la app "de verdad" o pasársela a alguien. |
 | Subir a Google Play / App Store | _(todavía no)_ | Requiere cuenta de Google Play Developer / Apple Developer. |
 
 Los builds se hacen en la nube de Expo (EAS) y tardan unos minutos. Al terminar, la terminal muestra un enlace y un QR; abre el enlace en el teléfono Android para descargar e instalar el APK. Si Android pide permiso para instalar apps de origen desconocido, acéptalo.
+
+Cada perfil construye **su propia app**, con su propio identificador (ver [Variantes de app](docs/lanzamiento.md#variantes-de-app)): la de desarrollo aparece como «gymbro-app (Dev)» y la preview como «gymbro-app (Preview)». Puedes tener las dos instaladas a la vez, sin que Android pida «actualizar» una con la otra.
 
 **Regla simple:** JS/TS cambia → `npm start`, no rebuild. Algo nativo cambia → `npm run build:dev`. Quieres la app final → `npm run build:preview`.
 
@@ -30,13 +32,20 @@ Solo para quien construye y distribuye la app: el proyecto de Expo es `@stormfor
    ```
 
    Nunca subas `SUPABASE_SERVICE_ROLE_KEY` ni `OPENAI_API_KEY` como variables `EXPO_PUBLIC_*`: todo lo que va en la app se puede extraer.
-3. `npm run build:dev` e instala el APK; luego `npm start`.
+3. Decir **qué app** construye cada entorno. Es obligatorio: sin esta variable el build se corta a propósito, para que nunca salga una app con el identificador equivocado (detalle en [Variantes de app](docs/lanzamiento.md#variantes-de-app)):
+
+   ```
+   eas env:set --name APP_VARIANT --value development --environment development --visibility plaintext
+   eas env:set --name APP_VARIANT --value preview --environment preview --visibility plaintext
+   eas env:set --name APP_VARIANT --value production --environment production --visibility plaintext
+   ```
+4. `npm run build:dev` e instala el APK; luego `npm start`. EAS crea una firma de Android por cada paquete, así que el primer build de cada app te pregunta si genera una nueva: ese build es interactivo y no puede ir con `--non-interactive` (comportamiento documentado por EAS; no verificado aquí).
 
 ## Perfiles (`eas.json`)
 
-- `development`: APK con `expo-dev-client`, se conecta a `npm start`.
-- `preview`: APK normal, sin servidor de desarrollo; recibe actualizaciones OTA del canal `preview`. Sube el número de versión solo en cada build para poder instalarlo encima del anterior.
-- `production`: para las tiendas (canal `production`); hoy no se usa.
+- `development`: APK con `expo-dev-client`, se conecta a `npm start`. App «gymbro-app (Dev)», paquete `com.stormforgeclick.gymbro.dev`.
+- `preview`: APK normal, sin servidor de desarrollo; recibe actualizaciones OTA del canal `preview`. Sube el número de versión solo en cada build para poder instalarlo encima del anterior. App «gymbro-app (Preview)», paquete `com.stormforgeclick.gymbro.preview`.
+- `production`: para las tiendas (canal `production`); hoy no se usa. App «gymbro-app», paquete `com.stormforgeclick.gymbro`.
 - `development-simulator`: solo para el simulador de iOS en un Mac.
 
 ## Pruebas

@@ -12,14 +12,35 @@ Cómo se construye, se reparte y se revierte una versión de la app. Es para **p
 | `preview` | `preview` | APK normal, sin servidor: el que se reparte a testers. Sube el número de versión solo en cada build | Testers |
 | `production` | `production` | Para las tiendas. **No se usa todavía** | — |
 
-La app es `com.stormforgeclick.gymbro`, del proyecto `@stormforge/gymbro-app` en Expo (organización `stormforge`). El nombre de paquete **no se cambia** una vez repartido un APK.
+La app es del proyecto `@stormforge/gymbro-app` en Expo (organización `stormforge`). Cada perfil construye una app distinta, con su propio paquete (ver [Variantes de app](#variantes-de-app)). El paquete de **producción**, `com.stormforgeclick.gymbro`, **no se cambia** una vez repartido un APK.
+
+## Variantes de app
+
+Cada perfil construye una app **distinta** para Android, con su propio paquete, nombre y esquema de enlaces, de modo que se pueden instalar a la vez en el mismo teléfono. Con un solo paquete, instalar una pediría «actualizar» la otra.
+
+| Variante (`APP_VARIANT`) | Paquete | Nombre en el teléfono | Esquema de enlaces |
+|---|---|---|---|
+| `development` | `com.stormforgeclick.gymbro.dev` | gymbro-app (Dev) | `gymbroapp-dev`, y `exp+gymbro-app` (el de los QR de `npm start`) |
+| `preview` | `com.stormforgeclick.gymbro.preview` | gymbro-app (Preview) | `gymbroapp-preview` |
+| `production` | `com.stormforgeclick.gymbro` | gymbro-app | `gymbroapp` |
+
+- **Dónde está.** `app.config.js` parte de `app.json` y le agrega el sufijo de la variante. Lo demás (proyecto de Expo, `slug`, canal OTA, plugins, Sentry) es igual en las tres. Se prueba en `scripts/__tests__/app-variants.test.ts`.
+- **De dónde sale `APP_VARIANT`.** De las variables de entorno de EAS, una por entorno (los pasos están en el [README](../README.md#primera-vez-con-eas-mantenedores)), y no de `eas.json`: `eas update --environment` solo lee las variables de EAS, y el build y el update tienen que resolver la misma variante para calcular la misma huella. En tu equipo, sin variable, la app es la de producción (lo que dice `app.json`). En un build de EAS, la variable ausente o con un valor desconocido **corta el build con un mensaje**, a propósito.
+- **Cada variante tiene sus propias actualizaciones.** La huella (*fingerprint*) incluye el paquete, el nombre y los esquemas, así que cada variante tiene su *Runtime version*.
+- **El paquete de producción es la identidad de la app en Google Play** y no se cambia. Cambiar los de desarrollo y preview solo obligaría a reinstalar esas apps internas.
+- **Firma.** EAS crea una firma de Android por paquete: el primer build de `development` y el primero de `preview` son interactivos.
+- **Esquemas distintos.** Dos apps con el mismo esquema harían que Android pregunte con cuál abrir cada enlace. Además, `expo-dev-client` agrega `exp+gymbro-app` a todos los builds si no se le dice otra cosa; `app.config.js` lo deja solo en el de desarrollo, para que el QR de `npm start` abra únicamente esa app.
+- **Compilar una variante en tu equipo.** `APP_VARIANT` debe estar definida antes de generar el proyecto nativo, y la carpeta `android/` conserva la variante anterior hasta que se regenera con `--clean`. En PowerShell: `$env:APP_VARIANT = "development"; npx expo prebuild --platform android --clean`.
+- **Maestro.** Los flujos de `.maestro/` abren la variante de producción, que es la que instala `expo run:android --variant release` sin variable. Contra un APK `preview` habría que cambiar su `appId` a `com.stormforgeclick.gymbro.preview`.
+- **Verificado el 2026-11-07:** `expo config` resuelve cada variante, y un proyecto Android generado desde cero para cada una (en una copia limpia del repo) trae el paquete, el nombre y los esquemas de la tabla; solo el de desarrollo lleva `exp+gymbro-app`. **No verificado en dispositivo:** instalar las dos a la vez, ni que un teléfono reciba una actualización en `preview`.
 
 ## Antes de construir
 
 1. `main` actualizada y con la CI en verde (`app`, `database` y CodeQL).
 2. `npx expo-doctor` sin fallos nuevos.
 3. Las variables `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY` del entorno `preview` de EAS apuntan al proyecto real (los pasos están en [README.md](../README.md#primera-vez-con-eas-mantenedores)). Un APK `preview` es una compilación de lanzamiento: Android bloquea ahí el tráfico `http`, así que no se usa con una base local.
-4. Si hay migraciones nuevas, ya están aplicadas en producción (ver siguiente sección). La app nueva nunca debe salir antes que la base que necesita.
+4. La variable `APP_VARIANT` existe en el entorno del perfil que vas a construir (mismo README), o el build se corta.
+5. Si hay migraciones nuevas, ya están aplicadas en producción (ver siguiente sección). La app nueva nunca debe salir antes que la base que necesita.
 
 ## Orden cuando hay cambios de base de datos
 
@@ -54,7 +75,7 @@ npm run update:preview -- --message "qué cambia"
 
 - **Solo Android, a propósito.** `eas update` exporta todas las plataformas si no se le dice otra cosa, y la exportación web renderiza la app en Node, donde el cliente de Supabase busca `window` y falla (`ReferenceError: window is not defined`). La app no se publica en la web, así que el script ya trae `--platform android`. Si lo escribes a mano, no te olvides de ese parámetro.
 
-- **Solo encaja con builds de la misma base nativa.** Cada build lleva un *fingerprint* (una huella de su código nativo) y una actualización solo se ofrece a los que coinciden. Si instalas una librería con código nativo, cambias `app.json`, `eas.json` o actualizas el SDK, la huella cambia y hace falta un **build nuevo** antes de publicar actualizaciones.
+- **Solo encaja con builds de la misma base nativa.** Cada build lleva un *fingerprint* (una huella de su código nativo) y una actualización solo se ofrece a los que coinciden. Si instalas una librería con código nativo, cambias `app.json`, `app.config.js`, `eas.json` o actualizas el SDK, la huella cambia y hace falta un **build nuevo** antes de publicar actualizaciones.
 - **Para ver la huella actual:** `npx expo-updates fingerprint:generate --platform android`. La carpeta `android/` generada en tu equipo, los scripts de `package.json` y el `.gitignore` no cuentan (ver `.fingerprintignore` y `fingerprint.config.js`), para que tu máquina y EAS calculen lo mismo y editar esos archivos no deje huérfanos a los builds ya instalados. Hasta el 2026-11-06 `.gitignore` sí contaba, así que los builds anteriores a este cambio tienen otra huella y necesitan un build nuevo antes de recibir actualizaciones.
 - **Publica desde el mismo commit del build.** Una actualización publicada desde un estado con otra huella se sube sin error pero no se entrega al APK instalado. La salida de `eas update` muestra su *Runtime version*; debe ser la del build.
 - **Cambios de base de datos primero:** la misma regla de orden de arriba. Una actualización OTA con código que espera una columna que aún no existe rompe a quien la reciba.
@@ -77,7 +98,7 @@ Los builds `preview` y `production` envían a Sentry los errores inesperados; el
 
   El DSN está en Sentry, *Project Settings → Client Keys (DSN)*; solo permite enviar eventos. El token es de organización (*Settings → Developer Settings → Auth Tokens*), es **secreto** y lo usa el build para subir los mapas de código. Repite lo mismo con `--environment production` cuando ese perfil se use.
 - **Sin DSN** la app funciona igual y no reporta nada. **Sin el token**, el build `preview` puede fallar en el paso de subir los mapas.
-- **Cómo comprobarlo** (**no verificado en dispositivo**): construir un `preview`, instalarlo y abrir la app; en Sentry debe aparecer la sesión de esa versión. Para provocar un error real sin tocar el código, abrir un enlace con un id inválido: `adb shell am start -a android.intent.action.VIEW -d "gymbroapp://exercises/xyz"`. La consulta del ejercicio falla, la pantalla muestra su estado de error y el fallo debe llegar a Sentry.
+- **Cómo comprobarlo** (**no verificado en dispositivo**): construir un `preview`, instalarlo y abrir la app; en Sentry debe aparecer la sesión de esa versión. Para provocar un error real sin tocar el código, abrir un enlace con un id inválido: `adb shell am start -a android.intent.action.VIEW -d "gymbroapp-preview://exercises/xyz"` (el esquema de la variante `preview`). La consulta del ejercicio falla, la pantalla muestra su estado de error y el fallo debe llegar a Sentry.
 
 ## Si algo sale mal
 
@@ -92,7 +113,7 @@ Cada punto necesita una decisión o una acción de una persona mantenedora:
 | Pendiente | Por qué importa | Qué lo bloquea |
 |---|---|---|
 | Reporte de fallos (Sentry) | Enterarse de cuándo se cae la app en el teléfono de alguien | El código y la configuración ya están. Falta poner `EXPO_PUBLIC_SENTRY_DSN` y `SENTRY_AUTH_TOKEN` en EAS, construir un `preview` y comprobar que llega un error |
-| Reconstruir la app de desarrollo y probarla en un teléfono | Cambió el paquete de Android y el SDK de Expo se actualizó: hasta que se construya y se pruebe, nada de esto está verificado en un dispositivo | Hacer `npm run build:dev` e instalar el APK nuevo |
+| Reconstruir las apps de desarrollo y preview y probarlas en un teléfono | Cambiaron los paquetes de Android (ahora hay uno por variante) y el SDK de Expo se actualizó: hasta que se construyan y se prueben, nada de esto está verificado en un dispositivo | Poner las variables `APP_VARIANT` en EAS, hacer `npm run build:dev` y `npm run build:preview` e instalar los APK nuevos |
 | Política de privacidad y términos reales | La pantalla de registro hoy menciona documentos que no existen | Redactarlos y publicarlos |
 | Copias de seguridad automáticas y contraseñas filtradas | Proteger las cuentas reales | Las dos son del plan Pro de Supabase. Mientras tanto, la copia manual está documentada y probada en local (falta ensayarla en un proyecto nuevo); lo de las contraseñas es un riesgo aceptado ([decisión 7](decisiones.md#7-avisos-del-asesor-de-supabase-que-se-aceptan)) |
 
