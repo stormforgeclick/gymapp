@@ -30,6 +30,16 @@ export const removeSet = (
     sets: exercise.sets.filter((set) => set.id !== setId),
   }));
 
+/**
+ * Where a deleted set goes when the delete is undone: back to its own position
+ * if that is still free (the planned reps are looked up by position), after the
+ * last set otherwise, since the database allows one set per position.
+ */
+export const restoredPosition = (remaining: WorkoutSet[], deleted: WorkoutSet) =>
+  remaining.some((set) => set.position === deleted.position)
+    ? Math.max(...remaining.map((set) => set.position)) + 1
+    : deleted.position;
+
 export const appendSet = (
   exercises: WorkoutExercise[],
   workoutExerciseId: string,

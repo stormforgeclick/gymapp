@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { appendSet, applySetPatch, removeSet } from "./cache";
+import { appendSet, applySetPatch, removeSet, restoredPosition } from "./cache";
 import {
   addWorkoutSet,
   deleteWorkoutSet,
@@ -105,6 +105,57 @@ export const useAddWorkoutSet = (workoutId: string, language: Language) => {
       qc.setQueryData<WorkoutExercise[]>(
         key,
         (data) => data && appendSet(data, workoutExerciseId, created)
+      );
+    },
+  });
+};
+
+/**
+ * Brings back a set that was just deleted, with the weight, reps and done mark
+ * it had. It is saved again (the delete is real), so it can fail, for example
+ * when the workout was finished in the meantime.
+ */
+export const useRestoreWorkoutSet = (workoutId: string, language: Language) => {
+  const qc = useQueryClient();
+  const key = workoutKey(workoutId, language);
+
+  return useMutation({
+    mutationFn: ({
+      workoutExerciseId,
+      set,
+    }: {
+      workoutExerciseId: string;
+      set: WorkoutSet;
+    }) => {
+      // Read now, not when it was deleted: the person may have added a set since.
+      const remaining =
+        qc
+          .getQueryData<WorkoutExercise[]>(key)
+          ?.find((exercise) => exercise.id === workoutExerciseId)?.sets ?? [];
+
+      return addWorkoutSet({
+        workoutExerciseId,
+        position: restoredPosition(remaining, set),
+        weight: set.weight,
+        reps: set.reps,
+        completed: set.completed,
+      });
+    },
+    onSuccess: (created, { workoutExerciseId, set }) => {
+      // The planned reps belong to a position, so they only come back with the set
+      // when it landed on the position it had.
+      const restored =
+        created.position === set.position
+          ? {
+              ...created,
+              target_min_reps: set.target_min_reps,
+              target_max_reps: set.target_max_reps,
+            }
+          : created;
+
+      qc.setQueryData<WorkoutExercise[]>(
+        key,
+        (data) => data && appendSet(data, workoutExerciseId, restored)
       );
     },
   });
