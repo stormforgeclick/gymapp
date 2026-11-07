@@ -377,6 +377,7 @@ export const en: Translations = {
     repsA11y: "Reps for set {n}",
     doneA11y: "Set {n} done",
     tabA11y: "{name}, exercise {n} of {total}",
+    tabDoneA11y: "{name}, exercise {n} of {total}, done",
     exerciseCounter: "EXERCISE {n} OF {total}",
     gifA11y: "{name} demonstration",
     addSet: "Add set",
@@ -413,6 +414,9 @@ export const en: Translations = {
       saved: "Workout saved",
       discarded: "Workout discarded",
       saveError: "Couldn't save the change",
+      setRemoved: "Set {n} removed",
+      undo: "Undo",
+      undoError: "Couldn't undo",
     },
   },
 

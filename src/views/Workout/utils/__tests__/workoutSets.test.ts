@@ -1,5 +1,5 @@
 import { makeSet, makeWorkoutExercise } from "@/test-utils/factories";
-import { countSets, nextSetDefaults } from "../workoutSets";
+import { countSets, isExerciseComplete, nextSetDefaults } from "../workoutSets";
 
 describe("countSets", () => {
   it("counts zero for a workout without exercises", () => {
@@ -88,5 +88,33 @@ describe("nextSetDefaults", () => {
     });
 
     expect(nextSetDefaults(exercise).position).toBe(6);
+  });
+});
+
+describe("isExerciseComplete", () => {
+  it("is not complete when the exercise has no sets", () => {
+    expect(isExerciseComplete(makeWorkoutExercise({ sets: [] }))).toBe(false);
+  });
+
+  it("is not complete while a set is still pending", () => {
+    const exercise = makeWorkoutExercise({
+      sets: [
+        makeSet({ id: "s1", completed: true }),
+        makeSet({ id: "s2", completed: false }),
+      ],
+    });
+
+    expect(isExerciseComplete(exercise)).toBe(false);
+  });
+
+  it("is complete once every set is done", () => {
+    const exercise = makeWorkoutExercise({
+      sets: [
+        makeSet({ id: "s1", completed: true }),
+        makeSet({ id: "s2", completed: true }),
+      ],
+    });
+
+    expect(isExerciseComplete(exercise)).toBe(true);
   });
 });

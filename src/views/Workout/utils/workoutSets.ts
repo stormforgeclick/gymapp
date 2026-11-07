@@ -6,6 +6,10 @@ export const countSets = (exercises: WorkoutExercise[]) => {
   return { done: sets.filter((set) => set.completed).length, total: sets.length };
 };
 
+/** An exercise is done once it has sets and every one of them is marked done. */
+export const isExerciseComplete = (exercise: WorkoutExercise) =>
+  exercise.sets.length > 0 && exercise.sets.every((set) => set.completed);
+
 /**
  * What a new set of the exercise starts with: it follows the last set, using
  * the planned reps when that one has none.

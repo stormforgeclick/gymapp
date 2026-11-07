@@ -1,5 +1,5 @@
 import { makeSet, makeWorkoutExercise } from "@/test-utils/factories";
-import { appendSet, applySetPatch, removeSet } from "../cache";
+import { appendSet, applySetPatch, removeSet, restoredPosition } from "../cache";
 
 const exercises = () => [
   makeWorkoutExercise({
@@ -102,5 +102,47 @@ describe("appendSet", () => {
     appendSet(original, "we-1", makeSet({ id: "new" }));
 
     expect(original).toEqual(exercises());
+  });
+});
+
+// Undoing a delete puts the set back. The database allows one set per position,
+// and the planned reps are looked up by position, so it returns to its own spot
+// whenever that is free.
+describe("restoredPosition", () => {
+  it("keeps the position the set had when nobody took it", () => {
+    const deleted = makeSet({ id: "s3", position: 3 });
+    const remaining = [
+      makeSet({ id: "s1", position: 1 }),
+      makeSet({ id: "s2", position: 2 }),
+    ];
+
+    expect(restoredPosition(remaining, deleted)).toBe(3);
+  });
+
+  it("keeps the position when the exercise has no sets left", () => {
+    const deleted = makeSet({ id: "s1", position: 1 });
+
+    expect(restoredPosition([], deleted)).toBe(1);
+  });
+
+  it("goes after the last set when another set took its position", () => {
+    const deleted = makeSet({ id: "s3", position: 3 });
+    const remaining = [
+      makeSet({ id: "s1", position: 1 }),
+      makeSet({ id: "s2", position: 2 }),
+      makeSet({ id: "s3-new", position: 3 }),
+    ];
+
+    expect(restoredPosition(remaining, deleted)).toBe(4);
+  });
+
+  it("goes after the highest position, even when the sets are not in order", () => {
+    const deleted = makeSet({ id: "s2", position: 2 });
+    const remaining = [
+      makeSet({ id: "a", position: 5 }),
+      makeSet({ id: "b", position: 2 }),
+    ];
+
+    expect(restoredPosition(remaining, deleted)).toBe(6);
   });
 });

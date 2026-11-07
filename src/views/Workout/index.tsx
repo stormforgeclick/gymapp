@@ -30,6 +30,7 @@ import {
   useDeleteWorkoutSet,
   useDiscardWorkout,
   useFinishWorkout,
+  useRestoreWorkoutSet,
   useUpdateWorkoutSet,
   useWorkoutExercises,
 } from "@/hooks/api/workouts";
@@ -47,7 +48,7 @@ import ExerciseTabs from "./components/ExerciseTabs";
 import ProgressBar from "./components/ProgressBar";
 import SetsTable from "./components/SetsTable";
 import { getResumeIndex } from "./utils/getResumeIndex";
-import { countSets, nextSetDefaults } from "./utils/workoutSets";
+import { countSets, isExerciseComplete, nextSetDefaults } from "./utils/workoutSets";
 
 const GIF_SIZE = 180;
 
@@ -146,6 +147,7 @@ const WorkoutScreen = () => {
   const updateSet = useUpdateWorkoutSet(workoutId, language);
   const addSet = useAddWorkoutSet(workoutId, language);
   const deleteSet = useDeleteWorkoutSet(workoutId, language);
+  const restoreSet = useRestoreWorkoutSet(workoutId, language);
   const finishWorkout = useFinishWorkout();
   const discardWorkout = useDiscardWorkout();
 
@@ -199,10 +201,30 @@ const WorkoutScreen = () => {
     );
   };
 
+  // The set is deleted for real, so "Undo" saves it again. Only the latest delete
+  // can be undone: the next toast replaces this one.
   const handleRemoveLastSet = () => {
     if (!exercise || exercise.sets.length <= 1) return;
-    const last = exercise.sets[exercise.sets.length - 1];
-    deleteSet.mutate(last.id, { onError: showSaveError });
+    const removed = exercise.sets[exercise.sets.length - 1];
+    const workoutExerciseId = exercise.id;
+    // The number the set had on screen, which is its place in the list.
+    const number = exercise.sets.length;
+
+    deleteSet.mutate(removed.id, {
+      // Offered once the delete is saved, so undoing cannot race with it.
+      onSuccess: () =>
+        toast.show(t("workout.toast.setRemoved", { n: number }), {
+          action: {
+            label: t("workout.toast.undo"),
+            onPress: () => {
+              restoreSet
+                .mutateAsync({ workoutExerciseId, set: removed })
+                .catch(() => toast.show(t("workout.toast.undoError"), { tone: "error" }));
+            },
+          },
+        }),
+      onError: showSaveError,
+    });
   };
 
   const finish = () =>
@@ -311,7 +333,10 @@ const WorkoutScreen = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ExerciseTabs
-          names={exercises.map((item) => item.name)}
+          exercises={exercises.map((item) => ({
+            name: item.name,
+            complete: isExerciseComplete(item),
+          }))}
           selectedIndex={index}
           onSelect={setSelectedIndex}
           color={color}

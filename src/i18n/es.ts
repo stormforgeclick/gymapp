@@ -382,6 +382,7 @@ export const es = {
     repsA11y: "Repeticiones de la serie {n}",
     doneA11y: "Serie {n} hecha",
     tabA11y: "{name}, ejercicio {n} de {total}",
+    tabDoneA11y: "{name}, ejercicio {n} de {total}, completo",
     exerciseCounter: "EJERCICIO {n} DE {total}",
     gifA11y: "Demostración de {name}",
     addSet: "Agregar serie",
@@ -418,6 +419,9 @@ export const es = {
       saved: "Entrenamiento guardado",
       discarded: "Entrenamiento descartado",
       saveError: "No se pudo guardar el cambio",
+      setRemoved: "Serie {n} eliminada",
+      undo: "Deshacer",
+      undoError: "No se pudo deshacer",
     },
   },
 

@@ -114,6 +114,8 @@ export async function addWorkoutSet(input: {
   position: number;
   weight: number | null;
   reps: number | null;
+  /** Only set when bringing back a set that was already done; new sets start pending. */
+  completed?: boolean;
 }): Promise<WorkoutSet> {
   const { data, error } = await supabase
     .from("workout_sets")
@@ -122,7 +124,7 @@ export async function addWorkoutSet(input: {
       position: input.position,
       weight: input.weight,
       reps: input.reps,
-      completed: false,
+      completed: input.completed ?? false,
     })
     .select("id, position, weight, reps, completed")
     .single();
