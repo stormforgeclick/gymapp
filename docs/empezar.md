@@ -75,9 +75,9 @@ eas login
 npm run build:dev
 ```
 
-Al terminar, la terminal muestra un enlace para descargar el APK; ábrelo en el teléfono Android e instálalo.
+Al terminar, la terminal muestra un enlace para descargar el APK; ábrelo en el teléfono Android e instálalo. Se instala como «gymbro-app (Dev)», aparte de la app `preview`: puedes tener las dos en el teléfono a la vez (ver [Variantes de app](lanzamiento.md#variantes-de-app)).
 
-**B. En tu equipo.** `npm run android` compila e instala la app (`expo run:android`). Requiere Android Studio (con su SDK) y el JDK que pida Expo para esta versión: sigue <https://docs.expo.dev/get-started/set-up-your-environment/>. **No verificado aquí.**
+**B. En tu equipo.** `npm run android` compila e instala la app (`expo run:android`). Sin más, se instala con el paquete de producción; para que sea la app de desarrollo, define antes `APP_VARIANT=development` (en PowerShell, `$env:APP_VARIANT = "development"`) y regenera `android/` con `npx expo prebuild --platform android --clean`. Requiere Android Studio (con su SDK) y el JDK que pida Expo para esta versión: sigue <https://docs.expo.dev/get-started/set-up-your-environment/>. **No verificado aquí.**
 
 Con la app de desarrollo instalada:
 
@@ -92,7 +92,7 @@ Cosas a tener en cuenta:
 - La app de desarrollo es una compilación *debug* y Android permite en ella hablar por `http` con tu PC (el `AndroidManifest` de debug lo habilita). Una app `preview` o de producción **no** podría. **No verificado en dispositivo.**
 - Un teléfono físico necesita estar en la misma red que tu PC y que el firewall deje pasar el puerto 54321. **No verificado en dispositivo.**
 - Las imágenes y GIF de los ejercicios se descargan del Storage público del proyecto real aunque tu base sea local.
-- Cambiar código de JavaScript o TypeScript no requiere reconstruir la app; instalar una librería con código nativo o tocar `app.json` sí (`npm run build:dev`).
+- Cambiar código de JavaScript o TypeScript no requiere reconstruir la app; instalar una librería con código nativo o tocar `app.json` o `app.config.js` sí (`npm run build:dev`).
 
 ## 7. Y ahora
 

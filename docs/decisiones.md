@@ -50,3 +50,9 @@ El asesor (Dashboard → Advisors, o `get_advisors`) deja estos avisos a propós
 - **Protección contra contraseñas filtradas desactivada.** Supabase la ofrece solo en el plan Pro. Es un riesgo aceptado mientras la beta sea cerrada y el proyecto siga en el plan Free; se activa al pasar a Pro.
 
 La lista se hizo el 2026-11-06 con el proyecto en el plan Free. Las claves foráneas sin índice **no** están aquí: se arreglaron (migración `index_foreign_keys`) y una prueba impide que vuelvan.
+
+## 8. Desarrollo, preview y producción son tres apps distintas
+
+- **Decisión:** cada perfil de EAS construye una app con su propio paquete (`.dev`, `.preview` y el de producción, sin sufijo), nombre y esquema de enlaces. `app.config.js` los elige con `APP_VARIANT`, que se define como variable de entorno de EAS en cada entorno.
+- **Por qué:** con un solo paquete, instalar la app de desarrollo sobre la preview (o al revés) pedía «actualizar» una con la otra y no se podían tener las dos en el teléfono. El paquete de producción queda reservado para Google Play.
+- **Costo:** cada paquete tiene su propia firma de Android, así que el primer build de cada uno es interactivo. Quien tenía el APK `preview` anterior instala el nuevo como otra app y desinstala el viejo. Y las variables viven en EAS, no en el repo: si faltan, el build se corta a propósito en vez de salir con el paquete equivocado. Detalle en [lanzamiento.md](lanzamiento.md#variantes-de-app).

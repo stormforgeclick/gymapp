@@ -65,13 +65,19 @@ Trae `auth.*` y `storage.*`. Nunca lo metas al repo; mira [base-de-datos.md](bas
 ## La app
 
 **La app de desarrollo pide reconstruirse.**
-Instalaste una librería con código nativo o cambiaste `app.json`. Corre `npm run build:dev` otra vez. Para cambios de JavaScript o TypeScript basta con `npm start`.
+Instalaste una librería con código nativo o cambiaste `app.json` o `app.config.js`. Corre `npm run build:dev` otra vez. Para cambios de JavaScript o TypeScript basta con `npm start`.
+
+**Android pide «actualizar» una app al instalar la otra (dev y preview).**
+Pasa con los APK anteriores a las variantes, que comparten el paquete `com.stormforgeclick.gymbro`. Desinstálalo e instala los APK nuevos: «gymbro-app (Dev)» y «gymbro-app (Preview)» son apps distintas y conviven. Ver [Variantes de app](lanzamiento.md#variantes-de-app).
+
+**Un build de EAS se corta con `APP_VARIANT is not set` (o `Unknown APP_VARIANT`).**
+Falta la variable en el entorno del perfil, o tiene un valor que no es `development`, `preview` ni `production`. Es a propósito: sin ella saldría una app con el paquete equivocado. Los comandos están en el [README](../README.md#primera-vez-con-eas-mantenedores).
 
 **Una prueba dentro de `src/app/` aparece como ruta.**
 Expo Router trata todo archivo de `src/app/` como una ruta. Las pruebas van en `__tests__/` junto al código, fuera de `src/app/`.
 
 **Una actualización OTA no llega al teléfono.**
-Lo más probable es que la huella nativa (*fingerprint*) del build instalado y la del momento de publicar no coincidan: se instaló una librería nativa, se cambió `app.json` o `eas.json` (y, en builds anteriores al 2026-11-06, hasta el `.gitignore`), o se actualizó el SDK después de construir; o se publicó desde otro commit que el del build. Compara el *Runtime version* que muestra `eas update` con el del build y la huella de `npx expo-updates fingerprint:generate --platform android` (campo `hash`); si cambió, construye de nuevo. Ver [lanzamiento.md](lanzamiento.md#actualizaciones-ota-sin-reinstalar).
+Lo más probable es que la huella nativa (*fingerprint*) del build instalado y la del momento de publicar no coincidan: se instaló una librería nativa, se cambió `app.json`, `app.config.js` o `eas.json` (y, en builds anteriores al 2026-11-06, hasta el `.gitignore`), o se actualizó el SDK después de construir; o se publicó desde otro commit que el del build, o con otra `APP_VARIANT` que la del build. Compara el *Runtime version* que muestra `eas update` con el del build y la huella de `npx expo-updates fingerprint:generate --platform android` (campo `hash`); si cambió, construye de nuevo. Ver [lanzamiento.md](lanzamiento.md#actualizaciones-ota-sin-reinstalar).
 
 **`eas update` falla con `ReferenceError: window is not defined` y `Export failed`.**
 Estás exportando la web, que se renderiza en Node (`app.json` tiene `web.output: "static"`), y el cliente de Supabase, que se crea al cargar el módulo, lee `window` a través de `AsyncStorage`. La app solo se publica en Android: usa `npm run update:preview -- --message "…"`, que exporta solo esa plataforma. Dejar la web funcionando exigiría que `src/lib/supabase.ts` no use almacenamiento fuera del dispositivo; no se ha hecho porque nadie usa la web.

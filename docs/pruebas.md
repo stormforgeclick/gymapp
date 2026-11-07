@@ -77,6 +77,6 @@ Además corre **CodeQL** (análisis de seguridad del código) en cada PR a `main
 
 ## E2E con Maestro (solo mantenedores)
 
-Abre la app real en un emulador de Android y la usa: pestañas, crear una rutina con ejercicios y reordenarlos arrastrando. Los flujos están en `.maestro/flows/` (por ejemplo `smoke.yaml`) y `scripts/e2e.ts` los orquesta (Maestro no sabe mantener presionado y arrastrar, así que el arrastre se hace con `adb`).
+Abre la app real en un emulador de Android y la usa: pestañas, crear una rutina con ejercicios y reordenarlos arrastrando. Los flujos están en `.maestro/flows/` (por ejemplo `smoke.yaml`) y `scripts/e2e.ts` los orquesta (Maestro no sabe mantener presionado y arrastrar, así que el arrastre se hace con `adb`). Los flujos abren `com.stormforgeclick.gymbro`, la variante de producción, que es la que instala `expo run:android --variant release`; contra un APK `preview` habría que cambiar su `appId` (ver [Variantes de app](lanzamiento.md#variantes-de-app)).
 
 **Hoy corre contra el proyecto real de Supabase**: usa la cuenta `e2e@gymbro.test` (que crea `scripts/e2e-user.ts` con `SUPABASE_SERVICE_ROLE_KEY`) y cada prueba crea y borra una rutina "E2E …". Por eso no es parte del onboarding ni de la CI. Apuntarlo a una base local o a un staging está pendiente. Los pasos para correrlo están en [README.md](../README.md#de-punta-a-punta-maestro--emulador-android).
